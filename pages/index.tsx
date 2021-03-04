@@ -1,11 +1,13 @@
 import Head from 'next/head'
+import Header from '../components/Header'
 
-export default function Home() {
+export default function Index() {
   return (
     <div>
       <Head>
         <title>Verifiable Credentials Verifier</title>
       </Head>
+      <Header />
       <main>
         <h1>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
