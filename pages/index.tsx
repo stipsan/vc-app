@@ -8,7 +8,7 @@ export default function Index() {
         <title>Verifiable Credentials Verifier</title>
       </Head>
       <Header />
-      <main>
+      <main style={{ height: '200vh' }}>
         <h1>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
