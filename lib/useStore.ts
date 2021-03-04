@@ -1,7 +1,13 @@
 import create from 'zustand'
+import { combine } from 'zustand/middleware'
 
-const useStore = create(set => ({
-  bears: 0,
-  increasePopulation: () => set(state => ({ bears: state.bears + 1 })),
-  removeAllBears: () => set({ bears: 0 })
-}))
+export const useStore = create(
+  combine({
+    url: '',
+    auth: '',
+  },
+  set => ({
+  setUrl: (url: string) => set({url}),
+  setAuth: (auth: string) => set({auth}),
+})
+  ))
