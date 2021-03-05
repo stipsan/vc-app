@@ -1,14 +1,43 @@
 import cx from 'classnames'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../lib/useStore'
+
+function SyncHistoryState() {
+  const auth = useStore((state) => state.auth)
+
+  useEffect(() => {
+    localStorage.setItem('vcv.auth', auth)
+  }, [auth])
+
+  return null
+}
 
 function UrlField() {
   const setUrl = useStore((state) => state.setUrl)
   const url = useStore((state) => state.url)
   const loading = useStore((state) => state.loading)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    const searchParams = new URLSearchParams(location.search)
+    if (searchParams.has('url')) {
+      try {
+        const defaultUrl = new URL(searchParams.get('url'))
+        console.log(searchParams.get('url'))
+        setUrl(defaultUrl.toString())
+      } catch {
+        // we ignore any URL parser errors
+      }
+    }
+  }, [])
 
   return (
     <label
-      className={cx('block transition-opacity', { 'opacity-30': loading })}
+      className={cx('block transition-opacity duration-150', {
+        'opacity-30 pointer-events-none': loading,
+      })}
     >
       <span className="text-gray-700">API URL</span>
       <input
@@ -18,7 +47,7 @@ function UrlField() {
         type="url"
         onChange={(event) => setUrl(event.target.value)}
         value={url}
-        readOnly={loading}
+        readOnly={!mounted || loading}
         required
       />
     </label>
@@ -29,10 +58,25 @@ function AuthField() {
   const setAuth = useStore((state) => state.setAuth)
   const auth = useStore((state) => state.auth)
   const loading = useStore((state) => state.loading)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    if (localStorage.getItem('vcv.auth')) {
+      try {
+        setAuth(localStorage.getItem('vcv.auth'))
+      } catch {
+        // we ignore any URL parser errors
+      }
+    }
+  }, [])
 
   return (
     <label
-      className={cx('block transition-opacity', { 'opacity-30': loading })}
+      className={cx('block transition-opacity duration-150', {
+        'opacity-30 pointer-events-none': loading,
+      })}
     >
       <span className="text-gray-700">Authorization</span>
       <input
@@ -42,7 +86,7 @@ function AuthField() {
         type="text"
         onChange={(event) => setAuth(event.target.value)}
         value={auth}
-        readOnly={loading}
+        readOnly={!mounted || loading}
         required
       />
     </label>
@@ -56,10 +100,39 @@ function SubmitButton() {
     <button
       type="submit"
       className={cx(
-        'focus:outline-none border border-transparent hover:bg-blue-200 focus:bg-blue-200 hover:text-blue-800 group flex items-center rounded-md bg-blue-100 text-blue-600 text-base font-medium px-6 h-10 focus:ring focus:ring-blue-100 focus:ring-opacity-50 place-self-end'
+        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md bg-blue-100 text-base font-medium px-6 h-10 md:place-self-end',
+        {
+          'text-blue-200 bg-blue-200 cursor-wait': loading,
+          'text-blue-600 hover:bg-blue-200 focus:bg-blue-200 hover:text-blue-800 focus:ring focus:ring-blue-100 focus:ring-opacity-50': !loading,
+        }
       )}
     >
-      Verify {loading ? 'loading' : ''}
+      <span className="absolute left-0 top-0 right-0 bottom-0 grid place-items-center">
+        <svg
+          className={cx(
+            'animate-spin h-5 w-5 text-blue-800 duration-150 trasnition-opacity',
+            { 'opacity-0': !loading, 'opacity-80': loading }
+          )}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </span>
+      Verify
     </button>
   )
 }
@@ -70,34 +143,52 @@ function SubmitButton() {
 export default function Header() {
   const setLoading = useStore((state) => state.setLoading)
   const loading = useStore((state) => state.loading)
+  const titleRef = useRef('')
+
+  useEffect(() => {
+    if (loading) {
+      titleRef.current = document.title
+      document.title = 'Verifying Credentials...'
+      return () => {
+        document.title = titleRef.current
+      }
+    }
+  }, [loading])
 
   return (
-    <header
-      className={cx('sticky top-0 px-6 py-2 bg-gradient-to-t', {
-        'cursor-wait': loading,
-      })}
-      style={{
-        ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem',
-      }}
-    >
-      <form
-        className={cx('grid gap-4 md:grid-cols-header', {
-          'pointer-events-none select-none': loading,
+    <>
+      <header
+        className={cx('sticky top-0 px-6 py-2 bg-gradient-to-t z-10', {
+          'cursor-wait': loading,
         })}
-        onSubmit={(event) => {
-          event.preventDefault()
-
-          if (loading) {
-            return
-          }
-
-          setLoading(true)
+        style={{
+          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem',
         }}
       >
-        <UrlField />
-        <AuthField />
-        <SubmitButton />
-      </form>
-    </header>
+        <form
+          title={loading ? 'Verifying...' : undefined}
+          className={cx('grid gap-4 md:grid-cols-header', {
+            'select-none bg-gradient-to-t rounded-md': loading,
+          })}
+          style={{
+            ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white .1rem',
+          }}
+          onSubmit={(event) => {
+            event.preventDefault()
+
+            if (loading) {
+              return
+            }
+
+            setLoading(true)
+          }}
+        >
+          <UrlField />
+          <AuthField />
+          <SubmitButton />
+        </form>
+      </header>
+      <SyncHistoryState />
+    </>
   )
 }
