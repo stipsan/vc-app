@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast'
 import cx from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import { useStore } from '../lib/useStore'
@@ -107,7 +108,7 @@ function SubmitButton() {
         }
       )}
     >
-      <span className="absolute left-0 top-0 right-0 bottom-0 grid place-items-center">
+      <span className="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center">
         <svg
           className={cx(
             'animate-spin h-5 w-5 text-blue-800 duration-150 trasnition-opacity',
@@ -137,9 +138,6 @@ function SubmitButton() {
   )
 }
 
-// https://api.stage.proxy.com/identity/me/credentials/
-// Bearer eyJhbGciOiJIUzI1NiJ9.eyJhenAiOiJjZjA5ODk5YWQ4OWM0N2M3ZGMzZWQ5MmRlYjAwODExNDZkYzQ2ZmM3Iiwic3ViIjoiMTI4ODVlZTctMWQxZi00MzQ1LWExMGItZGI1NDA0OGE1OWNmIiwic2lkIjoiOTY2ZTU0ZmYtMjhkMS00M2NmLThjMTAtNDkxOTM5NzU4OTQ3IiwiZXhwIjoxNjE0OTY2Nzk3LCJpYXQiOjE2MTQ4ODAzOTd9.gTGxMUgrAf2XRvo3U1X2bUR92aDZ0JUx7iXxyaxLqxo
-
 export default function Header() {
   const setLoading = useStore((state) => state.setLoading)
   const loading = useStore((state) => state.loading)
@@ -149,7 +147,9 @@ export default function Header() {
     if (loading) {
       titleRef.current = document.title
       document.title = 'Verifying Credentials...'
+      const toastId = toast.loading('Verifying...')
       return () => {
+        toast.dismiss(toastId)
         document.title = titleRef.current
       }
     }
@@ -158,7 +158,7 @@ export default function Header() {
   return (
     <>
       <header
-        className={cx('sticky top-0 px-6 py-2 bg-gradient-to-t z-10', {
+        className={cx('sticky top-0 px-6 pt-2 pb-4 bg-gradient-to-t z-10', {
           'cursor-wait': loading,
         })}
         style={{

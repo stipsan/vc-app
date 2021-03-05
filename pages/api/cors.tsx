@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const [url] = [].concat(req.query.url)
-  console.log({ url }, req.headers)
   const proxy = await fetch(url, {
     // @ts-expect-error
     headers: {

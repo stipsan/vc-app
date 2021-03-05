@@ -2,6 +2,7 @@ import Head from 'next/head'
 import FetchVerifiableCredentials from '../components/FetchVerifiableCredentials'
 import Header from '../components/Header'
 import { Toaster } from 'react-hot-toast'
+import ValidateLinkedData from '../components/ValidateLinkedData'
 
 export default function Index() {
   return (
@@ -10,8 +11,9 @@ export default function Index() {
         <title>Verifiable Credentials Verifier</title>
       </Head>
       <Header />
-      <main className="pt-4" style={{ height: '200vh' }}>
+      <main className="pb-20">
         <FetchVerifiableCredentials />
+        <ValidateLinkedData />
       </main>
       <Toaster position="bottom-center" />
     </>

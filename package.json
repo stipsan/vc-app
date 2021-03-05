@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.6",
+    "jsonld-checker": "^0.1.8-unstable.3",
     "next": "10.0.7",
     "react": "17.0.1",
     "react-dom": "17.0.1",

@@ -2,17 +2,17 @@ import cx from 'classnames'
 
 export default function ReportRow({
   children,
-  readyState,
+  readyState = 'pending',
 }: {
   children: React.ReactNode
   readyState?: 'pending' | 'loading' | 'error' | 'success'
 }) {
   return (
     <>
-      <hr className={cx('mx-6 border-t-2')} />
+      <hr className={cx('mx-6 mb-4 border-t-2 border-blue-800 opacity-5')} />
       <article
-        className={cx('px-6 py-2', {
-          'animate-pulse': readyState === 'pending' || readyState === 'loading',
+        className={cx('px-6 mb-4 grid gap-4', {
+          'animate-pulse': readyState === 'loading',
         })}
       >
         {children}
