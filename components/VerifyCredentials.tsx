@@ -50,7 +50,7 @@ export default function ValidateLinkedData() {
         }
         try {
           const result = await vc.verifyCredential({
-            credential: item,
+            credential: JSON.parse(JSON.stringify(item)),
             documentLoader,
             suite: new Ed25519Signature2018({}),
           })

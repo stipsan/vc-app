@@ -48,7 +48,9 @@ export default function ValidateLinkedData() {
           setJsonChecks({
             [i]: {
               readyState: 'success',
-              expanded: await jsonld.expand(item, { documentLoader }),
+              expanded: await jsonld.expand(JSON.parse(JSON.stringify(item)), {
+                documentLoader,
+              }),
               error: null,
             },
           })
