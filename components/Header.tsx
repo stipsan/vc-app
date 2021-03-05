@@ -26,7 +26,6 @@ function UrlField() {
     if (searchParams.has('url')) {
       try {
         const defaultUrl = new URL(searchParams.get('url'))
-        console.log(searchParams.get('url'))
         setUrl(defaultUrl.toString())
       } catch {
         // we ignore any URL parser errors
@@ -84,6 +83,7 @@ function AuthField() {
         className={cx(
           'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
         )}
+        placeholder="Bearer ..."
         type="text"
         onChange={(event) => setAuth(event.target.value)}
         value={auth}

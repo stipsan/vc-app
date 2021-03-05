@@ -33,10 +33,7 @@ export default function FetchVerifiableCredentials() {
         const data = await response.json()
         if (cancelled) return
 
-        const items = []
-          .concat(data?.items || data)
-          .concat(data?.items || data)
-          .concat(data?.items || data)
+        const items = [].concat(data?.items || data)
 
         if (!items.length) {
           throw new Error(

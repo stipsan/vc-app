@@ -3,9 +3,15 @@ import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
 import { useStore } from '../lib/useStore'
 import ReportRow from './ReportRow'
-import { Panel, ErrorMessage, ReadonlyTextarea } from './Formatted'
+import {
+  Panel,
+  ErrorMessage,
+  ReadonlyTextarea,
+  SuperReadonlyTextarea,
+} from './Formatted'
 import cx from 'classnames'
 import documentLoader from '../lib/documentLoader'
+import jsonld from 'jsonld'
 
 export default function ValidateLinkedData() {
   const items = useStore((state) => state.items)
@@ -15,7 +21,7 @@ export default function ValidateLinkedData() {
   const setJsonChecks = useStore((state) => state.setJsonChecks)
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading || !items.length) {
       return
     }
 
@@ -34,12 +40,16 @@ export default function ValidateLinkedData() {
         console.log(item, i)
         try {
           const result = await jsonldChecker.check(item, documentLoader)
-          console.log(i, item, result)
+          if (!result.ok) {
+            throw result.error
+          }
           if (cancelled) return
+          // throw new Error('oooh')
           setJsonChecks({
             [i]: {
-              readyState: result.ok ? 'success' : 'error',
-              error: result.error,
+              readyState: 'success',
+              expanded: await jsonld.expand(item, { documentLoader }),
+              error: null,
             },
           })
         } catch (err) {
@@ -55,26 +65,29 @@ export default function ValidateLinkedData() {
     }
   }, [loading, items])
 
-  const total = Object.keys(jsonChecks).length
+  const results = Object.values(jsonChecks)
 
   useEffect(() => {
     if (
       loading &&
-      total > 0 &&
-      // @ts-expect-error
-      Object.values(jsonChecks).every((check) => check.readyState === 'error')
+      results.length > 0 &&
+      results.every(
+        // @ts-expect-error
+        (check) => check.readyState === 'error'
+      )
     ) {
+      toast.error(`Failed JSON-LD validation`)
       setLoading(false)
     }
   }, [jsonChecks, loading])
 
-  if (!total) {
+  if (!results.length) {
     return null
   }
 
   return (
     <ReportRow>
-      {Object.values(jsonChecks).map(({ readyState, error }, i) => (
+      {results.map(({ readyState, error, expanded }, i) => (
         <Panel
           key={`report-${i}`}
           className={cx({
@@ -84,14 +97,17 @@ export default function ValidateLinkedData() {
             'text-green-900 bg-green-50': readyState === 'success',
           })}
         >
-          {total > 1 ? `#${i + 1} ` : ''}
+          {results.length > 1 ? `#${i + 1} ` : ''}
           {readyState === 'loading'
             ? 'Checking JSON-LD...'
             : readyState === 'error'
             ? 'Invalid JSON-LD'
             : 'Valid JSON-LD'}
+          {readyState === 'success' && expanded && (
+            <SuperReadonlyTextarea value={JSON.stringify(expanded, null, 2)} />
+          )}
           {readyState === 'error' && error && (
-            <div className="rounded py-2 my-1 px-3 bg-red-100">{`${JSON.stringify(
+            <div className="rounded py-2 my-1 px-3 bg-red-100">{`${error}: ${JSON.stringify(
               error
             )}`}</div>
           )}
