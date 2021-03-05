@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@transmute/jsonld-document-loader": "^0.2.0",
+    "@transmute/vc.js": "^0.2.1-unstable.8",
     "classnames": "^2.2.6",
     "jsonld-checker": "^0.1.8-unstable.3",
     "next": "10.0.7",

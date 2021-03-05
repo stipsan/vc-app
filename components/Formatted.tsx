@@ -5,7 +5,7 @@ export function Code({ children }: { children: React.ReactNode }) {
   return <code>{children}</code>
 }
 
-export function ReadonlyTextarea({ children }: { children: React.ReactNode }) {
+export function ReadonlyTextarea({ value }: { value: string }) {
   const ref = useRef()
   const [height, setHeight] = useState(0)
 
@@ -20,9 +20,8 @@ export function ReadonlyTextarea({ children }: { children: React.ReactNode }) {
       readOnly
       style={{ height: height ? `${height}px` : undefined, maxHeight: '9vh' }}
       className="bg-blue-50 text-black text-opacity-80 rounded-lg py-2 px-3 border-0"
-    >
-      {children}
-    </textarea>
+      value={value}
+    ></textarea>
   )
 }
 

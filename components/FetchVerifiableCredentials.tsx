@@ -24,7 +24,10 @@ export default function FetchVerifiableCredentials() {
 
     let cancelled = false
 
-    fetch(`/api/cors?url=${url}`, { headers: { Authorization: auth } })
+    fetch(`/api/cors?url=${url}`, {
+      credentials: 'omit',
+      headers: { Authorization: auth },
+    })
       .then(async (response) => {
         if (!response.ok) throw new Error(await response.text())
         const data = await response.json()
@@ -76,8 +79,11 @@ export default function FetchVerifiableCredentials() {
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
         </Panel>
-        {items.map((item) => (
-          <ReadonlyTextarea>{JSON.stringify(item, null, 2)}</ReadonlyTextarea>
+        {items.map((item, i) => (
+          <ReadonlyTextarea
+            key={`item-${i}`}
+            value={JSON.stringify(item, null, 2)}
+          />
         ))}
       </ReportRow>
     )

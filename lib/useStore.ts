@@ -8,14 +8,16 @@ export const useStore = create(
       auth: '',
       loading: false,
       items: [],
-      jsonLDs: []
+      jsonChecks: {},
+      verifyChecks: {}
     },
     (set) => ({
       setUrl: (url: string) => set({ url }),
       setAuth: (auth: string) => set({ auth }),
-      setLoading: (loading: boolean) => set({loading}),
+      setLoading: (loading: boolean) => loading ? set({loading, items: [], jsonChecks: {}, verifyChecks: {}}) : set({loading}),
       setItems: (items: any[]) => set({items}),
-      setJsonLDS: (jsonLDs: any[]) => set({jsonLDs})
+      setJsonChecks: (jsonChecks) => set(state => ({jsonChecks: {...state.jsonChecks, ...jsonChecks}})),
+      setVerifyChecks: (verifyChecks) => set(state => ({verifyChecks: {...state.verifyChecks, ...verifyChecks}})),
     })
   )
 )
