@@ -6,7 +6,7 @@ export function Code({ children }: { children: React.ReactNode }) {
 }
 
 export function ReadonlyTextarea({
-  className = 'bg-blue-50 text-black text-opacity-80 rounded-lg py-2 px-3 border-0',
+  className = 'bg-blue-50 text-black text-opacity-80 rounded-lg py-2 px-3 border-0 focus:ring-inset focus:ring-blue-200 focus:ring-2',
   value,
 }: {
   className?: string
@@ -32,7 +32,7 @@ export function ReadonlyTextarea({
 }
 
 export function SuperReadonlyTextarea({
-  className = 'bg-green-100',
+  className = 'bg-green-100 focus:ring-inset focus:ring-green-200 focus:ring-2',
   value,
 }: {
   className?: string

@@ -166,7 +166,7 @@ export default function TamperingDetector() {
           )}
           {readyState === 'failure' && expanded && (
             <SuperReadonlyTextarea
-              className="bg-red-100"
+              className="bg-red-100 focus:ring-inset focus:ring-red-200 focus:ring-2"
               value={JSON.stringify(expanded, null, 2)}
             />
           )}
