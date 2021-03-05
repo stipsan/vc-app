@@ -64,9 +64,10 @@ export default function TamperingDetector() {
           return
         }
         try {
-          item.credentialSubject.id = new Date()
+          const clone = JSON.parse(JSON.stringify(item))
+          clone.credentialSubject.id = new Date()
           const result = await vc.verifyCredential({
-            credential: JSON.parse(JSON.stringify(item)),
+            credential: clone,
             documentLoader,
             suite: new Ed25519Signature2018({}),
           })
