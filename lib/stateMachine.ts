@@ -1,11 +1,11 @@
-import { createMachine, AssignAction } from 'xstate'
+import { createMachine, AssignAction, State as MachineState, Interpreter as MachineInterpreter } from 'xstate'
 import { createUpdater, ImmerUpdateEvent, assign } from '@xstate/immer'
 
 interface Context {
   count: number
   status: string
   items: string[]
-  json: Map<string, unknown>
+  json: Map<string, object>
   jsonld: Map<string, 'success' | 'failure'>
   verifiedCredentials: Map<string, 'success' | 'failure'>
   counterfeitCredentials: Map<string, 'success' | 'failure'>
@@ -35,7 +35,7 @@ interface Context {
  * counterfeitCredentials: Map<#1, 'success' | 'failure'>()
  */
 
-type FetchEvent = ImmerUpdateEvent<'FETCH', number>
+type FetchEvent = ImmerUpdateEvent<'FETCH'>
 type FetchFailureEvent = ImmerUpdateEvent<'FETCH_FAILURE', string>
 type FetchSuccessEvent = ImmerUpdateEvent<'FETCH_SUCCESS', {}[]>
 type LinkingDataFailureEvent = ImmerUpdateEvent<'LINKING_DATA_FAILURE', string>
@@ -51,7 +51,7 @@ type CounterfeitCredentialSuccessEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIA
 type CounterfeitCredentialFailureEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIAL_FAILURE', string>
 type CounterfeitCredentialCompleteEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIAL_COMPLETE', string>
 
-export type Event =
+export type MachineEvent =
   | FetchEvent
   | FetchFailureEvent
   | FetchSuccessEvent
@@ -122,10 +122,14 @@ const counterfeitCredentialSuccess = createUpdater<Context, CounterfeitCredentia
   }
 )
 
-export default createMachine<Context, Event>({
+export type State = MachineState<Context, MachineEvent>
+export type Interpreter = MachineInterpreter<Context, State, MachineEvent>
+
+export default createMachine<Context, MachineEvent>({
   context: {
     count: 0,
     status: '',
+    // TODO: rename to ids
     items: [],
     json: new Map(),
     jsonld: new Map(),
@@ -161,7 +165,7 @@ export default createMachine<Context, Event>({
         [linkingDataSuccess.type]: [
           { cond: itemsIncludesInputCond, actions: linkingDataSuccess.action },
         ],
-        VERIFIED_CREDENTIAL_COMPLETE: [
+        LINKING_DATA_COMPLETE: [
           {
             cond: (ctx) =>
               [...ctx.jsonld.values()].some((_) => _ === 'success'),

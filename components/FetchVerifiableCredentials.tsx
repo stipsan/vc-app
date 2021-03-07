@@ -1,26 +1,27 @@
-import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
+import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import { Panel, ErrorMessage, ReadonlyTextarea } from './Formatted'
 
-export default function FetchVerifiableCredentials() {
+export default function FetchVerifiableCredentials(props: {
+  state: Interpreter['state']
+  send: Interpreter['send']
+}) {
+  const { send, state } = props
+  const { items, json } = state.context
+  const fetching = state.matches('fetching')
   const auth = useStore((state) => state.auth)
   const url = useStore((state) => state.url)
-  const items = useStore((state) => state.items)
-  const loading = useStore((state) => state.loading)
-  const setLoading = useStore((state) => state.setLoading)
-  const setItems = useStore((state) => state.setItems)
   const [error, setError] = useState('')
-  const [fetched, setFetched] = useState(false)
 
   useEffect(() => {
-    if (!loading) {
+    if (!fetching) {
       return
     }
 
     setError('')
-    setFetched(false)
 
     let cancelled = false
 
@@ -43,19 +44,18 @@ export default function FetchVerifiableCredentials() {
           )
         }
 
-        setItems(items)
-        setFetched(true)
+        send({ type: 'FETCH_SUCCESS', input: items })
       })
       .catch((reason) => {
+        send({ type: 'FETCH_FAILURE', input: `${reason}` })
         toast.error(`Failed fetching Verifiable Credentials`)
         setError(reason)
-        setLoading(false)
       })
 
     return () => {
       cancelled = true
     }
-  }, [loading, url, auth])
+  }, [fetching, url, auth])
 
   if (error) {
     return (
@@ -67,7 +67,7 @@ export default function FetchVerifiableCredentials() {
     )
   }
 
-  if (fetched) {
+  if (items.length) {
     return (
       <ReportRow readyState="success">
         <Panel className="text-green-900 bg-green-50">
@@ -76,17 +76,17 @@ export default function FetchVerifiableCredentials() {
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
         </Panel>
-        {items.map((item, i) => (
+        {items.map((id) => (
           <ReadonlyTextarea
-            key={`item-${i}`}
-            value={JSON.stringify(item, null, 2)}
+            key={id}
+            value={JSON.stringify(json.get(id), null, 2)}
           />
         ))}
       </ReportRow>
     )
   }
 
-  if (loading) {
+  if (state.matches('fetching')) {
     return (
       <ReportRow readyState="loading">
         <Panel>Loading Verifiable Credentials from API...</Panel>

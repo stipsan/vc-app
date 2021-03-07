@@ -1,6 +1,7 @@
-import toast from 'react-hot-toast'
 import cx from 'classnames'
 import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 
 function SyncHistoryState() {
@@ -94,8 +95,8 @@ function AuthField() {
   )
 }
 
-function SubmitButton() {
-  const loading = useStore((state) => state.loading)
+function SubmitButton(props: { state: Interpreter['state'] }) {
+  const loading = !['ready', 'success', 'failure'].some(props.state.matches)
 
   return (
     <button
@@ -138,7 +139,11 @@ function SubmitButton() {
   )
 }
 
-export default function Header() {
+export default function Header(props: {
+  send: Interpreter['send']
+  state: Interpreter['state']
+}) {
+  const { send, state } = props
   const setLoading = useStore((state) => state.setLoading)
   const loading = useStore((state) => state.loading)
   const titleRef = useRef('')
@@ -157,37 +162,32 @@ export default function Header() {
 
   return (
     <>
-      <header
-        className={cx('sticky top-0 px-6 pt-2 pb-4 bg-gradient-to-t z-10', {
-          'cursor-wait': loading,
+      <textarea></textarea>
+      <section
+        className={cx('grid gap-4 md:grid-cols-header px-6 pt-2 pb-4', {
+          'select-none bg-gradient-to-t rounded-md': loading,
         })}
+      >
+        <UrlField />
+        <AuthField />
+      </section>
+      <header
+        className={cx('sticky -top-2 -bottom-2 px-6 py-4 z-10')}
         style={{
-          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem',
+          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem, white 50%, hsla(0,0%,100%,0) 50%',
+          backgroundImage:
+            'linear-gradient(to top, var(--tw-gradient-stops)), linear-gradient(to bottom, var(--tw-gradient-stops))',
         }}
       >
-        <form
-          title={loading ? 'Verifying...' : undefined}
+        <div
           className={cx('grid gap-4 md:grid-cols-header', {
-            'select-none bg-gradient-to-t rounded-md': loading,
+            'select-none': loading,
           })}
-          style={{
-            ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white .1rem',
-          }}
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (loading) {
-              return
-            }
-
-            setLoading(true)
-          }}
         >
-          <UrlField />
-          <AuthField />
-          <SubmitButton />
-        </form>
+          <SubmitButton state={state} />
+        </div>
       </header>
+      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white" />
       <SyncHistoryState />
     </>
   )

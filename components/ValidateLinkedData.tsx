@@ -1,120 +1,109 @@
-import * as jsonldChecker from 'jsonld-checker'
-import toast from 'react-hot-toast'
-import { useEffect, useState } from 'react'
-import { useStore } from '../lib/useStore'
-import ReportRow from './ReportRow'
-import {
-  Panel,
-  ErrorMessage,
-  ReadonlyTextarea,
-  SuperReadonlyTextarea,
-} from './Formatted'
 import cx from 'classnames'
-import documentLoader from '../lib/documentLoader'
 import jsonld from 'jsonld'
+import * as jsonldChecker from 'jsonld-checker'
+import { useEffect, useState } from 'react'
+import documentLoader from '../lib/documentLoader'
+import type { Interpreter } from '../lib/stateMachine'
+import { Panel, SuperReadonlyTextarea } from './Formatted'
+import ReportRow from './ReportRow'
 
-export default function ValidateLinkedData() {
-  const items = useStore((state) => state.items)
-  const jsonChecks = useStore((state) => state.jsonChecks)
-  const loading = useStore((state) => state.loading)
-  const setLoading = useStore((state) => state.setLoading)
-  const setJsonChecks = useStore((state) => state.setJsonChecks)
+function ValidateLinkedDataRow(props: {
+  id: string
+  state: Interpreter['state']
+  send: Interpreter['send']
+}) {
+  const { id, send } = props
+  const { items, json } = props.state.context
+  const [readyState, setReadyState] = useState('loading')
+  const [expanded, setExpanded] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!loading || !items.length) {
-      return
-    }
-
     let cancelled = false
-    const defaults = items.reduce(
-      (acc, _, key) => ({
-        ...acc,
-        [key]: { readyState: 'loading', error: null },
-      }),
-      {}
-    )
+    setError(null)
+    setExpanded(null)
+    setReadyState('loading')
 
-    setJsonChecks(defaults)
-    Promise.allSettled(
-      items.map(async (item, i) => {
-        console.log(item, i)
-        try {
-          const result = await jsonldChecker.check(item, documentLoader)
-          if (!result.ok) {
-            throw result.error
-          }
-          if (cancelled) return
-          // throw new Error('oooh')
-          setJsonChecks({
-            [i]: {
-              readyState: 'success',
-              expanded: await jsonld.expand(JSON.parse(JSON.stringify(item)), {
-                documentLoader,
-              }),
-              error: null,
-            },
-          })
-        } catch (err) {
-          if (cancelled) return
-          setJsonChecks({ [i]: { readyState: 'error', error: err } })
-          console.error(i, item, err)
+    jsonldChecker
+      .check(json.get(id), documentLoader)
+      .then(async (result) => {
+        if (!result.ok) {
+          throw result.error
         }
+        if (cancelled) return
+        // throw new Error('oooh')
+        const expanded = await jsonld.expand(json.get(id), {
+          documentLoader,
+        })
+        if (cancelled) return
+        setReadyState('success')
+        setExpanded(expanded)
+        send({ type: 'LINKING_DATA_SUCCESS', input: id })
       })
-    )
+      .catch((err) => {
+        if (cancelled) return
+        setReadyState('error')
+        setError(err)
+        send({ type: 'LINKING_DATA_FAILURE', input: id })
+      })
 
     return () => {
       cancelled = true
     }
-  }, [loading, items])
+  }, [])
 
-  const results = Object.values(jsonChecks)
+  return (
+    <Panel
+      className={cx({
+        'bg-blue-50 text-black text-opacity-80 animate-pulse':
+          readyState === 'loading',
+        'text-red-900 bg-red-50': readyState === 'error',
+        'text-green-900 bg-green-50': readyState === 'success',
+      })}
+    >
+      {items.length > 1 ? `${id} ` : ''}
+      {readyState === 'loading'
+        ? 'Checking JSON-LD...'
+        : readyState === 'error'
+        ? 'Invalid JSON-LD'
+        : 'Valid JSON-LD'}
+      {readyState === 'success' && expanded && (
+        <SuperReadonlyTextarea value={JSON.stringify(expanded, null, 2)} />
+      )}
+      {readyState === 'error' && error && (
+        <div className="rounded py-2 my-1 px-3 bg-red-100">{`${error}: ${JSON.stringify(
+          error
+        )}`}</div>
+      )}
+    </Panel>
+  )
+}
+
+export default function ValidateLinkedData(props: {
+  state: Interpreter['state']
+  send: Interpreter['send']
+}) {
+  const { state, send } = props
+  const { items } = state.context
 
   useEffect(() => {
     if (
-      loading &&
-      results.length > 0 &&
-      results.every(
-        // @ts-expect-error
-        (check) => check.readyState === 'error'
-      )
+      state.matches('linkingData') &&
+      state.context.jsonld.size === items.length
     ) {
-      toast.error(`Failed JSON-LD validation`)
-      setLoading(false)
+      send({ type: 'LINKING_DATA_COMPLETE', input: '' })
     }
-  }, [jsonChecks, loading])
+  }, [state, items])
 
-  if (!results.length) {
-    return null
+  if (state.matches('linkingData') || state.context.jsonld.size) {
+    return (
+      <ReportRow>
+        {items.map((id) => (
+          <ValidateLinkedDataRow key={id} id={id} send={send} state={state} />
+        ))}
+      </ReportRow>
+    )
   }
 
-  return (
-    <ReportRow>
-      {results.map(({ readyState, error, expanded }, i) => (
-        <Panel
-          key={`report-${i}`}
-          className={cx({
-            'bg-blue-50 text-black text-opacity-80 animate-pulse':
-              readyState === 'loading',
-            'text-red-900 bg-red-50': readyState === 'error',
-            'text-green-900 bg-green-50': readyState === 'success',
-          })}
-        >
-          {results.length > 1 ? `#${i + 1} ` : ''}
-          {readyState === 'loading'
-            ? 'Checking JSON-LD...'
-            : readyState === 'error'
-            ? 'Invalid JSON-LD'
-            : 'Valid JSON-LD'}
-          {readyState === 'success' && expanded && (
-            <SuperReadonlyTextarea value={JSON.stringify(expanded, null, 2)} />
-          )}
-          {readyState === 'error' && error && (
-            <div className="rounded py-2 my-1 px-3 bg-red-100">{`${error}: ${JSON.stringify(
-              error
-            )}`}</div>
-          )}
-        </Panel>
-      ))}
-    </ReportRow>
-  )
+  return null
 }

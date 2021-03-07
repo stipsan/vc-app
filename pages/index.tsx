@@ -22,14 +22,20 @@ export default function Index() {
       <Head>
         <title>Verifiable Credentials Verifier</title>
       </Head>
-      <main className="pb-20">
-        <textarea>Hello</textarea>
-        <Header />
-        <FetchVerifiableCredentials />
-        <ValidateLinkedData />
-        <VerifyCredentials />
-        <TamperingDetector />
-      </main>
+      <form
+        className="pb-20"
+        onSubmit={(event) => {
+          event.preventDefault()
+
+          send({ type: 'FETCH', input: '' })
+        }}
+      >
+        <Header state={state} send={send} />
+        <FetchVerifiableCredentials state={state} send={send} />
+        <ValidateLinkedData state={state} send={send} />
+        <VerifyCredentials state={state} send={send} />
+        <TamperingDetector state={state} send={send} />
+      </form>
       <Celebrate />
       <Toaster position="bottom-center" />
     </>

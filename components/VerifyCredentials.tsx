@@ -1,12 +1,12 @@
-import toast from 'react-hot-toast'
-import { useEffect, useState } from 'react'
-import { useStore } from '../lib/useStore'
-import ReportRow from './ReportRow'
-import { Panel, ErrorMessage, SuperReadonlyTextarea } from './Formatted'
-import cx from 'classnames'
-import documentLoader from '../lib/documentLoader'
-import { ld as vc } from '@transmute/vc.js'
 import { Ed25519Signature2018 } from '@transmute/ed25519-signature-2018'
+import { ld as vc } from '@transmute/vc.js'
+import cx from 'classnames'
+import { useEffect } from 'react'
+import toast from 'react-hot-toast'
+import documentLoader from '../lib/documentLoader'
+import { useStore } from '../lib/useStore'
+import { Panel, SuperReadonlyTextarea } from './Formatted'
+import ReportRow from './ReportRow'
 
 export default function ValidateLinkedData() {
   const items = useStore((state) => state.items)
