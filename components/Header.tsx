@@ -14,10 +14,9 @@ function SyncHistoryState() {
   return null
 }
 
-function UrlField() {
+function UrlField({ loading }: { loading: boolean }) {
   const setUrl = useStore((state) => state.setUrl)
   const url = useStore((state) => state.url)
-  const loading = useStore((state) => state.loading)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -55,10 +54,9 @@ function UrlField() {
   )
 }
 
-function AuthField() {
+function AuthField({ loading }: { loading: boolean }) {
   const setAuth = useStore((state) => state.setAuth)
   const auth = useStore((state) => state.auth)
-  const loading = useStore((state) => state.loading)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -139,13 +137,19 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
   )
 }
 
-export default function Header(props: {
+export default function Header({
+  send,
+  state,
+}: {
   send: Interpreter['send']
   state: Interpreter['state']
 }) {
-  const { send, state } = props
-  const setLoading = useStore((state) => state.setLoading)
-  const loading = useStore((state) => state.loading)
+  const loading = [
+    'fetching',
+    'linkingData',
+    'verifyingCredentials',
+    'counterfeitingCredentials',
+  ].some(state.matches)
   const titleRef = useRef('')
 
   useEffect(() => {
@@ -168,8 +172,8 @@ export default function Header(props: {
           'select-none bg-gradient-to-t rounded-md': loading,
         })}
       >
-        <UrlField />
-        <AuthField />
+        <UrlField loading={loading} />
+        <AuthField loading={loading} />
       </section>
       <header
         className={cx('sticky -top-2 -bottom-2 px-6 py-4 z-10')}

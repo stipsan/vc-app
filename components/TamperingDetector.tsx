@@ -4,11 +4,18 @@ import cx from 'classnames'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import documentLoader from '../lib/documentLoader'
+import { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function TamperingDetector() {
+export default function TamperingDetector({
+  state,
+  send,
+}: {
+  state: Interpreter['state']
+  send: Interpreter['send']
+}) {
   const items = useStore((state) => state.items)
   const success = useStore((state) => state.success)
   const verifyChecks = useStore((state) => state.verifyChecks)

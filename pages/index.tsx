@@ -36,7 +36,7 @@ export default function Index() {
         <VerifyCredentials state={state} send={send} />
         <TamperingDetector state={state} send={send} />
       </form>
-      <Celebrate />
+      <Celebrate state={state} />
       <Toaster position="bottom-center" />
     </>
   )

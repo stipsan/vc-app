@@ -12,7 +12,8 @@ const MachineViz = dynamic(
 export default function Viz() {
   const [state, send, service] = useMachine(defaultMachine)
 
-  console.log({
+  console.log(state.event.type, state.event.input, state.context)
+  console.debug({
     context: state.context,
     value: state.value,
     event: state.event,
@@ -20,7 +21,7 @@ export default function Viz() {
 
   return (
     <>
-      <style>{`html,body,#__next{height:100%;width: 100%;}`}</style>
+      <style>{`html,body,#__next{height:100%;width: 100%;font-size: 12px;}`}</style>
       <MachineViz
         machine={defaultMachine}
         state={state}
@@ -34,12 +35,16 @@ export default function Viz() {
             case 'COUNTERFEIT_CREDENTIAL_SUCCESS':
               return send(event.eventType, {
                 input:
-                  state.context.items[
-                    ~~(Math.random() * state.context.items.length)
+                  state.context.ids[
+                    ~~(Math.random() * state.context.ids.length)
                   ],
               })
-            case 'FETCH_SUCCESS':
+            case 'DEMO_SUCCESS':
               return send(event.eventType, { input: [{}, {}, {}] })
+            case 'PARSE_SUCCESS':
+              return send(event.eventType, { input: [{}] })
+            case 'FETCH_SUCCESS':
+              return send(event.eventType, { input: [{}, {}] })
             default:
               // @ts-expect-error
               return send(event.eventType, { input: {} })

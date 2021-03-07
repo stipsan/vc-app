@@ -7,13 +7,16 @@ import type { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-function ValidateLinkedDataRow(props: {
+function ValidateLinkedDataRow({
+  id,
+  state,
+  send,
+}: {
   id: string
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
-  const { id, send } = props
-  const { items, json } = props.state.context
+  const { items, json } = state.context
   const [readyState, setReadyState] = useState('loading')
   const [expanded, setExpanded] = useState(null)
   const [error, setError] = useState(null)
@@ -79,11 +82,13 @@ function ValidateLinkedDataRow(props: {
   )
 }
 
-export default function ValidateLinkedData(props: {
+export default function ValidateLinkedData({
+  state,
+  send,
+}: {
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
-  const { state, send } = props
   const { items } = state.context
 
   useEffect(() => {

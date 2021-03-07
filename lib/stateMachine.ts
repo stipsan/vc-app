@@ -1,10 +1,16 @@
-import { createMachine, AssignAction, State as MachineState, Interpreter as MachineInterpreter } from 'xstate'
+import {
+  createMachine,
+  AssignAction,
+  State as MachineState,
+  Interpreter as MachineInterpreter,
+} from 'xstate'
 import { createUpdater, ImmerUpdateEvent, assign } from '@xstate/immer'
 
 interface Context {
+  strategy: 'demo' | 'parse' | 'fetch'
   count: number
   status: string
-  items: string[]
+  ids: string[]
   json: Map<string, object>
   jsonld: Map<string, 'success' | 'failure'>
   verifiedCredentials: Map<string, 'success' | 'failure'>
@@ -35,7 +41,14 @@ interface Context {
  * counterfeitCredentials: Map<#1, 'success' | 'failure'>()
  */
 
+type ExecEvent = ImmerUpdateEvent<'EXEC'>
+type DemoEvent = ImmerUpdateEvent<'DEMO'>
+type ParseEvent = ImmerUpdateEvent<'PARSE'>
 type FetchEvent = ImmerUpdateEvent<'FETCH'>
+type DemoFailureEvent = ImmerUpdateEvent<'DEMO_FAILURE', string>
+type DemoSuccessEvent = ImmerUpdateEvent<'DEMO_SUCCESS', {}[]>
+type ParseFailureEvent = ImmerUpdateEvent<'PARSE_FAILURE', string>
+type ParseSuccessEvent = ImmerUpdateEvent<'PARSE_SUCCESS', {}[]>
 type FetchFailureEvent = ImmerUpdateEvent<'FETCH_FAILURE', string>
 type FetchSuccessEvent = ImmerUpdateEvent<'FETCH_SUCCESS', {}[]>
 type LinkingDataFailureEvent = ImmerUpdateEvent<'LINKING_DATA_FAILURE', string>
@@ -44,15 +57,40 @@ type LinkingDataCompleteEvent = ImmerUpdateEvent<
   'LINKING_DATA_COMPLETE',
   string
 >
-type VerifiedCredentialSuccessEvent = ImmerUpdateEvent<'VERIFIED_CREDENTIAL_SUCCESS', string>
-type VerifiedCredentialFailureEvent = ImmerUpdateEvent<'VERIFIED_CREDENTIAL_FAILURE', string>
-type VerifiedCredentialCompleteEvent = ImmerUpdateEvent<'VERIFIED_CREDENTIAL_COMPLETE', string>
-type CounterfeitCredentialSuccessEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIAL_SUCCESS', string>
-type CounterfeitCredentialFailureEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIAL_FAILURE', string>
-type CounterfeitCredentialCompleteEvent = ImmerUpdateEvent<'COUNTERFEIT_CREDENTIAL_COMPLETE', string>
+type VerifiedCredentialSuccessEvent = ImmerUpdateEvent<
+  'VERIFIED_CREDENTIAL_SUCCESS',
+  string
+>
+type VerifiedCredentialFailureEvent = ImmerUpdateEvent<
+  'VERIFIED_CREDENTIAL_FAILURE',
+  string
+>
+type VerifiedCredentialCompleteEvent = ImmerUpdateEvent<
+  'VERIFIED_CREDENTIAL_COMPLETE',
+  string
+>
+type CounterfeitCredentialSuccessEvent = ImmerUpdateEvent<
+  'COUNTERFEIT_CREDENTIAL_SUCCESS',
+  string
+>
+type CounterfeitCredentialFailureEvent = ImmerUpdateEvent<
+  'COUNTERFEIT_CREDENTIAL_FAILURE',
+  string
+>
+type CounterfeitCredentialCompleteEvent = ImmerUpdateEvent<
+  'COUNTERFEIT_CREDENTIAL_COMPLETE',
+  string
+>
 
 export type MachineEvent =
+  | ExecEvent
+  | DemoEvent
+  | ParseEvent
   | FetchEvent
+  | DemoFailureEvent
+  | DemoSuccessEvent
+  | ParseFailureEvent
+  | ParseSuccessEvent
   | FetchFailureEvent
   | FetchSuccessEvent
   | LinkingDataFailureEvent
@@ -65,22 +103,62 @@ export type MachineEvent =
   | CounterfeitCredentialSuccessEvent
   | CounterfeitCredentialCompleteEvent
 
-const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
-  'FETCH_SUCCESS',
+const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx) => {
+  // Keep track of how many times we've executed
+  ctx.count += 1
+  // Reset the context from previous exec runs
+  ctx.status = ''
+  ctx.ids.length = 0
+  ctx.json.clear()
+  ctx.jsonld.clear()
+  ctx.verifiedCredentials.clear()
+  ctx.counterfeitCredentials.clear()
+})
+
+const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
+  'DEMO_SUCCESS',
   (ctx, { input }) => {
     input.forEach((item, i) => {
       const id = `#${i + 1}`
-      ctx.items.push(id)
+      ctx.ids.push(id)
       ctx.json.set(id, item)
     })
   }
 )
 
-const itemsIncludesInputCond = (
+const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
+  'PARSE_SUCCESS',
+  (ctx, { input }) => {
+    input.forEach((item, i) => {
+      const id = `#${i + 1}`
+      ctx.ids.push(id)
+      ctx.json.set(id, item)
+    })
+  }
+)
+
+const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
+  'FETCH_SUCCESS',
+  (ctx, { input }) => {
+    input.forEach((item, i) => {
+      const id = `#${i + 1}`
+      ctx.ids.push(id)
+      ctx.json.set(id, item)
+    })
+  }
+)
+
+const idsIncludesInputCond = (
   ctx: Context,
-  event: LinkingDataFailureEvent | LinkingDataSuccessEvent | VerifiedCredentialFailureEvent | VerifiedCredentialSuccessEvent | CounterfeitCredentialFailureEvent | CounterfeitCredentialSuccessEvent
+  event:
+    | LinkingDataFailureEvent
+    | LinkingDataSuccessEvent
+    | VerifiedCredentialFailureEvent
+    | VerifiedCredentialSuccessEvent
+    | CounterfeitCredentialFailureEvent
+    | CounterfeitCredentialSuccessEvent
 ) => {
-  return ctx.items.includes(event.input)
+  return ctx.ids.includes(event.input)
 }
 
 const linkingDataFailure = createUpdater<Context, LinkingDataFailureEvent>(
@@ -96,41 +174,41 @@ const linkingDataSuccess = createUpdater<Context, LinkingDataSuccessEvent>(
   }
 )
 
-const verifiedCredentialFailure = createUpdater<Context, VerifiedCredentialFailureEvent>(
-  'VERIFIED_CREDENTIAL_FAILURE',
-  (ctx, { input }) => {
-    ctx.verifiedCredentials.set(input, 'failure')
-  }
-)
-const verifiedCredentialSuccess = createUpdater<Context, VerifiedCredentialSuccessEvent>(
-  'VERIFIED_CREDENTIAL_SUCCESS',
-  (ctx, { input }) => {
-    ctx.verifiedCredentials.set(input, 'success')
-  }
-)
+const verifiedCredentialFailure = createUpdater<
+  Context,
+  VerifiedCredentialFailureEvent
+>('VERIFIED_CREDENTIAL_FAILURE', (ctx, { input }) => {
+  ctx.verifiedCredentials.set(input, 'failure')
+})
+const verifiedCredentialSuccess = createUpdater<
+  Context,
+  VerifiedCredentialSuccessEvent
+>('VERIFIED_CREDENTIAL_SUCCESS', (ctx, { input }) => {
+  ctx.verifiedCredentials.set(input, 'success')
+})
 
-const counterfeitCredentialFailure = createUpdater<Context, CounterfeitCredentialFailureEvent>(
-  'COUNTERFEIT_CREDENTIAL_FAILURE',
-  (ctx, { input }) => {
-    ctx.counterfeitCredentials.set(input, 'failure')
-  }
-)
-const counterfeitCredentialSuccess = createUpdater<Context, CounterfeitCredentialSuccessEvent>(
-  'COUNTERFEIT_CREDENTIAL_SUCCESS',
-  (ctx, { input }) => {
-    ctx.counterfeitCredentials.set(input, 'success')
-  }
-)
+const counterfeitCredentialFailure = createUpdater<
+  Context,
+  CounterfeitCredentialFailureEvent
+>('COUNTERFEIT_CREDENTIAL_FAILURE', (ctx, { input }) => {
+  ctx.counterfeitCredentials.set(input, 'failure')
+})
+const counterfeitCredentialSuccess = createUpdater<
+  Context,
+  CounterfeitCredentialSuccessEvent
+>('COUNTERFEIT_CREDENTIAL_SUCCESS', (ctx, { input }) => {
+  ctx.counterfeitCredentials.set(input, 'success')
+})
 
 export type State = MachineState<Context, MachineEvent>
 export type Interpreter = MachineInterpreter<Context, State, MachineEvent>
 
 export default createMachine<Context, MachineEvent>({
   context: {
+    strategy: 'fetch',
     count: 0,
     status: '',
-    // TODO: rename to ids
-    items: [],
+    ids: [],
     json: new Map(),
     jsonld: new Map(),
     verifiedCredentials: new Map(),
@@ -138,9 +216,90 @@ export default createMachine<Context, MachineEvent>({
   },
   initial: 'ready',
   states: {
+    failure: {
+      on: {
+        DEMO: { actions: assign((ctx) => (ctx.strategy = 'demo')) },
+        PARSE: { actions: assign((ctx) => (ctx.strategy = 'parse')) },
+        FETCH: { actions: assign((ctx) => (ctx.strategy = 'fetch')) },
+        [exec.type]: [
+          {
+            cond: function shouldDemo(ctx) {
+              return ctx.strategy === 'demo'
+            },
+            actions: exec.action,
+            target: 'demoing',
+          },
+          {
+            cond: function shouldParse(ctx) {
+              return ctx.strategy === 'parse'
+            },
+            actions: exec.action,
+            target: 'parsing',
+          },
+          {
+            cond: function shouldFetch(ctx) {
+              return ctx.strategy === 'fetch'
+            },
+            actions: exec.action,
+            target: 'fetching',
+          },
+        ],
+      },
+    },
     ready: {
       on: {
-        FETCH: 'fetching',
+        DEMO: { actions: assign((ctx) => (ctx.strategy = 'demo')) },
+        PARSE: { actions: assign((ctx) => (ctx.strategy = 'parse')) },
+        FETCH: { actions: assign((ctx) => (ctx.strategy = 'fetch')) },
+        [exec.type]: [
+          {
+            cond: function shouldDemo(ctx) {
+              return ctx.strategy === 'demo'
+            },
+            actions: exec.action,
+            target: 'demoing',
+          },
+          {
+            cond: function shouldParse(ctx) {
+              return ctx.strategy === 'parse'
+            },
+            actions: exec.action,
+            target: 'parsing',
+          },
+          {
+            cond: function shouldFetch(ctx) {
+              return ctx.strategy === 'fetch'
+            },
+            actions: exec.action,
+            target: 'fetching',
+          },
+        ],
+      },
+    },
+    demoing: {
+      on: {
+        DEMO_FAILURE: {
+          target: 'failure',
+          actions: assign((ctx, { input }) => {
+            ctx.status = input
+          }),
+        },
+        [demoSuccess.type]: [
+          { actions: demoSuccess.action, target: 'linkingData' },
+        ],
+      },
+    },
+    parsing: {
+      on: {
+        PARSE_FAILURE: {
+          target: 'failure',
+          actions: assign((ctx, { input }) => {
+            ctx.status = input
+          }),
+        },
+        [parseSuccess.type]: [
+          { actions: parseSuccess.action, target: 'linkingData' },
+        ],
       },
     },
     fetching: {
@@ -159,72 +318,120 @@ export default createMachine<Context, MachineEvent>({
     linkingData: {
       on: {
         [linkingDataFailure.type]: {
-          cond: itemsIncludesInputCond,
+          cond: idsIncludesInputCond,
           actions: linkingDataFailure.action,
         },
         [linkingDataSuccess.type]: [
-          { cond: itemsIncludesInputCond, actions: linkingDataSuccess.action },
+          { cond: idsIncludesInputCond, actions: linkingDataSuccess.action },
         ],
         LINKING_DATA_COMPLETE: [
           {
-            cond: (ctx) =>
-              [...ctx.jsonld.values()].some((_) => _ === 'success'),
+            cond: function onlyFailures(ctx) {
+              return ctx.ids.every((id) => ctx.jsonld.get(id) === 'failure')
+            },
+            target: 'failure',
+          },
+          {
+            cond: function allSettled(ctx) {
+              return ctx.ids.every((id) => ctx.jsonld.has(id))
+            },
             target: 'verifyingCredentials',
           },
-          'failure',
         ],
       },
     },
     verifyingCredentials: {
       on: {
         [verifiedCredentialFailure.type]: {
-          cond: itemsIncludesInputCond,
+          cond: idsIncludesInputCond,
           actions: verifiedCredentialFailure.action,
         },
         [verifiedCredentialSuccess.type]: [
-          { cond: itemsIncludesInputCond, actions: verifiedCredentialSuccess.action },
+          {
+            cond: idsIncludesInputCond,
+            actions: verifiedCredentialSuccess.action,
+          },
         ],
         VERIFIED_CREDENTIAL_COMPLETE: [
           {
-            cond: (ctx) =>
-              [...ctx.verifiedCredentials.values()].some((_) => _ === 'success'),
+            cond: function onlyFailures(ctx) {
+              return ctx.ids.every(
+                (id) => ctx.verifiedCredentials.get(id) === 'failure'
+              )
+            },
+            target: 'failure',
+          },
+          {
+            cond: function allSettled(ctx) {
+              return ctx.ids.every((id) => ctx.verifiedCredentials.has(id))
+            },
             target: 'counterfeitingCredentials',
           },
-          'failure',
         ],
       },
     },
     counterfeitingCredentials: {
       on: {
         [counterfeitCredentialFailure.type]: {
-          cond: itemsIncludesInputCond,
+          cond: idsIncludesInputCond,
           actions: counterfeitCredentialFailure.action,
         },
         [counterfeitCredentialSuccess.type]: [
-          { cond: itemsIncludesInputCond, actions: counterfeitCredentialSuccess.action },
+          {
+            cond: idsIncludesInputCond,
+            actions: counterfeitCredentialSuccess.action,
+          },
         ],
         COUNTERFEIT_CREDENTIAL_COMPLETE: [
           {
-            cond: (ctx) =>
-              [...ctx.counterfeitCredentials.values()].some((_) => _ === 'success'),
+            cond: function someFailures(ctx) {
+              return ctx.ids.some(
+                (id) => ctx.counterfeitCredentials.get(id) === 'failure'
+              )
+            },
+            target: 'failure',
+          },
+          {
+            cond: function allSettled(ctx) {
+              return ctx.ids.every((id) => ctx.counterfeitCredentials.has(id))
+            },
             target: 'success',
           },
-          'failure',
         ],
       },
     },
-    creatingPresentation: {    },
-    signingPresentation: {    },
-    verifyingPresentation: {    },
-    counterfeitingPresentation: {    },
+    //creatingPresentation: {},
+    //signingPresentation: {},
+    //verifyingPresentation: {},
+    //counterfeitingPresentation: {},
     success: {
       on: {
-        FETCH: 'fetching',
-      },
-    },
-    failure: {
-      on: {
-        FETCH: 'fetching',
+        DEMO: { actions: assign((ctx) => (ctx.strategy = 'demo')) },
+        PARSE: { actions: assign((ctx) => (ctx.strategy = 'parse')) },
+        FETCH: { actions: assign((ctx) => (ctx.strategy = 'fetch')) },
+        [exec.type]: [
+          {
+            cond: function shouldDemo(ctx) {
+              return ctx.strategy === 'demo'
+            },
+            actions: exec.action,
+            target: 'demoing',
+          },
+          {
+            cond: function shouldParse(ctx) {
+              return ctx.strategy === 'parse'
+            },
+            actions: exec.action,
+            target: 'parsing',
+          },
+          {
+            cond: function shouldFetch(ctx) {
+              return ctx.strategy === 'fetch'
+            },
+            actions: exec.action,
+            target: 'fetching',
+          },
+        ],
       },
     },
   },
