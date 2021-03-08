@@ -21,10 +21,16 @@ function StrategyPanel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function DemoStrategy() {
+function DemoStrategy({
+  send,
+  state,
+}: {
+  send: Interpreter['send']
+  state: Interpreter['state']
+}) {
   return (
     <StrategyPanel>
-      <div className="rounded-lg py-2 px-3 bg-blue-50 ">
+      <div className="rounded-lg py-2 px-3 bg-gray-50 ">
         Create a few mock Verifiable Credentials to demonstrate the verification
         flow.
       </div>
@@ -32,9 +38,16 @@ function DemoStrategy() {
   )
 }
 
-function ParseStrategy() {
+function ParseStrategy({
+  send,
+  state,
+}: {
+  send: Interpreter['send']
+  state: Interpreter['state']
+}) {
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
+  const { strategy } = state.context
 
   return (
     <StrategyPanel>
@@ -47,6 +60,7 @@ function ParseStrategy() {
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         value={editor}
+        disabled={strategy !== 'parse'}
         required
       />
     </StrategyPanel>
@@ -154,6 +168,7 @@ function FetchStrategy({
     'verifyingCredentials',
     'counterfeitingCredentials',
   ].some(state.matches)
+  const { strategy } = state.context
 
   return (
     <StrategyPanel>
@@ -161,6 +176,7 @@ function FetchStrategy({
         className={cx('grid gap-4 grid-cols-2', {
           'select-none bg-gradient-to-t rounded-md': loading,
         })}
+        disabled={strategy !== 'fetch'}
       >
         <UrlField loading={loading} />
         <AuthField loading={loading} />
@@ -231,8 +247,8 @@ export default function Strategy({
         <StrategyTab index={2}>Fetch</StrategyTab>
       </TabList>
       <TabPanels className="mt-4">
-        <DemoStrategy />
-        <ParseStrategy />
+        <DemoStrategy state={state} send={send} />
+        <ParseStrategy state={state} send={send} />
         <FetchStrategy state={state} send={send} />
       </TabPanels>
     </Tabs>
