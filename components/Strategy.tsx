@@ -77,7 +77,7 @@ function ParseStrategy({
                 plugins: [babelParser],
               })
               .trim()
-            setEditor(prettyEditor)
+            setTimeout(() => setEditor(prettyEditor), 150)
           } catch {
             // Do nothing
           }
