@@ -10,7 +10,7 @@ export default function FetchVerifiableCredentials(props: {
   send: Interpreter['send']
 }) {
   const { send, state } = props
-  const { items, json } = state.context
+  const { ids, json } = state.context
   const fetching = state.matches('fetching')
   const auth = useStore((state) => state.auth)
   const url = useStore((state) => state.url)
@@ -67,16 +67,16 @@ export default function FetchVerifiableCredentials(props: {
     )
   }
 
-  if (items.length) {
+  if (ids.length) {
     return (
       <ReportRow readyState="success">
         <Panel className="text-green-900 bg-green-50">
-          Found <strong className="font-bold">{items.length}</strong>
-          {items.length === 1
+          Found <strong className="font-bold">{ids.length}</strong>
+          {ids.length === 1
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
         </Panel>
-        {items.map((id) => (
+        {ids.map((id) => (
           <ReadonlyTextarea
             key={id}
             value={JSON.stringify(json.get(id), null, 2)}

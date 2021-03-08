@@ -27,7 +27,7 @@ export default function Index() {
         onSubmit={(event) => {
           event.preventDefault()
 
-          send({ type: 'FETCH', input: '' })
+          send({ type: 'EXEC', input: '' })
         }}
       >
         <Header state={state} send={send} />

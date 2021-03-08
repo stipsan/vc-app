@@ -16,16 +16,15 @@ function ValidateLinkedDataRow({
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
-  const { items, json } = state.context
-  const [readyState, setReadyState] = useState('loading')
+  const { ids, json } = state.context
+  const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  )
   const [expanded, setExpanded] = useState(null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     let cancelled = false
-    setError(null)
-    setExpanded(null)
-    setReadyState('loading')
 
     jsonldChecker
       .check(json.get(id), documentLoader)
@@ -35,9 +34,12 @@ function ValidateLinkedDataRow({
         }
         if (cancelled) return
         // throw new Error('oooh')
-        const expanded = await jsonld.expand(json.get(id), {
-          documentLoader,
-        })
+        const expanded = await jsonld.expand(
+          JSON.parse(JSON.stringify(json.get(id))),
+          {
+            documentLoader,
+          }
+        )
         if (cancelled) return
         setReadyState('success')
         setExpanded(expanded)
@@ -64,7 +66,7 @@ function ValidateLinkedDataRow({
         'text-green-900 bg-green-50': readyState === 'success',
       })}
     >
-      {items.length > 1 ? `${id} ` : ''}
+      {ids.length > 1 ? `${id} ` : ''}
       {readyState === 'loading'
         ? 'Checking JSON-LD...'
         : readyState === 'error'
@@ -89,21 +91,19 @@ export default function ValidateLinkedData({
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
-  const { items } = state.context
+  const { ids, jsonld } = state.context
+  const isCurrent = state.matches('linkingData')
 
   useEffect(() => {
-    if (
-      state.matches('linkingData') &&
-      state.context.jsonld.size === items.length
-    ) {
+    if (isCurrent && jsonld.size === ids.length) {
       send({ type: 'LINKING_DATA_COMPLETE', input: '' })
     }
-  }, [state, items])
+  }, [isCurrent, jsonld.size, ids.length])
 
-  if (state.matches('linkingData') || state.context.jsonld.size) {
+  if (isCurrent || jsonld.size) {
     return (
       <ReportRow>
-        {items.map((id) => (
+        {ids.map((id) => (
           <ValidateLinkedDataRow key={id} id={id} send={send} state={state} />
         ))}
       </ReportRow>
