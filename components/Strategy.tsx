@@ -239,6 +239,7 @@ export default function Strategy({
   send: Interpreter['send']
 }) {
   const idle = ['ready', 'success', 'failure'].some(state.matches)
+  const [mounted, setMounted] = useState(false)
   const getIndex = useCallback((state: Interpreter['state']) => {
     switch (state.context.strategy) {
       case 'demo':
@@ -249,6 +250,13 @@ export default function Strategy({
         return 2
     }
   }, [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <Tabs
