@@ -1,71 +1,55 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function FetchVerifiableCredentials(props: {
+export default function ParseVerifiableCredentials(props: {
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
   const { send, state } = props
   const { ids, json } = state.context
-  const fetching = state.matches('fetching')
-  const auth = useStore((state) => state.auth)
-  const url = useStore((state) => state.url)
+  const parsing = state.matches('parsing')
+  const editor = useStore((state) => state.editor)
   const [error, setError] = useState('')
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('parsing') || state.matches('demoing')) {
+    if (state.matches('fetching') || state.matches('demoing')) {
       setLastUsedStrategy(false)
     }
   }, [state])
 
   useEffect(() => {
-    if (!fetching) {
+    if (!parsing) {
       return
     }
 
     setLastUsedStrategy(true)
     setError('')
 
-    let cancelled = false
+    try {
+      const data = JSON.parse(editor)
+      const items = [].concat(data?.items || data)
 
-    fetch(`/api/cors?url=${url}`, {
-      credentials: 'omit',
-      headers: { Authorization: auth },
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error(await response.text())
-        const data = await response.json()
-        if (cancelled) return
+      if (!items.length) {
+        throw new Error(`Failed to find Verifiable Credentials in the editor`)
+      }
 
-        const items = [].concat(data?.items || data)
-
-        if (!items.length) {
-          throw new Error(
-            `Failed to find Verifiable Credentials in the API response: ${JSON.stringify(
-              data
-            )}`
-          )
-        }
-
-        send({ type: 'FETCH_SUCCESS', input: items })
+      send({ type: 'PARSE_SUCCESS', input: items })
+    } catch (err) {
+      send({
+        type: 'PARSE_FAILURE',
+        input: `Couldn't find Verifiable Credentials in the editor`,
       })
-      .catch((reason) => {
-        send({ type: 'FETCH_FAILURE', input: `${reason}` })
-        toast.error(`Failed fetching Verifiable Credentials`)
-        setError(reason)
-      })
-
-    return () => {
-      cancelled = true
+      toast.error(`Failed finding Verifiable Credentials in the editor`)
+      setError(err)
     }
-  }, [fetching, url, auth])
+  }, [parsing, editor])
 
-  if (!lastUsedStrategy && !state.matches('fetching')) {
+  if (!lastUsedStrategy && !state.matches('parsing')) {
     return null
   }
 
@@ -95,10 +79,10 @@ export default function FetchVerifiableCredentials(props: {
     )
   }
 
-  if (state.matches('fetching')) {
+  if (state.matches('parsing')) {
     return (
       <ReportRow readyState="loading">
-        <Panel>Loading Verifiable Credentials from API...</Panel>
+        <Panel>Parsing Verifiable Credentials from editor...</Panel>
       </ReportRow>
     )
   }

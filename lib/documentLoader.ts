@@ -7,6 +7,7 @@ import {
   contexts,
 } from '@transmute/jsonld-document-loader'
 import citizenship from './citizenship-v1.json'
+import didDoc from './did.json'
 
 const webResolver = getResolver()
 // @ts-expect-error
@@ -56,6 +57,13 @@ const documentLoader = documentLoaderFactory.pluginFactory
     ['did:web']: {
       resolve: (did: string) => {
         return didResolver.resolve(did)
+      },
+    },
+  })
+  .addResolver({
+    [didDoc.id]: {
+      resolve: async (did: string) => {
+        return didDoc
       },
     },
   })

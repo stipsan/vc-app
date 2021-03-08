@@ -1,101 +1,10 @@
-import toast from 'react-hot-toast'
 import cx from 'classnames'
-import { useEffect, useRef, useState } from 'react'
-import { useStore } from '../lib/useStore'
+import { useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
+import type { Interpreter } from '../lib/stateMachine'
 
-function SyncHistoryState() {
-  const auth = useStore((state) => state.auth)
-
-  useEffect(() => {
-    localStorage.setItem('vcv.auth', auth)
-  }, [auth])
-
-  return null
-}
-
-function UrlField() {
-  const setUrl = useStore((state) => state.setUrl)
-  const url = useStore((state) => state.url)
-  const loading = useStore((state) => state.loading)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-
-    const searchParams = new URLSearchParams(location.search)
-    if (searchParams.has('url')) {
-      try {
-        const defaultUrl = new URL(searchParams.get('url'))
-        setUrl(defaultUrl.toString())
-      } catch {
-        // we ignore any URL parser errors
-      }
-    }
-  }, [])
-
-  return (
-    <label
-      className={cx('block transition-opacity duration-150', {
-        'opacity-30 pointer-events-none': loading,
-      })}
-    >
-      <span className="text-gray-700">API URL</span>
-      <input
-        className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
-        )}
-        type="url"
-        onChange={(event) => setUrl(event.target.value)}
-        value={url}
-        readOnly={!mounted || loading}
-        required
-      />
-    </label>
-  )
-}
-
-function AuthField() {
-  const setAuth = useStore((state) => state.setAuth)
-  const auth = useStore((state) => state.auth)
-  const loading = useStore((state) => state.loading)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-
-    if (localStorage.getItem('vcv.auth')) {
-      try {
-        setAuth(localStorage.getItem('vcv.auth'))
-      } catch {
-        // we ignore any URL parser errors
-      }
-    }
-  }, [])
-
-  return (
-    <label
-      className={cx('block transition-opacity duration-150', {
-        'opacity-30 pointer-events-none': loading,
-      })}
-    >
-      <span className="text-gray-700">Authorization</span>
-      <input
-        className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
-        )}
-        placeholder="Bearer ..."
-        type="text"
-        onChange={(event) => setAuth(event.target.value)}
-        value={auth}
-        readOnly={!mounted || loading}
-        required
-      />
-    </label>
-  )
-}
-
-function SubmitButton() {
-  const loading = useStore((state) => state.loading)
+function SubmitButton(props: { state: Interpreter['state'] }) {
+  const loading = !['ready', 'success', 'failure'].some(props.state.matches)
 
   return (
     <button
@@ -138,10 +47,23 @@ function SubmitButton() {
   )
 }
 
-export default function Header() {
-  const setLoading = useStore((state) => state.setLoading)
-  const loading = useStore((state) => state.loading)
+export default function Header({
+  send,
+  state,
+}: {
+  send: Interpreter['send']
+  state: Interpreter['state']
+}) {
+  const loading = [
+    'fetching',
+    'linkingData',
+    'verifyingCredentials',
+    'counterfeitingCredentials',
+  ].some(state.matches)
+  const failure = state.matches('failure')
+  const success = state.matches('success')
   const titleRef = useRef('')
+  const { status } = state.context
 
   useEffect(() => {
     if (loading) {
@@ -155,40 +77,45 @@ export default function Header() {
     }
   }, [loading])
 
+  const message = status
+    ? status
+    : loading
+    ? 'Verifying...'
+    : failure
+    ? 'Verification failed!'
+    : ''
+
   return (
     <>
       <header
-        className={cx('sticky top-0 px-6 pt-2 pb-4 bg-gradient-to-t z-10', {
-          'cursor-wait': loading,
-        })}
+        className={cx('sticky -top-2 -bottom-2 px-6 py-4 z-10')}
         style={{
-          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem',
+          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem, white 50%, hsla(0,0%,100%,0) 50%',
+          backgroundImage:
+            'linear-gradient(to top, var(--tw-gradient-stops)), linear-gradient(to bottom, var(--tw-gradient-stops))',
         }}
       >
-        <form
-          title={loading ? 'Verifying...' : undefined}
-          className={cx('grid gap-4 md:grid-cols-header', {
-            'select-none bg-gradient-to-t rounded-md': loading,
-          })}
-          style={{
-            ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white .1rem',
-          }}
-          onSubmit={(event) => {
-            event.preventDefault()
-
-            if (loading) {
-              return
-            }
-
-            setLoading(true)
-          }}
+        <div
+          className={cx(
+            'grid gap-x-2 grid-cols-1 md:grid-rows-1 md:grid-cols-header',
+            { 'grid-rows-2': message }
+          )}
         >
-          <UrlField />
-          <AuthField />
-          <SubmitButton />
-        </form>
+          <SubmitButton state={state} />
+          {message && (
+            <span
+              className={cx('self-center', {
+                'text-gray-800': !failure && !success,
+                'text-red-800': failure,
+                'text-green-800': success,
+              })}
+            >
+              {message}
+            </span>
+          )}
+        </div>
       </header>
-      <SyncHistoryState />
+      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white" />
     </>
   )
 }

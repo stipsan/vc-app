@@ -1,12 +1,13 @@
 import useWindowSize from 'react-use/lib/useWindowSize'
 import Confetti from 'react-confetti'
 import { useEffect, useRef } from 'react'
-import { useStore } from '../lib/useStore'
+import { Interpreter } from '../lib/stateMachine'
 
-const Celebrate = () => {
+const Celebrate = (props: { state: Interpreter['state'] }) => {
+  const { state } = props
   const { width, height } = useWindowSize()
   const onceRef = useRef(false)
-  const success = useStore((state) => state.success)
+  const success = state.matches('success')
 
   useEffect(() => {
     if (success) {
