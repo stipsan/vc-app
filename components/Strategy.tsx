@@ -50,6 +50,12 @@ function ParseStrategy({
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const { strategy } = state.context
+  const loading = [
+    'parsing',
+    'linkingData',
+    'verifyingCredentials',
+    'counterfeitingCredentials',
+  ].some(state.matches)
 
   return (
     <StrategyPanel>
@@ -57,7 +63,8 @@ function ParseStrategy({
         spellCheck={false}
         placeholder="Paste your JSON in here..."
         className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
+          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-opacity duration-150',
+          { 'opacity-30 pointer-events-none': loading }
         )}
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
@@ -231,6 +238,7 @@ export default function Strategy({
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
+  const idle = ['ready', 'success', 'failure'].some(state.matches)
   const getIndex = useCallback((state: Interpreter['state']) => {
     switch (state.context.strategy) {
       case 'demo':
@@ -257,7 +265,11 @@ export default function Strategy({
         }
       }}
     >
-      <TabList className="flex flex-initial">
+      <TabList
+        className={cx('flex flex-initial transition-opacity duration-150', {
+          'opacity-30 pointer-events-none': !idle,
+        })}
+      >
         <StrategyTab index={0}>Demo</StrategyTab>
         <StrategyTab index={1}>Editor</StrategyTab>
         <StrategyTab index={2}>Fetch</StrategyTab>

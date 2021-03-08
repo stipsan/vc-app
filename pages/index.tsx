@@ -11,6 +11,7 @@ import Strategy from '../components/Strategy'
 import TamperingDetector from '../components/TamperingDetector'
 import ValidateLinkedData from '../components/ValidateLinkedData'
 import VerifyCredentials from '../components/VerifyCredentials'
+import ScrollTo from '../components/ScrollTo'
 import defaultMachine from '../lib/stateMachine'
 
 export default function Index() {
@@ -26,6 +27,7 @@ export default function Index() {
         <title>Verifiable Credentials Verifier</title>
       </Head>
       <form
+        className="min-h-screen"
         onSubmit={(event) => {
           event.preventDefault()
 
@@ -40,7 +42,16 @@ export default function Index() {
         <ValidateLinkedData state={state} send={send} />
         <VerifyCredentials state={state} send={send} />
         <TamperingDetector state={state} send={send} />
+        <ScrollTo state={state} />
       </form>
+      <footer className="bg-gray-50 py-10 px-6 grid place-items-center">
+        <a
+          className="text-lg font-semibold"
+          href="https://github.com/stipsan/vc-app"
+        >
+          GitHub
+        </a>
+      </footer>
       <Celebrate state={state} />
       <Toaster position="bottom-center" />
     </>
