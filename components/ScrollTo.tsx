@@ -4,8 +4,6 @@ import { Interpreter } from '../lib/stateMachine'
 
 export default function ScrollTo({ state }: { state: Interpreter['state'] }) {
   const nodeRef = useRef()
-  const demoing = state.matches('demoing')
-  const parsing = state.matches('parsing')
   const fetching = state.matches('fetching')
   const linkingData = state.matches('linkingData')
   const verifyingCredentials = state.matches('verifyingCredentials')
@@ -15,8 +13,6 @@ export default function ScrollTo({ state }: { state: Interpreter['state'] }) {
 
   useEffect(() => {
     switch (true) {
-      case demoing:
-      case parsing:
       case fetching:
       case linkingData:
       case verifyingCredentials:
@@ -33,8 +29,6 @@ export default function ScrollTo({ state }: { state: Interpreter['state'] }) {
         )
     }
   }, [
-    demoing,
-    parsing,
     fetching,
     linkingData,
     verifyingCredentials,
