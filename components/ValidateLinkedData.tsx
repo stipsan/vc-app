@@ -73,7 +73,7 @@ function ValidateLinkedDataRow({
         ? 'Invalid JSON-LD'
         : 'Valid JSON-LD'}
       {readyState === 'success' && expanded && (
-        <SuperReadonlyTextarea value={JSON.stringify(expanded, null, 2)} />
+        <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
       )}
       {readyState === 'error' && error && (
         <div className="rounded py-2 my-1 px-3 bg-red-100">{`${error}: ${JSON.stringify(

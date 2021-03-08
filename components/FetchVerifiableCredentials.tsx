@@ -89,10 +89,7 @@ export default function FetchVerifiableCredentials(props: {
             : ' Verifiable Credentials'}
         </Panel>
         {ids.map((id) => (
-          <ReadonlyTextarea
-            key={id}
-            value={JSON.stringify(json.get(id), null, 2)}
-          />
+          <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
         ))}
       </ReportRow>
     )

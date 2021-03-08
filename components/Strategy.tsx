@@ -12,6 +12,8 @@ import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import Textarea from 'react-expanding-textarea'
+import prettier from 'prettier/standalone'
+import babelParser from 'prettier/parser-babel'
 
 function StrategyPanel({ children }: { children: React.ReactNode }) {
   return (
@@ -59,6 +61,20 @@ function ParseStrategy({
         )}
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
+        onBlur={() => {
+          try {
+            const prettyEditor = prettier
+              .format(editor, {
+                tabWidth: 4,
+                parser: 'json',
+                plugins: [babelParser],
+              })
+              .trim()
+            setEditor(prettyEditor)
+          } catch {
+            // Do nothing
+          }
+        }}
         value={editor}
         disabled={strategy !== 'parse'}
         required

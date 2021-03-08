@@ -101,12 +101,12 @@ function TamperingDetectorRow({
         ? `Able to tamper with credentialSubject without failing the signature check`
         : 'Tampering with credentialSubject successfully detected by the signature check'}
       {readyState === 'success' && error && (
-        <SuperReadonlyTextarea value={JSON.stringify(error, null, 2)} />
+        <SuperReadonlyTextarea value={JSON.stringify(error)} />
       )}
       {readyState === 'failure' && expanded && (
         <SuperReadonlyTextarea
           className="bg-red-100 focus:ring-inset focus:ring-red-200 focus:ring-2"
-          value={JSON.stringify(expanded, null, 2)}
+          value={JSON.stringify(expanded)}
         />
       )}
       {readyState === 'error' && error && (

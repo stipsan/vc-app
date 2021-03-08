@@ -1,5 +1,7 @@
 import cx from 'classnames'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import prettier from 'prettier/standalone'
+import babelParser from 'prettier/parser-babel'
 
 export function Code({ children }: { children: React.ReactNode }) {
   return <code>{children}</code>
@@ -15,6 +17,19 @@ export function ReadonlyTextarea({
   const ref = useRef()
   const [height, setHeight] = useState(0)
 
+  const formatted = useMemo(
+    () =>
+      prettier
+        .format(value, {
+          printWidth: 100,
+          tabWidth: 4,
+          parser: 'json',
+          plugins: [babelParser],
+        })
+        .trim(),
+    [value]
+  )
+
   useLayoutEffect(() => {
     // @ts-expect-error
     setHeight(ref.current.scrollHeight)
@@ -26,7 +41,7 @@ export function ReadonlyTextarea({
       readOnly
       style={{ height: height ? `${height}px` : undefined }}
       className={className}
-      value={value}
+      value={formatted}
     ></textarea>
   )
 }
