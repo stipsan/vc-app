@@ -4,6 +4,8 @@ import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import Celebrate from '../components/Celebrate'
 import FetchVerifiableCredentials from '../components/FetchVerifiableCredentials'
+import ParseVerifiableCredentials from '../components/ParseVerifiableCredentials'
+import DemoVerifiableCredentials from '../components/DemoVerifiableCredentials'
 import Header from '../components/Header'
 import Strategy from '../components/Strategy'
 import TamperingDetector from '../components/TamperingDetector'
@@ -33,6 +35,8 @@ export default function Index() {
         <Strategy state={state} send={send} />
         <Header state={state} send={send} />
         <FetchVerifiableCredentials state={state} send={send} />
+        <ParseVerifiableCredentials state={state} send={send} />
+        <DemoVerifiableCredentials state={state} send={send} />
         <ValidateLinkedData state={state} send={send} />
         <VerifyCredentials state={state} send={send} />
         <TamperingDetector state={state} send={send} />

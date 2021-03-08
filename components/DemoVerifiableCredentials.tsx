@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function FetchVerifiableCredentials(props: {
+export default function DemoVerifiableCredentials(props: {
   state: Interpreter['state']
   send: Interpreter['send']
 }) {
@@ -18,7 +18,7 @@ export default function FetchVerifiableCredentials(props: {
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('parsing') || state.matches('demoing')) {
+    if (state.matches('parsing') || state.matches('fetching')) {
       setLastUsedStrategy(false)
     }
   }, [state])
@@ -65,7 +65,7 @@ export default function FetchVerifiableCredentials(props: {
     }
   }, [fetching, url, auth])
 
-  if (!lastUsedStrategy && !state.matches('fetching')) {
+  if (!lastUsedStrategy && !state.matches('demoing')) {
     return null
   }
 
@@ -83,7 +83,7 @@ export default function FetchVerifiableCredentials(props: {
     return (
       <ReportRow readyState="success">
         <Panel className="text-green-900 bg-green-50">
-          Found <strong className="font-bold">{ids.length}</strong>
+          Created <strong className="font-bold">{ids.length}</strong>
           {ids.length === 1
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
@@ -98,10 +98,10 @@ export default function FetchVerifiableCredentials(props: {
     )
   }
 
-  if (state.matches('fetching')) {
+  if (state.matches('demoing')) {
     return (
       <ReportRow readyState="loading">
-        <Panel>Loading Verifiable Credentials from API...</Panel>
+        <Panel>Creatomg demo Verifiable Credentials...</Panel>
       </ReportRow>
     )
   }

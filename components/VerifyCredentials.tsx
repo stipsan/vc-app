@@ -70,7 +70,7 @@ function VerifyCredentialsRow({
       className={cx({
         'bg-blue-50 text-black text-opacity-80':
           readyState === 'loading' || jsonldStatus === 'failure',
-        'animate-pulse': readyState === 'loading',
+        'animate-pulse': readyState === 'loading' && jsonldStatus !== 'failure',
         'text-red-900 bg-red-50': readyState === 'error',
         'text-green-900 bg-green-50': readyState === 'success',
       })}

@@ -79,19 +79,22 @@ function TamperingDetectorRow({
           readyState === 'loading' ||
           verifiedCredentialStatus === 'failure' ||
           jsonldStatus === 'failure',
-        'animate-pulse': readyState === 'loading',
+        'animate-pulse':
+          readyState === 'loading' &&
+          verifiedCredentialStatus !== 'failure' &&
+          jsonldStatus !== 'failure',
         'text-red-900 bg-red-50':
           readyState === 'error' || readyState === 'failure',
         'text-green-900 bg-green-50': readyState === 'success',
       })}
     >
       {ids.length > 1 ? `${id} ` : ''}
-      {readyState === 'loading'
-        ? 'Attempting to tamper with credentialSubject and fool the signature check...'
-        : jsonldStatus === 'failure'
+      {jsonldStatus === 'failure'
         ? `Skipped tampering detection because of the JSON-LD validation failing`
         : verifiedCredentialStatus === 'failure'
         ? `Skipped tampering detection because of the failed verification`
+        : readyState === 'loading'
+        ? 'Attempting to tamper with credentialSubject and fool the signature check...'
         : readyState === 'error'
         ? `Unexpected error`
         : readyState === 'failure'

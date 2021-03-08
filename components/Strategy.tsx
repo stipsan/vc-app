@@ -47,6 +47,7 @@ function ParseStrategy() {
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         value={editor}
+        required
       />
     </StrategyPanel>
   )
