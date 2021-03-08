@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import Celebrate from '../components/Celebrate'
 import FetchVerifiableCredentials from '../components/FetchVerifiableCredentials'
 import Header from '../components/Header'
+import Strategy from '../components/Strategy'
 import TamperingDetector from '../components/TamperingDetector'
 import ValidateLinkedData from '../components/ValidateLinkedData'
 import VerifyCredentials from '../components/VerifyCredentials'
@@ -23,13 +24,13 @@ export default function Index() {
         <title>Verifiable Credentials Verifier</title>
       </Head>
       <form
-        className="pb-20"
         onSubmit={(event) => {
           event.preventDefault()
 
           send({ type: 'EXEC', input: '' })
         }}
       >
+        <Strategy state={state} send={send} />
         <Header state={state} send={send} />
         <FetchVerifiableCredentials state={state} send={send} />
         <ValidateLinkedData state={state} send={send} />

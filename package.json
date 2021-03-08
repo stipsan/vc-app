@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@reach/tabs": "^0.13.2",
     "@transmute/ed25519-signature-2018": "^0.2.1-unstable.8",
     "@transmute/jsonld-document-loader": "^0.2.0",
     "@transmute/vc.js": "^0.2.1-unstable.8",
@@ -24,6 +25,7 @@
     "react": "17.0.1",
     "react-confetti": "^6.0.1",
     "react-dom": "17.0.1",
+    "react-expanding-textarea": "^2.3.1",
     "react-hot-toast": "^1.0.2",
     "react-use": "^17.1.1",
     "smooth-scroll-into-view-if-needed": "^1.1.30",

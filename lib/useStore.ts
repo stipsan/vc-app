@@ -6,10 +6,12 @@ export const useStore = create(
     {
       url: '',
       auth: '',
+      editor: '',
     },
     (set) => ({
       setUrl: (url: string) => set({ url }),
       setAuth: (auth: string) => set({ auth }),
+      setEditor: (editor: string) => set({ editor }),
     })
   )
 )

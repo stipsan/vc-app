@@ -205,7 +205,7 @@ export type Interpreter = MachineInterpreter<Context, State, MachineEvent>
 
 export default createMachine<Context, MachineEvent>({
   context: {
-    strategy: 'fetch',
+    strategy: 'demo',
     count: 0,
     status: '',
     ids: [],
@@ -218,9 +218,9 @@ export default createMachine<Context, MachineEvent>({
   states: {
     failure: {
       on: {
-        DEMO: { actions: assign((ctx) => (ctx.strategy = 'demo')) },
-        PARSE: { actions: assign((ctx) => (ctx.strategy = 'parse')) },
-        FETCH: { actions: assign((ctx) => (ctx.strategy = 'fetch')) },
+        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
+        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
+        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {
@@ -395,6 +395,7 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.counterfeitCredentials.has(id))
             },
+            actions: assign((ctx) => {ctx.status = 'Verification successful!'}),
             target: 'success',
           },
         ],
@@ -406,9 +407,9 @@ export default createMachine<Context, MachineEvent>({
     //counterfeitingPresentation: {},
     success: {
       on: {
-        DEMO: { actions: assign((ctx) => (ctx.strategy = 'demo')) },
-        PARSE: { actions: assign((ctx) => (ctx.strategy = 'parse')) },
-        FETCH: { actions: assign((ctx) => (ctx.strategy = 'fetch')) },
+        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
+        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
+        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {

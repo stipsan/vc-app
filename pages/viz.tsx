@@ -40,11 +40,9 @@ export default function Viz() {
                   ],
               })
             case 'DEMO_SUCCESS':
-              return send(event.eventType, { input: [{}, {}, {}] })
             case 'PARSE_SUCCESS':
-              return send(event.eventType, { input: [{}] })
             case 'FETCH_SUCCESS':
-              return send(event.eventType, { input: [{}, {}] })
+              return send(event.eventType, { input: [{}] })
             default:
               // @ts-expect-error
               return send(event.eventType, { input: {} })

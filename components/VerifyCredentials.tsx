@@ -38,7 +38,9 @@ function VerifyCredentialsRow({
       documentLoader,
       suite: new Ed25519Signature2018({}),
     })
-      .then((result) => {
+      .then(async (result) => {
+        await new Promise((resolve) => setTimeout(() => resolve(null), 3000))
+
         // throw new Error('oooh')
         if (cancelled) return
         if (result.verified) {

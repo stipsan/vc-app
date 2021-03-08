@@ -13,7 +13,7 @@ export default function ReportRow({
 
   useLayoutEffect(() => {
     if (domRef.current) {
-      scrollIntoView(domRef.current, { behavior: 'smooth', block: 'start' })
+      //scrollIntoView(domRef.current, { behavior: 'smooth', block: 'start' })
     }
   }, [])
 
