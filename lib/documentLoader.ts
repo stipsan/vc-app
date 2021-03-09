@@ -1,13 +1,12 @@
+import {
+  contexts, documentLoaderFactory
+} from '@transmute/jsonld-document-loader'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
-//import { getResolver } from 'web-did-resolver'
-import { getResolver } from './webResolver'
-import {
-  documentLoaderFactory,
-  contexts,
-} from '@transmute/jsonld-document-loader'
 import citizenship from './citizenship-v1.json'
 import didDoc from './did.json'
+//import { getResolver } from 'web-did-resolver'
+import { getResolver } from './webResolver'
 
 const webResolver = getResolver()
 // @ts-expect-error

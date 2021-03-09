@@ -1,25 +1,16 @@
 import { useMachine } from '@xstate/react'
+import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import Celebrate from '../components/Celebrate'
-import FetchVerifiableCredentials from '../components/FetchVerifiableCredentials'
-import ParseVerifiableCredentials from '../components/ParseVerifiableCredentials'
-import DemoVerifiableCredentials from '../components/DemoVerifiableCredentials'
 import Header from '../components/Header'
-
-import TamperingDetector from '../components/TamperingDetector'
-import ValidateLinkedData from '../components/ValidateLinkedData'
-import VerifyCredentials from '../components/VerifyCredentials'
-import ScrollTo from '../components/ScrollTo'
 import defaultMachine from '../lib/stateMachine'
-import dynamic from 'next/dynamic'
 
 const Strategy = dynamic(() => import('../components/Strategy'), {
   ssr: false,
   loading: () => (
     <>
-      <div className="mx-6 mt-8 flex flex-initial items-center">
+      <div className="px-6 pt-8 flex flex-initial items-center">
         <div className="animate-pulse bg-gray-100 py-1 rounded-full w-16">
           &nbsp;
         </div>
@@ -44,6 +35,34 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
       </div>
     </>
   ),
+})
+const FetchVerifiableCredentials = dynamic(
+  () => import('../components/FetchVerifiableCredentials'),
+  { ssr: false }
+)
+const ParseVerifiableCredentials = dynamic(
+  () => import('../components/ParseVerifiableCredentials'),
+  { ssr: false }
+)
+const DemoVerifiableCredentials = dynamic(
+  () => import('../components/DemoVerifiableCredentials'),
+  { ssr: false }
+)
+const ValidateLinkedData = dynamic(
+  () => import('../components/ValidateLinkedData'),
+  { ssr: false }
+)
+const VerifyCredentials = dynamic(
+  () => import('../components/VerifyCredentials'),
+  { ssr: false }
+)
+const TamperingDetector = dynamic(
+  () => import('../components/TamperingDetector'),
+  { ssr: false }
+)
+const ScrollTo = dynamic(() => import('../components/ScrollTo'), { ssr: false })
+const Celebrate = dynamic(() => import('../components/Celebrate'), {
+  ssr: false,
 })
 
 export default function Index() {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'

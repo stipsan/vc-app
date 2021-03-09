@@ -1,6 +1,6 @@
-import useWindowSize from 'react-use/lib/useWindowSize'
-import Confetti from 'react-confetti'
 import { useEffect, useRef } from 'react'
+import Confetti from 'react-confetti'
+import useWindowSize from 'react-use/lib/useWindowSize'
 import { Interpreter } from '../lib/stateMachine'
 
 const Celebrate = (props: { state: Interpreter['state'] }) => {

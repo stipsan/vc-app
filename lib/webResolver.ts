@@ -1,10 +1,10 @@
 // TODO: resolve CORS issues on did.json resources
 
 import { DIDDocument, ParsedDID } from 'did-resolver'
+import { fetchLoader } from './documentLoader'
 
 const DOC_PATH = '/.well-known/did.json'
 
-import {fetchLoader} from './documentLoader'
 
 export function getResolver() {
   async function resolve(

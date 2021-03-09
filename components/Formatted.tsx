@@ -1,7 +1,7 @@
 import cx from 'classnames'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import prettier from 'prettier/standalone'
 import babelParser from 'prettier/parser-babel'
+import prettier from 'prettier/standalone'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 export function Code({ children }: { children: React.ReactNode }) {
   return <code>{children}</code>

@@ -1,10 +1,10 @@
+import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
   createMachine,
-  AssignAction,
-  State as MachineState,
-  Interpreter as MachineInterpreter,
+
+
+  Interpreter as MachineInterpreter, State as MachineState
 } from 'xstate'
-import { createUpdater, ImmerUpdateEvent, assign } from '@xstate/immer'
 
 interface Context {
   strategy: 'demo' | 'parse' | 'fetch'

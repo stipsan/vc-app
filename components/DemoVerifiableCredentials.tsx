@@ -1,13 +1,13 @@
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519'
 import { Ed25519Signature2018 } from '@transmute/ed25519-signature-2018'
+import { ld as vc } from '@transmute/vc.js'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import didDoc from '../lib/did.json'
+import documentLoader from '../lib/documentLoader'
 import type { Interpreter } from '../lib/stateMachine'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import didDoc from '../lib/did.json'
-import { ld as vc } from '@transmute/vc.js'
-import documentLoader from '../lib/documentLoader'
 
 export default function DemoVerifiableCredentials(props: {
   state: Interpreter['state']
@@ -37,7 +37,6 @@ export default function DemoVerifiableCredentials(props: {
 
     import('faker')
       .then(async ({ default: faker }) => {
-        console.log(faker)
         if (cancelled) return
         const src = {
           '@context': [

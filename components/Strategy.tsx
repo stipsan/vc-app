@@ -1,19 +1,18 @@
 import {
-  Tabs,
-  TabList,
   Tab,
-  TabPanels,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
+import babelParser from 'prettier/parser-babel'
+import prettier from 'prettier/standalone'
+import React, { useCallback, useEffect, useLayoutEffect } from 'react'
+import Textarea from 'react-expanding-textarea'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
-import Textarea from 'react-expanding-textarea'
-import prettier from 'prettier/standalone'
-import babelParser from 'prettier/parser-babel'
 
 function StrategyPanel({ children }: { children: React.ReactNode }) {
   return (
@@ -103,11 +102,8 @@ function SyncHistoryState() {
 function UrlField({ loading }: { loading: boolean }) {
   const setUrl = useStore((state) => state.setUrl)
   const url = useStore((state) => state.url)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-
+  useLayoutEffect(() => {
     const searchParams = new URLSearchParams(location.search)
     if (searchParams.has('url')) {
       try {
@@ -133,7 +129,7 @@ function UrlField({ loading }: { loading: boolean }) {
         type="url"
         onChange={(event) => setUrl(event.target.value)}
         value={url}
-        readOnly={!mounted || loading}
+        readOnly={loading}
         required
       />
     </label>
@@ -143,11 +139,8 @@ function UrlField({ loading }: { loading: boolean }) {
 function AuthField({ loading }: { loading: boolean }) {
   const setAuth = useStore((state) => state.setAuth)
   const auth = useStore((state) => state.auth)
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-
+  useLayoutEffect(() => {
     if (localStorage.getItem('vcv.auth')) {
       try {
         setAuth(localStorage.getItem('vcv.auth'))
@@ -172,7 +165,7 @@ function AuthField({ loading }: { loading: boolean }) {
         type="text"
         onChange={(event) => setAuth(event.target.value)}
         value={auth}
-        readOnly={!mounted || loading}
+        readOnly={loading}
       />
     </label>
   )

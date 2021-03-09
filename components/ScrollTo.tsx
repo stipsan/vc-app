@@ -1,5 +1,5 @@
-import scrollIntoView from 'smooth-scroll-into-view-if-needed'
 import { useEffect, useRef } from 'react'
+import scrollIntoView from 'smooth-scroll-into-view-if-needed'
 import { Interpreter } from '../lib/stateMachine'
 
 export default function ScrollTo({ state }: { state: Interpreter['state'] }) {
