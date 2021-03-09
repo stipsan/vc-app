@@ -91,43 +91,42 @@ export default function DemoVerifiableCredentials(props: {
     }
   }, [demoing])
 
-  if (!lastUsedStrategy && !state.matches('demoing')) {
-    return null
-  }
+  switch (true) {
+    case !lastUsedStrategy && !state.matches('demoing'):
+      return null
 
-  if (error) {
-    return (
-      <ReportRow readyState="error">
-        <Panel className="text-red-900 bg-red-50">
-          <ErrorMessage>{error}</ErrorMessage>
-        </Panel>
-      </ReportRow>
-    )
-  }
+    case !!error:
+      return (
+        <ReportRow readyState="error">
+          <Panel className="text-red-900 bg-red-50">
+            <ErrorMessage>{error}</ErrorMessage>
+          </Panel>
+        </ReportRow>
+      )
 
-  if (ids.length) {
-    return (
-      <ReportRow readyState="success">
-        <Panel className="text-green-900 bg-green-50">
-          Created <strong className="font-bold">{ids.length}</strong>
-          {ids.length === 1
-            ? ' Verifiable Credential'
-            : ' Verifiable Credentials'}
-        </Panel>
-        {ids.map((id) => (
-          <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
-        ))}
-      </ReportRow>
-    )
-  }
+    case ids.length > 0:
+      return (
+        <ReportRow readyState="success">
+          <Panel className="text-green-900 bg-green-50">
+            Created <strong className="font-bold">{ids.length}</strong>
+            {ids.length === 1
+              ? ' Verifiable Credential'
+              : ' Verifiable Credentials'}
+          </Panel>
+          {ids.map((id) => (
+            <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
+          ))}
+        </ReportRow>
+      )
 
-  if (state.matches('demoing')) {
-    return (
-      <ReportRow readyState="loading">
-        <Panel>Creating fake Verifiable Credentials...</Panel>
-      </ReportRow>
-    )
-  }
+    case state.matches('demoing'):
+      return (
+        <ReportRow readyState="loading">
+          <Panel>Creating fake Verifiable Credentials...</Panel>
+        </ReportRow>
+      )
 
-  return null
+    default:
+      return null
+  }
 }

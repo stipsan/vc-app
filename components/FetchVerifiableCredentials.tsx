@@ -65,43 +65,42 @@ export default function FetchVerifiableCredentials(props: {
     }
   }, [fetching, url, auth])
 
-  if (!lastUsedStrategy && !state.matches('fetching')) {
-    return null
-  }
+  switch (true) {
+    case !lastUsedStrategy && !state.matches('fetching'):
+      return null
 
-  if (error) {
-    return (
-      <ReportRow readyState="error">
-        <Panel className="text-red-900 bg-red-50">
-          <ErrorMessage>{error}</ErrorMessage>
-        </Panel>
-      </ReportRow>
-    )
-  }
+    case !!error:
+      return (
+        <ReportRow readyState="error">
+          <Panel className="text-red-900 bg-red-50">
+            <ErrorMessage>{error}</ErrorMessage>
+          </Panel>
+        </ReportRow>
+      )
 
-  if (ids.length) {
-    return (
-      <ReportRow readyState="success">
-        <Panel className="text-green-900 bg-green-50">
-          Found <strong className="font-bold">{ids.length}</strong>
-          {ids.length === 1
-            ? ' Verifiable Credential'
-            : ' Verifiable Credentials'}
-        </Panel>
-        {ids.map((id) => (
-          <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
-        ))}
-      </ReportRow>
-    )
-  }
+    case ids.length > 0:
+      return (
+        <ReportRow readyState="success">
+          <Panel className="text-green-900 bg-green-50">
+            Found <strong className="font-bold">{ids.length}</strong>
+            {ids.length === 1
+              ? ' Verifiable Credential'
+              : ' Verifiable Credentials'}
+          </Panel>
+          {ids.map((id) => (
+            <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
+          ))}
+        </ReportRow>
+      )
 
-  if (state.matches('fetching')) {
-    return (
-      <ReportRow readyState="loading">
-        <Panel>Loading Verifiable Credentials from API...</Panel>
-      </ReportRow>
-    )
-  }
+    case state.matches('fetching'):
+      return (
+        <ReportRow readyState="loading">
+          <Panel>Loading Verifiable Credentials from API...</Panel>
+        </ReportRow>
+      )
 
-  return null
+    default:
+      return null
+  }
 }
