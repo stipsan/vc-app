@@ -10,18 +10,24 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
     <button
       type="submit"
       className={cx(
-        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md bg-blue-100 text-base font-medium px-6 h-10 md:place-self-end',
+        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50 transition-colors duration-150',
         {
-          'text-blue-200 bg-blue-200 cursor-wait': loading,
-          'text-blue-600 hover:bg-blue-200 focus:bg-blue-200 hover:text-blue-800 focus:ring focus:ring-blue-100 focus:ring-opacity-50': !loading,
+          'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 cursor-wait': loading,
+          'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-800 dark:hover:text-blue-200 active:bg-blue-300 dark:active:bg-blue-700': !loading,
         }
       )}
     >
-      <span className="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center">
+      <span
+        key="spinner"
+        className="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
+      >
         <svg
           className={cx(
-            'animate-spin h-5 w-5 text-blue-800 duration-150 trasnition-opacity',
-            { 'opacity-0': !loading, 'opacity-80': loading }
+            'animate-spin h-5 w-5 duration-150 transition-opacity',
+            {
+              'opacity-0': !loading,
+              'opacity-80': loading,
+            }
           )}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -42,18 +48,20 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
           ></path>
         </svg>
       </span>
-      Verify
+      <span
+        key="label"
+        className={cx('duration-150 transition-opacity', {
+          'opacity-0': loading,
+          'opacity-100': !loading,
+        })}
+      >
+        Verify
+      </span>
     </button>
   )
 }
 
-export default function Header({
-  send,
-  state,
-}: {
-  send: Interpreter['send']
-  state: Interpreter['state']
-}) {
+export default function Header({ state }: { state: Interpreter['state'] }) {
   const loading = [
     'fetching',
     'linkingData',
@@ -88,12 +96,9 @@ export default function Header({
   return (
     <>
       <header
-        className={cx('sticky -top-2 -bottom-2 px-6 py-4 z-10')}
-        style={{
-          ['--tw-gradient-stops' as string]: 'hsla(0,0%,100%,0), white 1.5rem, white 50%, hsla(0,0%,100%,0) 50%',
-          backgroundImage:
-            'linear-gradient(to top, var(--tw-gradient-stops)), linear-gradient(to bottom, var(--tw-gradient-stops))',
-        }}
+        className={cx(
+          'sticky -top-2 -bottom-2 px-6 py-4 z-10 bg-gradient-to-t-to-b from-white dark:from-gray-900'
+        )}
       >
         <div
           className={cx(
@@ -105,9 +110,9 @@ export default function Header({
           {message && (
             <span
               className={cx('self-center', {
-                'text-gray-800': !failure && !success,
-                'text-red-800': failure,
-                'text-green-800': success,
+                'text-gray-800 dark:text-gray-400': !failure && !success,
+                'text-red-800 dark:text-red-400': failure,
+                'text-green-800 dark:text-green-400': success,
               })}
             >
               {message}
@@ -115,7 +120,7 @@ export default function Header({
           )}
         </div>
       </header>
-      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white" />
+      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900" />
     </>
   )
 }

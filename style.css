@@ -1,0 +1,10 @@
+:root {
+  --reach-tabs: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background: theme('colors.gray.900');
+    color: theme('colors.gray.50');
+  }
+}

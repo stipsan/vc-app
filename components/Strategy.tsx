@@ -16,22 +16,16 @@ import { useStore } from '../lib/useStore'
 
 function StrategyPanel({ children }: { children: React.ReactNode }) {
   return (
-    <TabPanel className="focus:outline-none bg-white rounded-md focus-visible:ring ring-blue-200 ring-offset-4">
+    <TabPanel className="focus:outline-none bg-white dark:bg-gray-900 dark:bg-opacity-50 rounded-md focus-visible:ring ring-blue-200 dark:ring-blue-900 ring-offset-4 dark:ring-offset-gray-900">
       {children}
     </TabPanel>
   )
 }
 
-function DemoStrategy({
-  send,
-  state,
-}: {
-  send: Interpreter['send']
-  state: Interpreter['state']
-}) {
+function DemoStrategy() {
   return (
     <StrategyPanel>
-      <div className="rounded-lg py-2 px-3 bg-gray-50 ">
+      <div className="rounded-lg py-2 px-3 bg-gray-50 dark:bg-gray-800">
         Create a few mock Verifiable Credentials to demonstrate the verification
         flow.
       </div>
@@ -39,13 +33,7 @@ function DemoStrategy({
   )
 }
 
-function ParseStrategy({
-  send,
-  state,
-}: {
-  send: Interpreter['send']
-  state: Interpreter['state']
-}) {
+function ParseStrategy({ state }: { state: Interpreter['state'] }) {
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const { strategy } = state.context
@@ -62,7 +50,7 @@ function ParseStrategy({
         spellCheck={false}
         placeholder="Paste your JSON in here..."
         className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition-opacity duration-150',
+          'mt-1 h-10 block w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity duration-150',
           { 'opacity-30 pointer-events-none': loading }
         )}
         // @ts-expect-error
@@ -121,10 +109,10 @@ function UrlField({ loading }: { loading: boolean }) {
         'opacity-30 pointer-events-none': loading,
       })}
     >
-      <span className="text-gray-700">API URL</span>
+      <span className="text-gray-700 dark:text-gray-400">API URL</span>
       <input
         className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
+          'mt-1 h-10 block w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring ring-blue-200 dark:focus:ring-blue-900 focus:ring-opacity-50'
         )}
         type="url"
         onChange={(event) => setUrl(event.target.value)}
@@ -156,10 +144,10 @@ function AuthField({ loading }: { loading: boolean }) {
         'opacity-30 pointer-events-none': loading,
       })}
     >
-      <span className="text-gray-700">Authorization</span>
+      <span className="text-gray-700 dark:text-gray-400">Authorization</span>
       <input
         className={cx(
-          'mt-1 h-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
+          'mt-1 h-10 block w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring ring-blue-200 dark:focus:ring-blue-900 focus:ring-opacity-50'
         )}
         placeholder="Bearer ..."
         type="text"
@@ -190,7 +178,7 @@ function FetchStrategy({
     <StrategyPanel>
       <fieldset
         className={cx('grid gap-4 grid-cols-2', {
-          'select-none bg-gradient-to-t rounded-md': loading,
+          'select-none': loading,
         })}
         disabled={strategy !== 'fetch'}
       >
@@ -213,10 +201,12 @@ function StrategyTab({
   return (
     <Tab
       className={cx(
-        'px-3 py-1 font-semibold focus:outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-offset-white focus-visible:ring-gray-300 rounded-full',
+        'px-3 py-1 font-semibold focus:outline-none transition-colors duration-300 focus-visible:ring-2 ring-gray-300 dark:ring-gray-700 rounded-full',
         {
-          'text-gray-900 bg-gray-100': selectedIndex === index,
-          'text-gray-400 hover:text-gray-900': selectedIndex !== index,
+          'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800':
+            selectedIndex === index,
+          'text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-gray-100':
+            selectedIndex !== index,
         }
       )}
       {...props}
@@ -268,8 +258,8 @@ export default function Strategy({
         <StrategyTab index={2}>Fetch</StrategyTab>
       </TabList>
       <TabPanels className="mt-4">
-        <DemoStrategy state={state} send={send} />
-        <ParseStrategy state={state} send={send} />
+        <DemoStrategy />
+        <ParseStrategy state={state} />
         <FetchStrategy state={state} send={send} />
       </TabPanels>
     </Tabs>

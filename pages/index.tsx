@@ -86,7 +86,7 @@ export default function Index() {
         }}
       >
         <Strategy state={state} send={send} />
-        <Header state={state} send={send} />
+        <Header state={state} />
         <FetchVerifiableCredentials state={state} send={send} />
         <ParseVerifiableCredentials state={state} send={send} />
         <DemoVerifiableCredentials state={state} send={send} />
@@ -95,7 +95,7 @@ export default function Index() {
         <TamperingDetector state={state} send={send} />
         <ScrollTo state={state} />
       </form>
-      <footer className="bg-gray-50 py-10 px-6 grid place-items-center">
+      <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
         <a
           className="text-lg font-semibold"
           href="https://github.com/stipsan/vc-app"

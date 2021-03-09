@@ -8,7 +8,7 @@ export function Code({ children }: { children: React.ReactNode }) {
 }
 
 export function ReadonlyTextarea({
-  className = 'bg-blue-50 text-black text-opacity-80 rounded-lg py-2 px-3 border-0 focus:ring-inset focus:ring-blue-200 focus:ring-2',
+  className = 'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 border-0 focus:ring-inset focus:ring-blue-200 dark:focus:ring-blue-800 focus:ring-2',
   value,
 }: {
   className?: string
@@ -45,9 +45,9 @@ export function ReadonlyTextarea({
     ></textarea>
   )
 }
-
+//text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900
 export function SuperReadonlyTextarea({
-  className = 'bg-green-100 focus:ring-inset focus:ring-green-200 focus:ring-2',
+  className = 'bg-green-100 dark:bg-opacity-25 dark:bg-green-900 focus:ring-inset focus:ring-green-200 dark:focus:ring-green-900 focus:ring-2',
   value,
 }: {
   className?: string
@@ -83,7 +83,7 @@ export function ErrorMessage({ children }: { children: Error | string }) {
 
 export function Panel({
   children,
-  className = 'bg-blue-50 text-black text-opacity-80',
+  className = 'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80',
 }: {
   children: React.ReactNode
   className?: string

@@ -65,11 +65,13 @@ function VerifyCredentialsRow({
   return (
     <Panel
       className={cx({
-        'bg-blue-50 text-black text-opacity-80':
+        'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
           readyState === 'loading' || jsonldStatus === 'failure',
         'animate-pulse': readyState === 'loading' && jsonldStatus !== 'failure',
-        'text-red-900 bg-red-50': readyState === 'error',
-        'text-green-900 bg-green-50': readyState === 'success',
+        'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
+          readyState === 'error',
+        'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
+          readyState === 'success',
       })}
     >
       {ids.length > 1 ? `${id} ` : ''}
@@ -84,7 +86,7 @@ function VerifyCredentialsRow({
         <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
       )}
       {readyState === 'error' && error && (
-        <div className="rounded py-2 my-1 px-3 bg-red-100">{`${error}: ${JSON.stringify(
+        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">{`${error}: ${JSON.stringify(
           error
         )}`}</div>
       )}

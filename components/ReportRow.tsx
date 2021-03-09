@@ -9,7 +9,11 @@ export default function ReportRow({
 }) {
   return (
     <>
-      <hr className={cx('mx-6 mb-4 border-t-2 border-blue-800 opacity-5')} />
+      <hr
+        className={cx(
+          'mx-6 mb-4 border-t-2 border-blue-800 dark:border-blue-200 opacity-5'
+        )}
+      />
       <article
         className={cx('px-6 mb-4 grid gap-4', {
           'animate-pulse': readyState === 'loading',

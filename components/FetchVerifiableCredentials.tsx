@@ -72,7 +72,7 @@ export default function FetchVerifiableCredentials(props: {
     case !!error:
       return (
         <ReportRow readyState="error">
-          <Panel className="text-red-900 bg-red-50">
+          <Panel className="text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900">
             <ErrorMessage>{error}</ErrorMessage>
           </Panel>
         </ReportRow>
@@ -81,7 +81,7 @@ export default function FetchVerifiableCredentials(props: {
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel className="text-green-900 bg-green-50">
+          <Panel className="text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900">
             Found <strong className="font-bold">{ids.length}</strong>
             {ids.length === 1
               ? ' Verifiable Credential'
