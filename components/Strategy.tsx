@@ -50,7 +50,7 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
         spellCheck={false}
         placeholder="Paste your JSON in here..."
         className={cx(
-          'mt-1 h-10 block w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity duration-150',
+          'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity duration-150',
           { 'opacity-30 pointer-events-none': loading }
         )}
         // @ts-expect-error
