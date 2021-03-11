@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import didDoc from '../lib/did.json'
-import documentLoader from '../lib/documentLoader'
 import type { Interpreter } from '../lib/stateMachine'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -37,6 +35,8 @@ export default function DemoVerifiableCredentials(props: {
       import('@transmute/did-key-ed25519'),
       import('@transmute/ed25519-signature-2018'),
       import('@transmute/vc.js'),
+      import('../lib/did.json'),
+      import('../lib/documentLoader'),
     ])
       .then(
         async ([
@@ -44,6 +44,8 @@ export default function DemoVerifiableCredentials(props: {
           { Ed25519KeyPair },
           { Ed25519Signature2018 },
           { ld: vc },
+          didDoc,
+          { default: documentLoader },
         ]) => {
           if (cancelled) return
 
