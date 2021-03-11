@@ -1,35 +1,15 @@
 // This file should be imported dynamically using either `next/dynamic` or `React.lazy`
 // As everything in here can load while the user is figuring out which strategy to use
 
-import Celebrate from './Celebrate'
-import dynamic from 'next/dynamic'
+import DemoVerifiableCredentials from '../components/DemoVerifiableCredentials'
+import FetchVerifiableCredentials from '../components/FetchVerifiableCredentials'
+import ParseVerifiableCredentials from '../components/ParseVerifiableCredentials'
+import ScrollTo from '../components/ScrollTo'
+import TamperingDetector from '../components/TamperingDetector'
+import ValidateLinkedData from '../components/ValidateLinkedData'
+import VerifyCredentials from '../components/VerifyCredentials'
 import type { Interpreter } from '../lib/stateMachine'
-
-const FetchVerifiableCredentials = dynamic(
-  () => import('../components/FetchVerifiableCredentials'),
-  { ssr: false }
-)
-const ParseVerifiableCredentials = dynamic(
-  () => import('../components/ParseVerifiableCredentials'),
-  { ssr: false }
-)
-const DemoVerifiableCredentials = dynamic(
-  () => import('../components/DemoVerifiableCredentials'),
-  { ssr: false }
-)
-const ValidateLinkedData = dynamic(
-  () => import('../components/ValidateLinkedData'),
-  { ssr: false }
-)
-const VerifyCredentials = dynamic(
-  () => import('../components/VerifyCredentials'),
-  { ssr: false }
-)
-const TamperingDetector = dynamic(
-  () => import('../components/TamperingDetector'),
-  { ssr: false }
-)
-const ScrollTo = dynamic(() => import('../components/ScrollTo'), { ssr: false })
+import Celebrate from './Celebrate'
 
 export default function LazyBunch({
   state,

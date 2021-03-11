@@ -85,6 +85,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
   },
 })
 
+let retried = typeof window !== 'undefined'
 const LazyBunch = dynamic(
   () =>
     import('../components/LazyBunch').then(
@@ -128,7 +129,10 @@ className={cx('px-6 mb-4 grid gap-4', {
                 <button
                   className="focus:outline-none focus:underline font-semibold hover:underline"
                   type="button"
-                  onClick={retry}
+                  onClick={() => {
+                    retried = true
+                    retry()
+                  }}
                 >
                   Retry?
                 </button>
@@ -143,7 +147,8 @@ className={cx('px-6 mb-4 grid gap-4', {
                 className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3"
                 style={{ animationDelay: '250ms' }}
               >
-                {JSON.stringify({ pastDelay })} Loading verifiers...
+                {JSON.stringify({ pastDelay: pastDelay || retried })} Loading
+                verifiers...
               </div>
             </>
           )
