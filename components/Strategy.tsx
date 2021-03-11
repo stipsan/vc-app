@@ -7,9 +7,6 @@ import {
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import { resolve } from 'node:path'
-import babelParser from 'prettier/parser-babel'
-import prettier from 'prettier/standalone'
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import Textarea from 'react-expanding-textarea'
 import type { Interpreter } from '../lib/stateMachine'
