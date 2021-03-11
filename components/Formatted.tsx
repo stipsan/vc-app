@@ -17,12 +17,12 @@ export function ReadonlyTextarea({
   const [formatted, setFormatted] = useState('')
 
   useEffect(() => {
-    let invalidated = false
+    let cancelled = false
     Promise.all([
       import('prettier/parser-babel'),
       import('prettier/standalone'),
     ]).then(([{ default: babelParser }, { default: prettier }]) => {
-      if (invalidated) return
+      if (cancelled) return
 
       setFormatted(
         prettier
@@ -37,7 +37,7 @@ export function ReadonlyTextarea({
     })
 
     return () => {
-      invalidated = true
+      cancelled = true
     }
   }, [value])
 

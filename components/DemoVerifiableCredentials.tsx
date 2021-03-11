@@ -1,6 +1,3 @@
-import { Ed25519KeyPair } from '@transmute/did-key-ed25519'
-import { Ed25519Signature2018 } from '@transmute/ed25519-signature-2018'
-import { ld as vc } from '@transmute/vc.js'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import didDoc from '../lib/did.json'
@@ -35,50 +32,63 @@ export default function DemoVerifiableCredentials(props: {
 
     let cancelled = false
 
-    import('faker')
-      .then(async ({ default: faker }) => {
-        if (cancelled) return
-        const src = {
-          '@context': [
-            'https://www.w3.org/2018/credentials/v1',
-            'https://www.w3.org/2018/credentials/examples/v1',
-          ],
-          id: 'http://example.gov/credentials/3732',
-          type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-          issuer: { id: 'did:example:123' },
-          issuanceDate: new Date().toISOString(),
-          credentialSubject: {
-            id: 'did:example:456',
-            givenName: faker.name.firstName(),
-            familyName: faker.name.lastName(),
-            degree: {
-              type: 'BachelorDegree',
-              name: 'Bachelor of Science and Arts',
-            },
-          },
-        }
-        const credential = {
-          ...src,
-          issuer: { id: didDoc.id },
-          credentialSubject: {
-            ...src.credentialSubject,
-            id: didDoc.id,
-          },
-        }
-        const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
-        key.id = key.controller + key.id
-        const suite = new Ed25519Signature2018({
-          key,
-        })
-        const verifiableCredential = await vc.issue({
-          credential,
-          suite,
-          documentLoader,
-        })
+    Promise.all([
+      import('faker'),
+      import('@transmute/did-key-ed25519'),
+      import('@transmute/ed25519-signature-2018'),
+      import('@transmute/vc.js'),
+    ])
+      .then(
+        async ([
+          { default: faker },
+          { Ed25519KeyPair },
+          { Ed25519Signature2018 },
+          { ld: vc },
+        ]) => {
+          if (cancelled) return
 
-        if (cancelled) return
-        send({ type: 'DEMO_SUCCESS', input: [verifiableCredential] })
-      })
+          const src = {
+            '@context': [
+              'https://www.w3.org/2018/credentials/v1',
+              'https://www.w3.org/2018/credentials/examples/v1',
+            ],
+            id: 'http://example.gov/credentials/3732',
+            type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+            issuer: { id: 'did:example:123' },
+            issuanceDate: new Date().toISOString(),
+            credentialSubject: {
+              id: 'did:example:456',
+              givenName: faker.name.firstName(),
+              familyName: faker.name.lastName(),
+              degree: {
+                type: 'BachelorDegree',
+                name: 'Bachelor of Science and Arts',
+              },
+            },
+          }
+          const credential = {
+            ...src,
+            issuer: { id: didDoc.id },
+            credentialSubject: {
+              ...src.credentialSubject,
+              id: didDoc.id,
+            },
+          }
+          const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
+          key.id = key.controller + key.id
+          const suite = new Ed25519Signature2018({
+            key,
+          })
+          const verifiableCredential = await vc.issue({
+            credential,
+            suite,
+            documentLoader,
+          })
+
+          if (cancelled) return
+          send({ type: 'DEMO_SUCCESS', input: [verifiableCredential] })
+        }
+      )
       .catch((reason) => {
         send({ type: 'DEMO_FAILURE', input: `${reason}` })
         toast.error(`Failed fetching Verifiable Credentials`)
