@@ -34,6 +34,7 @@ function ValidateLinkedDataRow({
           jsonldChecker,
           { default: documentLoader },
         ]) => {
+          if (cancelled) return
           const result = await jsonldChecker.check(json.get(id), documentLoader)
 
           if (!result.ok) {
