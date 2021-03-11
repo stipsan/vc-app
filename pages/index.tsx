@@ -57,6 +57,12 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
               >
                 Retry?
               </button>
+              {error?.stack && (
+                <>
+                  <br />
+                  {error.stack}
+                </>
+              )}
             </div>
           </>
         )
@@ -126,6 +132,12 @@ const LazyBunch = dynamic(
                 >
                   Retry?
                 </button>
+                {error?.stack && (
+                  <>
+                    <br />
+                    {error.stack}
+                  </>
+                )}
               </div>
             </div>
           )
