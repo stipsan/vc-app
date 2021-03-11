@@ -1,20 +1,29 @@
 import cx from 'classnames'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 
 function SubmitButton(props: { state: Interpreter['state'] }) {
+  const [mounted, setMounted] = useState(false)
+  const [mountedComplete, setMountedComplete] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+    setTimeout(() => setMountedComplete(true), 150)
+  }, [])
+
   const loading = !['ready', 'success', 'failure'].some(props.state.matches)
 
   return (
     <button
-      type="submit"
+      type={mounted ? 'submit' : 'button'}
       className={cx(
-        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50 transition-colors duration-150',
+        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50 duration-150',
         {
           'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 cursor-wait': loading,
           'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-800 dark:hover:text-blue-200 active:bg-blue-300 dark:active:bg-blue-700': !loading,
-        }
+          'opacity-0 cursor-default': !mounted,
+        },
+        mounted && mountedComplete ? 'transition-colors' : 'transition-opacity'
       )}
     >
       <span
