@@ -1,8 +1,5 @@
 import cx from 'classnames'
-import jsonld from 'jsonld'
-import * as jsonldChecker from 'jsonld-checker'
 import { useEffect, useState } from 'react'
-import documentLoader from '../lib/documentLoader'
 import type { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -26,25 +23,35 @@ function ValidateLinkedDataRow({
   useEffect(() => {
     let cancelled = false
 
-    jsonldChecker
-      .check(json.get(id), documentLoader)
-      .then(async (result) => {
-        if (!result.ok) {
-          throw result.error
-        }
-        if (cancelled) return
-        // throw new Error('oooh')
-        const expanded = await jsonld.expand(
-          JSON.parse(JSON.stringify(json.get(id))),
-          {
-            documentLoader,
+    Promise.all([
+      import('jsonld'),
+      import('jsonld-checker'),
+      import('../lib/documentLoader'),
+    ])
+      .then(
+        async ([
+          { default: jsonld },
+          jsonldChecker,
+          { default: documentLoader },
+        ]) => {
+          const result = await jsonldChecker.check(json.get(id), documentLoader)
+
+          if (!result.ok) {
+            throw result.error
           }
-        )
-        if (cancelled) return
-        setReadyState('success')
-        setExpanded(expanded)
-        send({ type: 'LINKING_DATA_SUCCESS', input: id })
-      })
+          if (cancelled) return
+          // throw new Error('oooh')
+          const expanded = await jsonld.expand(
+            JSON.parse(JSON.stringify(json.get(id))),
+            // @ts-expect-error
+            { documentLoader }
+          )
+          if (cancelled) return
+          setReadyState('success')
+          setExpanded(expanded)
+          send({ type: 'LINKING_DATA_SUCCESS', input: id })
+        }
+      )
       .catch((err) => {
         if (cancelled) return
         setReadyState('error')
