@@ -2,12 +2,9 @@ import { useMachine } from '@xstate/react'
 import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import React from 'react'
 import { Toaster } from 'react-hot-toast'
-import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
-import ReportRow from '../components/ReportRow'
 import defaultMachine from '../lib/stateMachine'
 
 let retries = 0
@@ -38,8 +35,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
     )
     const tClassName =
       'px-6 pt-8 flex flex-initial items-center transition-opacity'
-    const bClassName =
-      'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors break-words'
+    const bClassName = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
     switch (true) {
       case !!error:
       case timedOut:
@@ -49,7 +45,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
             <div
               className={cx(
                 bClassName,
-                'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
+                'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
               )}
             >
               {error?.message || 'Loading failed'}
@@ -105,13 +101,19 @@ const LazyBunch = dynamic(
     timeout: 10000,
     loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
       console.log({ retries, error, isLoading, pastDelay, timedOut })
+      const className = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
       switch (true) {
         case !!error:
         case timedOut:
           return (
             <div className="transition-opacity">
               <HorisontalRuler />
-              <div className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 break-words">
+              <div
+                className={cx(
+                  className,
+                  'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
+                )}
+              >
                 {error?.message || 'Loading failed'}
                 {'! '}
                 <button
@@ -136,10 +138,13 @@ const LazyBunch = dynamic(
               })}
             >
               <HorisontalRuler />
-              <div className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3">
-                <span>Test span</span>
-                {JSON.stringify({ pastDelay, retried })}
-                {pastDelay || retried ? 'Loading...' : 'Waiting...'}
+              <div
+                className={cx(
+                  className,
+                  'animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
+                )}
+              >
+                {(pastDelay || retried) && 'Loading...'}
               </div>
             </div>
           )
