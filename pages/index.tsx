@@ -1,13 +1,14 @@
 import { useMachine } from '@xstate/react'
+import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import cx from 'classnames'
-import { Toaster } from 'react-hot-toast'
-import Header from '../components/Header'
-import defaultMachine from '../lib/stateMachine'
 import React from 'react'
-import ReportRow from '../components/ReportRow'
+import { Toaster } from 'react-hot-toast'
 import { Panel } from '../components/Formatted'
+import Header from '../components/Header'
+import HorisontalRuler from '../components/HorizontalRuler'
+import ReportRow from '../components/ReportRow'
+import defaultMachine from '../lib/stateMachine'
 
 let retries = 0
 
@@ -15,7 +16,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
   ssr: false,
   // @ts-expect-error
   timeout: 10000,
-  loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
+  loading: ({ error, isLoading, retry, timedOut }) => {
     const dots = (
       <>
         <div className="animate-pulse bg-gray-100 dark:bg-gray-800 py-1 rounded-full w-16">
@@ -38,7 +39,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
     const tClassName =
       'px-6 pt-8 flex flex-initial items-center transition-opacity duration-150'
     const bClassName =
-      'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors duration-150'
+      'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors duration-150 break-words'
     switch (true) {
       case !!error:
       case timedOut:
@@ -85,7 +86,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
   },
 })
 
-let retried = typeof window !== 'undefined'
+let retried = false
 const LazyBunch = dynamic(
   () =>
     import('../components/LazyBunch').then(
@@ -100,30 +101,17 @@ const LazyBunch = dynamic(
   {
     ssr: false,
     // @ts-expect-error
+    delay: 3000,
     timeout: 10000,
     loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
       console.log({ retries, error, isLoading, pastDelay, timedOut })
-      /*
-className={cx('px-6 mb-4 grid gap-4', {
-          'animate-pulse': readyState === 'loading',
-        })}
-        className = 'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80',
-        rounded-lg py-2 px-3
-      */
-      const loading = (
-        <ReportRow readyState="loading">
-          <Panel>Loading Verifiable Credentials from API...</Panel>
-        </ReportRow>
-      )
       switch (true) {
         case !!error:
         case timedOut:
           return (
-            <>
-              <div
-                className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3"
-                style={{ animationDelay: '250ms' }}
-              >
+            <div className="transition-opacity duration-1000">
+              <HorisontalRuler />
+              <div className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 break-words">
                 {error?.message || 'Loading failed'}
                 {'! '}
                 <button
@@ -137,20 +125,23 @@ className={cx('px-6 mb-4 grid gap-4', {
                   Retry?
                 </button>
               </div>
-            </>
+            </div>
           )
 
         case isLoading:
           return (
-            <>
-              <div
-                className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3"
-                style={{ animationDelay: '250ms' }}
-              >
-                {JSON.stringify({ pastDelay: pastDelay || retried })} Loading
-                verifiers...
+            <div
+              className={cx('transition-opacity duration-1000', {
+                'opacity-0': !pastDelay && !retried,
+              })}
+            >
+              <HorisontalRuler />
+              <div className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3">
+                <span>Test span</span>
+                {JSON.stringify({ pastDelay, retried })}
+                {pastDelay || retried ? 'Loading...' : 'Waiting...'}
               </div>
-            </>
+            </div>
           )
         default:
           return null
