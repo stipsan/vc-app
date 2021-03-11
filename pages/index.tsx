@@ -37,9 +37,9 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
       </>
     )
     const tClassName =
-      'px-6 pt-8 flex flex-initial items-center transition-opacity duration-150'
+      'px-6 pt-8 flex flex-initial items-center transition-opacity'
     const bClassName =
-      'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors duration-150 break-words'
+      'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors break-words'
     switch (true) {
       case !!error:
       case timedOut:
@@ -109,7 +109,7 @@ const LazyBunch = dynamic(
         case !!error:
         case timedOut:
           return (
-            <div className="transition-opacity duration-1000">
+            <div className="transition-opacity">
               <HorisontalRuler />
               <div className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 break-words">
                 {error?.message || 'Loading failed'}
@@ -131,7 +131,7 @@ const LazyBunch = dynamic(
         case isLoading:
           return (
             <div
-              className={cx('transition-opacity duration-1000', {
+              className={cx('transition-opacity', {
                 'opacity-0': !pastDelay && !retried,
               })}
             >

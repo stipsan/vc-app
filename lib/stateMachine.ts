@@ -1,9 +1,8 @@
 import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
   createMachine,
-
-
-  Interpreter as MachineInterpreter, State as MachineState
+  Interpreter as MachineInterpreter,
+  State as MachineState,
 } from 'xstate'
 
 interface Context {
@@ -103,11 +102,18 @@ export type MachineEvent =
   | CounterfeitCredentialSuccessEvent
   | CounterfeitCredentialCompleteEvent
 
-const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx) => {
+const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
+  ctx.status =
+    ctx.strategy === 'demo'
+      ? 'Generating...'
+      : ctx.strategy === 'fetch'
+      ? 'Fetching...'
+      : ctx.strategy === 'parse'
+      ? 'Parsing...'
+      : ''
   // Keep track of how many times we've executed
   ctx.count += 1
   // Reset the context from previous exec runs
-  ctx.status = ''
   ctx.ids.length = 0
   ctx.json.clear()
   ctx.jsonld.clear()
@@ -218,9 +224,24 @@ export default createMachine<Context, MachineEvent>({
   states: {
     failure: {
       on: {
-        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
-        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
-        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
+        DEMO: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'demo'
+            ctx.status = ''
+          }),
+        },
+        PARSE: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'parse'
+            ctx.status = ''
+          }),
+        },
+        FETCH: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'fetch'
+            ctx.status = ''
+          }),
+        },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {
@@ -395,7 +416,9 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.counterfeitCredentials.has(id))
             },
-            actions: assign((ctx) => {ctx.status = 'Verification successful!'}),
+            actions: assign((ctx) => {
+              ctx.status = 'Verification successful!'
+            }),
             target: 'success',
           },
         ],
@@ -407,9 +430,24 @@ export default createMachine<Context, MachineEvent>({
     //counterfeitingPresentation: {},
     success: {
       on: {
-        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
-        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
-        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
+        DEMO: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'demo'
+            ctx.status = ''
+          }),
+        },
+        PARSE: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'parse'
+            ctx.status = ''
+          }),
+        },
+        FETCH: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'fetch'
+            ctx.status = ''
+          }),
+        },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {
