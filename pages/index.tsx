@@ -7,8 +7,6 @@ import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
 import defaultMachine from '../lib/stateMachine'
 
-let retries = 0
-
 const Strategy = dynamic(() => import('../components/Strategy'), {
   ssr: false,
   // @ts-expect-error
@@ -89,83 +87,70 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
 })
 
 let retried = false
-const LazyBunch = dynamic(
-  () =>
-    import('../components/LazyBunch').then(
-      (res) =>
-        new Promise((resolve, reject) => {
-          if (retries > 1) setTimeout(() => resolve(res), 3000)
-          if (retries === 1)
-            setTimeout(() => reject(new Error('Unexpected Error')), 3000)
-          retries++
-        })
-    ),
-  {
-    ssr: false,
-    // @ts-expect-error
-    delay: 3000,
-    timeout: 10000,
-    loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
-      console.log({ retries, error, isLoading, pastDelay, timedOut })
-      const className = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
-      switch (true) {
-        case !!error:
-        case timedOut:
-          return (
-            <div className="transition-opacity">
-              <HorisontalRuler />
-              <div
-                className={cx(
-                  className,
-                  'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
-                )}
-              >
-                {error?.message || 'Loading failed'}
-                {'! '}
-                <button
-                  className="focus:outline-none focus:underline font-semibold hover:underline"
-                  type="button"
-                  onClick={() => {
-                    retried = true
-                    retry()
-                  }}
-                >
-                  Retry?
-                </button>
-                {error?.stack && (
-                  <>
-                    <br />
-                    {error.stack}
-                  </>
-                )}
-              </div>
-            </div>
-          )
-
-        case isLoading:
-          return (
+const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
+  ssr: false,
+  // @ts-expect-error
+  delay: 3000,
+  timeout: 10000,
+  loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
+    const className = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
+    switch (true) {
+      case !!error:
+      case timedOut:
+        return (
+          <div className="transition-opacity">
+            <HorisontalRuler />
             <div
-              className={cx('transition-opacity', {
-                'opacity-0': !pastDelay && !retried,
-              })}
+              className={cx(
+                className,
+                'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
+              )}
             >
-              <HorisontalRuler />
-              <div
-                className={cx(
-                  className,
-                  'animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
-                )}
+              {error?.message || 'Loading failed'}
+              {'! '}
+              <button
+                className="focus:outline-none focus:underline font-semibold hover:underline"
+                type="button"
+                onClick={() => {
+                  retried = true
+                  retry()
+                }}
               >
-                {(pastDelay || retried) && 'Loading...'}
-              </div>
+                Retry?
+              </button>
+              {error?.stack && (
+                <>
+                  <br />
+                  {error.stack}
+                </>
+              )}
             </div>
-          )
-        default:
-          return null
-      }
-    },
-  }
-)
+          </div>
+        )
+
+      case isLoading:
+        return (
+          <div
+            className={cx('transition-opacity', {
+              'opacity-0': !pastDelay && !retried,
+            })}
+          >
+            <HorisontalRuler />
+            <div
+              className={cx(
+                className,
+                'animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
+              )}
+            >
+              {(pastDelay || retried) && 'Loading...'}
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
+  },
+})
 
 export default function Index() {
   // send and service are stable and return the same reference on every render, while state changes all the time
