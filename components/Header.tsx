@@ -76,20 +76,22 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
   ].some(state.matches)
   const failure = state.matches('failure')
   const success = state.matches('success')
-  const titleRef = useRef('')
+  const titleRef = useRef(typeof window !== 'undefined' ? document.title : '')
   const { status } = state.context
 
   useEffect(() => {
-    if (loading) {
-      titleRef.current = document.title
-      document.title = 'Verifying Credentials...'
-      const toastId = toast.loading('Verifying...')
+    if (!failure && !success && status) {
+      let timeout = new Promise((resolve) =>
+        setTimeout(() => resolve(undefined), 3000)
+      )
+      document.title = status
+      const toastId = toast.loading(status)
       return () => {
-        toast.dismiss(toastId)
+        timeout.then(() => toast.dismiss(toastId))
         document.title = titleRef.current
       }
     }
-  }, [loading])
+  }, [failure, success, status])
 
   const message = status
     ? status

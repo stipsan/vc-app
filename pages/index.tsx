@@ -172,11 +172,7 @@ export default function Index() {
       >
         <Strategy state={state} send={send} />
         <Header state={state} />
-        <LazyBunch
-          // @ts-ignore
-          state={state}
-          send={send}
-        />
+        <LazyBunch state={state} send={send} />
       </form>
       <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
         <a
@@ -186,7 +182,7 @@ export default function Index() {
           GitHub
         </a>
       </footer>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-right" />
     </>
   )
 }

@@ -124,6 +124,7 @@ const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
 const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
   'DEMO_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -135,6 +136,7 @@ const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
 const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
   'PARSE_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -146,6 +148,7 @@ const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
 const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
   'FETCH_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -356,6 +359,7 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.jsonld.has(id))
             },
+            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Verifying Credential...' : 'Verifying Credentials...')),
             target: 'verifyingCredentials',
           },
         ],
@@ -386,6 +390,7 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.verifiedCredentials.has(id))
             },
+            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Counterfeiting Credential...' : 'Counterfeiting Credentials...')),
             target: 'counterfeitingCredentials',
           },
         ],
