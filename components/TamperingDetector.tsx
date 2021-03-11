@@ -1,5 +1,6 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -60,6 +61,7 @@ function TamperingDetectorRow({
           if (result.verified) {
             setReadyState('failure')
             setExpanded(result.results)
+            toast.error(`${id} Failed to detect tampering`)
             send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
           } else {
             setReadyState('success')
@@ -72,6 +74,7 @@ function TamperingDetectorRow({
         if (cancelled) return
         setReadyState('error')
         setError(err)
+        toast.error(`${id} Failed to perform tampering check`)
         send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
       })
 

@@ -52,7 +52,13 @@ export default function FetchVerifiableCredentials(props: {
           )
         }
 
-        send({ type: 'FETCH_SUCCESS', input: items })
+        send({
+          type: 'FETCH_SUCCESS',
+          input: items.map((item) => {
+            if ('verifiableCredential' in item) return item.verifiableCredential
+            return item
+          }),
+        })
       })
       .catch((reason) => {
         send({ type: 'FETCH_FAILURE', input: `${reason}` })

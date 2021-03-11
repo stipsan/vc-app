@@ -1,5 +1,6 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -55,6 +56,7 @@ function VerifyCredentialsRow({
           } else {
             setReadyState('error')
             setError(result.error)
+            toast.error(`${id} Failed verification`)
             send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
           }
         }
@@ -63,6 +65,7 @@ function VerifyCredentialsRow({
         if (cancelled) return
         setReadyState('error')
         setError(err)
+        toast.error(`${id} Failed verification`)
         send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
       })
 

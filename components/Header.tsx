@@ -81,17 +81,24 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
 
   useEffect(() => {
     if (!failure && !success && status) {
-      let timeout = new Promise((resolve) =>
-        setTimeout(() => resolve(undefined), 3000)
-      )
       document.title = status
-      const toastId = toast.loading(status)
       return () => {
-        timeout.then(() => toast.dismiss(toastId))
         document.title = titleRef.current
       }
     }
   }, [failure, success, status])
+
+  useEffect(() => {
+    if (success) {
+      let timeout = new Promise((resolve) =>
+        setTimeout(() => resolve(undefined), 3000)
+      )
+      const toastId = toast.success(status, { duration: 10000 })
+      return () => {
+        timeout.then(() => toast.dismiss(toastId))
+      }
+    }
+  }, [success])
 
   const message = status
     ? status

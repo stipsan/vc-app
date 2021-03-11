@@ -1,5 +1,6 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -57,6 +58,7 @@ function ValidateLinkedDataRow({
         if (cancelled) return
         setReadyState('error')
         setError(err)
+        toast.error(`${id} Invalid JSON-LD`)
         send({ type: 'LINKING_DATA_FAILURE', input: id })
       })
 

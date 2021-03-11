@@ -353,6 +353,9 @@ export default createMachine<Context, MachineEvent>({
             cond: function onlyFailures(ctx) {
               return ctx.ids.every((id) => ctx.jsonld.get(id) === 'failure')
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
@@ -384,6 +387,9 @@ export default createMachine<Context, MachineEvent>({
                 (id) => ctx.verifiedCredentials.get(id) === 'failure'
               )
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
@@ -415,6 +421,9 @@ export default createMachine<Context, MachineEvent>({
                 (id) => ctx.counterfeitCredentials.get(id) === 'failure'
               )
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
