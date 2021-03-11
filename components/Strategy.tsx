@@ -62,30 +62,26 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
         onChange={(event) => setEditor(event.target.value)}
         onBlur={() => {
           editingRef.current = false
-          try {
-            Promise.all([
-              import('prettier/parser-babel'),
-              import('prettier/standalone'),
-              // The delay ensure that if the user tries to click on Verify the
-              // click event have time to trigger before the textarea might change its height and push
-              // the button out of view
-              new Promise((resolve) => setTimeout(() => resolve(!0), 150)),
-            ]).then(([{ default: babelParser }, { default: prettier }]) => {
-              if (editingRef.current) return
+          Promise.all([
+            import('prettier/parser-babel'),
+            import('prettier/standalone'),
+            // The delay ensure that if the user tries to click on Verify the
+            // click event have time to trigger before the textarea might change its height and push
+            // the button out of view
+            new Promise((resolve) => setTimeout(() => resolve(!0), 150)),
+          ]).then(([{ default: babelParser }, { default: prettier }]) => {
+            if (editingRef.current) return
 
-              setEditor(
-                prettier
-                  .format(editor, {
-                    tabWidth: 4,
-                    parser: 'json',
-                    plugins: [babelParser],
-                  })
-                  .trim()
-              )
-            })
-          } catch {
-            // Do nothing
-          }
+            setEditor(
+              prettier
+                .format(editor, {
+                  tabWidth: 4,
+                  parser: 'json',
+                  plugins: [babelParser],
+                })
+                .trim()
+            )
+          })
         }}
         value={editor}
         disabled={strategy !== 'parse'}

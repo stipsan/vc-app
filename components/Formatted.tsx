@@ -1,7 +1,5 @@
 import cx from 'classnames'
-import babelParser from 'prettier/parser-babel'
-import prettier from 'prettier/standalone'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 export function Code({ children }: { children: React.ReactNode }) {
   return <code>{children}</code>
@@ -14,26 +12,44 @@ export function ReadonlyTextarea({
   className?: string
   value: string
 }) {
-  const ref = useRef()
+  const ref = useRef<HTMLTextAreaElement>()
   const [height, setHeight] = useState(0)
+  const [formatted, setFormatted] = useState('')
 
-  const formatted = useMemo(
-    () =>
-      prettier
-        .format(value, {
-          printWidth: 100,
-          tabWidth: 4,
-          parser: 'json',
-          plugins: [babelParser],
-        })
-        .trim(),
-    [value]
-  )
+  useEffect(() => {
+    let invalidated = false
+    Promise.all([
+      import('prettier/parser-babel'),
+      import('prettier/standalone'),
+    ]).then(([{ default: babelParser }, { default: prettier }]) => {
+      if (invalidated) return
+
+      setFormatted(
+        prettier
+          .format(value, {
+            printWidth: 100,
+            tabWidth: 4,
+            parser: 'json',
+            plugins: [babelParser],
+          })
+          .trim()
+      )
+    })
+
+    return () => {
+      invalidated = true
+    }
+  }, [value])
 
   useLayoutEffect(() => {
-    // @ts-expect-error
-    setHeight(ref.current.scrollHeight)
-  }, [])
+    if (ref.current) {
+      setHeight(ref.current.scrollHeight)
+    }
+  }, [formatted])
+
+  if (!formatted) {
+    return <div className={cx(className, 'animate-pulse')}>Formatting...</div>
+  }
 
   return (
     <textarea
