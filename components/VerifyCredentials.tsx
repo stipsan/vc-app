@@ -1,8 +1,6 @@
-import { Ed25519Signature2018 } from '@transmute/ed25519-signature-2018'
-import { ld as vc } from '@transmute/vc.js'
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
-import documentLoader from '../lib/documentLoader'
+import toast from 'react-hot-toast'
 import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -32,28 +30,42 @@ function VerifyCredentialsRow({
 
     let cancelled = false
 
-    vc.verifyCredential({
-      credential: JSON.parse(JSON.stringify(json.get(id))),
-      documentLoader,
-      suite: new Ed25519Signature2018({}),
-    })
-      .then(async (result) => {
-        // throw new Error('oooh')
-        if (cancelled) return
-        if (result.verified) {
-          setReadyState('success')
-          setExpanded(result.results)
-          send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
-        } else {
-          setReadyState('error')
-          setError(result.error)
-          send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
+    Promise.all([
+      import('@transmute/ed25519-signature-2018'),
+      import('@transmute/vc.js'),
+      import('../lib/documentLoader'),
+    ])
+      .then(
+        async ([
+          { Ed25519Signature2018 },
+          { ld: vc },
+          { default: documentLoader },
+        ]) => {
+          if (cancelled) return
+          const result = await vc.verifyCredential({
+            credential: JSON.parse(JSON.stringify(json.get(id))),
+            documentLoader,
+            suite: new Ed25519Signature2018({}),
+          })
+          // throw new Error('oooh')
+          if (cancelled) return
+          if (result.verified) {
+            setReadyState('success')
+            setExpanded(result.results)
+            send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
+          } else {
+            setReadyState('error')
+            setError(result.error)
+            toast.error(`${id} Failed verification`)
+            send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
+          }
         }
-      })
+      )
       .catch((err) => {
         if (cancelled) return
         setReadyState('error')
         setError(err)
+        toast.error(`${id} Failed verification`)
         send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
       })
 
@@ -62,26 +74,30 @@ function VerifyCredentialsRow({
     }
   }, [])
 
+  const message =
+    jsonldStatus === 'failure'
+      ? `Skipping verification because of invalid JSON-LD`
+      : readyState === 'loading'
+      ? 'Verifying Credential...'
+      : readyState === 'error'
+      ? `Failed verification`
+      : 'Credential verified successfully'
+
   return (
     <Panel
       className={cx({
-        'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
-          readyState === 'loading' || jsonldStatus === 'failure',
         'animate-pulse': readyState === 'loading' && jsonldStatus !== 'failure',
-        'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
-          readyState === 'error',
-        'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
-          readyState === 'success',
       })}
+      variant={
+        readyState === 'error'
+          ? 'error'
+          : readyState === 'success'
+          ? 'success'
+          : 'default'
+      }
     >
       {ids.length > 1 ? `${id} ` : ''}
-      {jsonldStatus === 'failure'
-        ? `Skipping verification because of invalid JSON-LD`
-        : readyState === 'loading'
-        ? 'Verifying Credential...'
-        : readyState === 'error'
-        ? `Failed verification`
-        : 'Credential verified successfully'}
+      {message}
       {readyState === 'success' && expanded && (
         <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
       )}

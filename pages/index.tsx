@@ -1,16 +1,20 @@
 import { useMachine } from '@xstate/react'
+import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
+import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
+import HorisontalRuler from '../components/HorizontalRuler'
 import defaultMachine from '../lib/stateMachine'
 
 const Strategy = dynamic(() => import('../components/Strategy'), {
   ssr: false,
-  loading: () => (
-    <>
-      <div className="px-6 pt-8 flex flex-initial items-center">
+  // @ts-expect-error
+  timeout: 10000,
+  loading: ({ error, isLoading, retry, timedOut }) => {
+    const dots = (
+      <>
         <div className="animate-pulse bg-gray-100 dark:bg-gray-800 py-1 rounded-full w-16">
           &nbsp;
         </div>
@@ -26,51 +30,125 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
         >
           &nbsp;
         </div>
-      </div>
-      <div
-        className="mx-6 mt-4 bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse rounded-lg py-2 px-3"
-        style={{ animationDelay: '250ms' }}
-      >
-        Loading...
-      </div>
-    </>
-  ),
+      </>
+    )
+    const tClassName =
+      'px-6 pt-8 flex flex-initial items-center transition-opacity'
+    const bClassName = 'mx-6 mt-4 transition-colors'
+    switch (true) {
+      case !!error:
+      case timedOut:
+        return (
+          <>
+            <div className={cx(tClassName, 'opacity-0')}>{dots}</div>
+            <Panel className={bClassName} variant="error">
+              {error?.message || 'Loading failed'}
+              {'! '}
+              <button
+                className="focus:outline-none focus:underline font-semibold hover:underline"
+                type="button"
+                onClick={retry}
+              >
+                Retry?
+              </button>
+              {error?.stack && (
+                <>
+                  <br />
+                  {error.stack}
+                </>
+              )}
+            </Panel>
+          </>
+        )
+
+      case isLoading:
+        return (
+          <>
+            <div className={tClassName}>{dots}</div>
+            <Panel
+              className={cx(
+                bClassName,
+                'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse'
+              )}
+              style={{ animationDelay: '250ms' }}
+              variant="blank"
+            >
+              Loading...
+            </Panel>
+          </>
+        )
+      default:
+        return null
+    }
+  },
 })
-const FetchVerifiableCredentials = dynamic(
-  () => import('../components/FetchVerifiableCredentials'),
-  { ssr: false }
-)
-const ParseVerifiableCredentials = dynamic(
-  () => import('../components/ParseVerifiableCredentials'),
-  { ssr: false }
-)
-const DemoVerifiableCredentials = dynamic(
-  () => import('../components/DemoVerifiableCredentials'),
-  { ssr: false }
-)
-const ValidateLinkedData = dynamic(
-  () => import('../components/ValidateLinkedData'),
-  { ssr: false }
-)
-const VerifyCredentials = dynamic(
-  () => import('../components/VerifyCredentials'),
-  { ssr: false }
-)
-const TamperingDetector = dynamic(
-  () => import('../components/TamperingDetector'),
-  { ssr: false }
-)
-const ScrollTo = dynamic(() => import('../components/ScrollTo'), { ssr: false })
-const Celebrate = dynamic(() => import('../components/Celebrate'), {
+
+let retried = false
+const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   ssr: false,
+  // @ts-expect-error
+  delay: 3000,
+  timeout: 10000,
+  loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
+    const className = 'mx-6 mt-4 transition-colors'
+    switch (true) {
+      case !!error:
+      case timedOut:
+        return (
+          <div className="transition-opacity">
+            <HorisontalRuler />
+            <Panel className={className} variant="error">
+              {error?.message || 'Loading failed'}
+              {'! '}
+              <button
+                className="focus:outline-none focus:underline font-semibold hover:underline"
+                type="button"
+                onClick={() => {
+                  retried = true
+                  retry()
+                }}
+              >
+                Retry?
+              </button>
+              {error?.stack && (
+                <>
+                  <br />
+                  {error.stack}
+                </>
+              )}
+            </Panel>
+          </div>
+        )
+
+      case isLoading:
+        return (
+          <div
+            className={cx('transition-opacity', {
+              'opacity-0': !pastDelay && !retried,
+            })}
+          >
+            <HorisontalRuler />
+            <Panel
+              className={cx(
+                className,
+                'animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
+              )}
+              variant="blank"
+            >
+              {(pastDelay || retried) && 'Loading...'}
+            </Panel>
+          </div>
+        )
+      default:
+        return null
+    }
+  },
 })
 
 export default function Index() {
+  // send and service are stable and return the same reference on every render, while state changes all the time
+  // TODO: use xstate hooks on `service` to cut down on unnecessary rerenders
   const [state, send, service] = useMachine(defaultMachine)
-
-  useEffect(() => console.log('state changed', state), [state])
-  useEffect(() => console.log('send changed', send), [send])
-  useEffect(() => console.log('service changed', service), [service])
 
   return (
     <>
@@ -87,13 +165,7 @@ export default function Index() {
       >
         <Strategy state={state} send={send} />
         <Header state={state} />
-        <FetchVerifiableCredentials state={state} send={send} />
-        <ParseVerifiableCredentials state={state} send={send} />
-        <DemoVerifiableCredentials state={state} send={send} />
-        <ValidateLinkedData state={state} send={send} />
-        <VerifyCredentials state={state} send={send} />
-        <TamperingDetector state={state} send={send} />
-        <ScrollTo state={state} />
+        <LazyBunch state={state} send={send} />
       </form>
       <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
         <a
@@ -103,8 +175,7 @@ export default function Index() {
           GitHub
         </a>
       </footer>
-      <Celebrate state={state} />
-      <Toaster position="bottom-center" />
+      <Toaster position="top-right" />
     </>
   )
 }

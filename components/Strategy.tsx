@@ -7,9 +7,7 @@ import {
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import babelParser from 'prettier/parser-babel'
-import prettier from 'prettier/standalone'
-import React, { useCallback, useEffect, useLayoutEffect } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import Textarea from 'react-expanding-textarea'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
@@ -36,6 +34,7 @@ function DemoStrategy() {
 function ParseStrategy({ state }: { state: Interpreter['state'] }) {
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
+  const editingRef = useRef(false)
   const { strategy } = state.context
   const loading = [
     'parsing',
@@ -50,24 +49,36 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
         spellCheck={false}
         placeholder="Paste your JSON in here..."
         className={cx(
-          'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity duration-150',
+          'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity',
           { 'opacity-30 pointer-events-none': loading }
         )}
+        onFocus={() => {
+          editingRef.current = true
+        }}
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         onBlur={() => {
-          try {
-            const prettyEditor = prettier
-              .format(editor, {
-                tabWidth: 4,
-                parser: 'json',
-                plugins: [babelParser],
-              })
-              .trim()
-            setTimeout(() => setEditor(prettyEditor), 150)
-          } catch {
-            // Do nothing
-          }
+          editingRef.current = false
+          Promise.all([
+            import('prettier/parser-babel'),
+            import('prettier/standalone'),
+            // The delay ensure that if the user tries to click on Verify the
+            // click event have time to trigger before the textarea might change its height and push
+            // the button out of view
+            new Promise((resolve) => setTimeout(() => resolve(!0), 150)),
+          ]).then(([{ default: babelParser }, { default: prettier }]) => {
+            if (editingRef.current) return
+
+            setEditor(
+              prettier
+                .format(editor, {
+                  tabWidth: 4,
+                  parser: 'json',
+                  plugins: [babelParser],
+                })
+                .trim()
+            )
+          })
         }}
         value={editor}
         disabled={strategy !== 'parse'}
@@ -105,7 +116,7 @@ function UrlField({ loading }: { loading: boolean }) {
 
   return (
     <label
-      className={cx('block transition-opacity duration-150', {
+      className={cx('block transition-opacity', {
         'opacity-30 pointer-events-none': loading,
       })}
     >
@@ -140,7 +151,7 @@ function AuthField({ loading }: { loading: boolean }) {
 
   return (
     <label
-      className={cx('block transition-opacity duration-150', {
+      className={cx('block transition-opacity', {
         'opacity-30 pointer-events-none': loading,
       })}
     >
@@ -249,7 +260,7 @@ export default function Strategy({
       }}
     >
       <TabList
-        className={cx('flex flex-initial transition-opacity duration-150', {
+        className={cx('flex flex-initial transition-opacity', {
           'opacity-30 pointer-events-none': !idle,
         })}
       >

@@ -1,9 +1,8 @@
 import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
   createMachine,
-
-
-  Interpreter as MachineInterpreter, State as MachineState
+  Interpreter as MachineInterpreter,
+  State as MachineState,
 } from 'xstate'
 
 interface Context {
@@ -103,11 +102,18 @@ export type MachineEvent =
   | CounterfeitCredentialSuccessEvent
   | CounterfeitCredentialCompleteEvent
 
-const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx) => {
+const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
+  ctx.status =
+    ctx.strategy === 'demo'
+      ? 'Generating...'
+      : ctx.strategy === 'fetch'
+      ? 'Fetching...'
+      : ctx.strategy === 'parse'
+      ? 'Parsing...'
+      : ''
   // Keep track of how many times we've executed
   ctx.count += 1
   // Reset the context from previous exec runs
-  ctx.status = ''
   ctx.ids.length = 0
   ctx.json.clear()
   ctx.jsonld.clear()
@@ -118,6 +124,7 @@ const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx) => {
 const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
   'DEMO_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -129,6 +136,7 @@ const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
 const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
   'PARSE_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -140,6 +148,7 @@ const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
 const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
   'FETCH_SUCCESS',
   (ctx, { input }) => {
+    ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = `#${i + 1}`
       ctx.ids.push(id)
@@ -218,9 +227,24 @@ export default createMachine<Context, MachineEvent>({
   states: {
     failure: {
       on: {
-        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
-        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
-        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
+        DEMO: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'demo'
+            ctx.status = ''
+          }),
+        },
+        PARSE: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'parse'
+            ctx.status = ''
+          }),
+        },
+        FETCH: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'fetch'
+            ctx.status = ''
+          }),
+        },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {
@@ -329,12 +353,16 @@ export default createMachine<Context, MachineEvent>({
             cond: function onlyFailures(ctx) {
               return ctx.ids.every((id) => ctx.jsonld.get(id) === 'failure')
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.jsonld.has(id))
             },
+            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Verifying Credential...' : 'Verifying Credentials...')),
             target: 'verifyingCredentials',
           },
         ],
@@ -359,12 +387,16 @@ export default createMachine<Context, MachineEvent>({
                 (id) => ctx.verifiedCredentials.get(id) === 'failure'
               )
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.verifiedCredentials.has(id))
             },
+            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Counterfeiting Credential...' : 'Counterfeiting Credentials...')),
             target: 'counterfeitingCredentials',
           },
         ],
@@ -389,13 +421,18 @@ export default createMachine<Context, MachineEvent>({
                 (id) => ctx.counterfeitCredentials.get(id) === 'failure'
               )
             },
+            actions: assign((ctx) => {
+              ctx.status = 'Verification failed!'
+            }),
             target: 'failure',
           },
           {
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.counterfeitCredentials.has(id))
             },
-            actions: assign((ctx) => {ctx.status = 'Verification successful!'}),
+            actions: assign((ctx) => {
+              ctx.status = 'Verification successful!'
+            }),
             target: 'success',
           },
         ],
@@ -407,9 +444,24 @@ export default createMachine<Context, MachineEvent>({
     //counterfeitingPresentation: {},
     success: {
       on: {
-        DEMO: { actions: assign((ctx) => {ctx.strategy = 'demo';ctx.status = ''}) },
-        PARSE: { actions: assign((ctx) => {ctx.strategy = 'parse';ctx.status = ''}) },
-        FETCH: { actions: assign((ctx) => {ctx.strategy = 'fetch';ctx.status = ''}) },
+        DEMO: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'demo'
+            ctx.status = ''
+          }),
+        },
+        PARSE: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'parse'
+            ctx.status = ''
+          }),
+        },
+        FETCH: {
+          actions: assign((ctx) => {
+            ctx.strategy = 'fetch'
+            ctx.status = ''
+          }),
+        },
         [exec.type]: [
           {
             cond: function shouldDemo(ctx) {

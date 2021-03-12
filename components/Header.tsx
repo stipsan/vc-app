@@ -1,20 +1,29 @@
 import cx from 'classnames'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { Interpreter } from '../lib/stateMachine'
 
 function SubmitButton(props: { state: Interpreter['state'] }) {
+  const [mounted, setMounted] = useState(false)
+  const [mountedComplete, setMountedComplete] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+    setTimeout(() => setMountedComplete(true), 150)
+  }, [])
+
   const loading = !['ready', 'success', 'failure'].some(props.state.matches)
 
   return (
     <button
-      type="submit"
+      type={mounted ? 'submit' : 'button'}
       className={cx(
-        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50 transition-colors duration-150',
+        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50',
         {
           'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 cursor-wait': loading,
           'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-800 dark:hover:text-blue-200 active:bg-blue-300 dark:active:bg-blue-700': !loading,
-        }
+          'opacity-0 cursor-default': !mounted,
+        },
+        mounted && mountedComplete ? 'transition-colors' : 'transition-opacity'
       )}
     >
       <span
@@ -22,13 +31,10 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
         className="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
       >
         <svg
-          className={cx(
-            'animate-spin h-5 w-5 duration-150 transition-opacity',
-            {
-              'opacity-0': !loading,
-              'opacity-80': loading,
-            }
-          )}
+          className={cx('animate-spin h-5 w-5 transition-opacity', {
+            'opacity-0': !loading,
+            'opacity-80': loading,
+          })}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -50,7 +56,7 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
       </span>
       <span
         key="label"
-        className={cx('duration-150 transition-opacity', {
+        className={cx('transition-opacity', {
           'opacity-0': loading,
           'opacity-100': !loading,
         })}
@@ -70,20 +76,29 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
   ].some(state.matches)
   const failure = state.matches('failure')
   const success = state.matches('success')
-  const titleRef = useRef('')
+  const titleRef = useRef(typeof window !== 'undefined' ? document.title : '')
   const { status } = state.context
 
   useEffect(() => {
-    if (loading) {
-      titleRef.current = document.title
-      document.title = 'Verifying Credentials...'
-      const toastId = toast.loading('Verifying...')
+    if (!failure && !success && status) {
+      document.title = status
       return () => {
-        toast.dismiss(toastId)
         document.title = titleRef.current
       }
     }
-  }, [loading])
+  }, [failure, success, status])
+
+  useEffect(() => {
+    if (success) {
+      let timeout = new Promise((resolve) =>
+        setTimeout(() => resolve(undefined), 3000)
+      )
+      const toastId = toast.success(status, { duration: 10000 })
+      return () => {
+        timeout.then(() => toast.dismiss(toastId))
+      }
+    }
+  }, [success])
 
   const message = status
     ? status
