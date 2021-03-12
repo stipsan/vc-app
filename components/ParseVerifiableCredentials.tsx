@@ -32,13 +32,19 @@ export default function ParseVerifiableCredentials(props: {
 
     try {
       const data = JSON.parse(editor)
-      const items = [].concat(data?.items || data)
+      const items = [].concat(data?.verifiableCredential || data?.items || data)
 
       if (!items.length) {
         throw new Error(`Failed to find Verifiable Credentials in the editor`)
       }
 
-      send({ type: 'PARSE_SUCCESS', input: items })
+      send({
+        type: 'PARSE_SUCCESS',
+        input: items.map((item) => {
+          if ('verifiableCredential' in item) return item.verifiableCredential
+          return item
+        }),
+      })
     } catch (err) {
       send({
         type: 'PARSE_FAILURE',
