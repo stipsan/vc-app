@@ -1,12 +1,11 @@
 {
-  "name": "vc",
-  "version": "0.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "test": "tsc --noEmit",
-    "start": "next start"
+    "start": "next start",
+    "storybook": "start-storybook -p 6006",
+    "storybook:build": "build-storybook"
   },
   "dependencies": {
     "@reach/tabs": "^0.13.2",
@@ -27,9 +26,11 @@
     "next": "10.0.8",
     "react": "17.0.1",
     "react-confetti": "^6.0.1",
+    "react-diff-viewer": "^3.1.1",
     "react-dom": "17.0.1",
     "react-expanding-textarea": "^2.3.1",
     "react-hot-toast": "^1.0.2",
+    "react-json-view": "^1.21.3",
     "react-use": "^17.1.1",
     "smooth-scroll-into-view-if-needed": "^1.1.30",
     "use-immer": "^0.4.2",
@@ -38,6 +39,11 @@
     "zustand": "^3.3.3"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^6.2.0-beta.14",
+    "@storybook/addon-essentials": "^6.2.0-beta.14",
+    "@storybook/addon-links": "^6.2.0-beta.14",
+    "@storybook/addon-postcss": "^2.0.0",
+    "@storybook/react": "^6.2.0-beta.14",
     "@tailwindcss/forms": "^0.2.1",
     "@tailwindcss/line-clamp": "^0.2.0",
     "@types/classnames": "^2.2.11",

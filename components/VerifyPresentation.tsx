@@ -112,7 +112,7 @@ function VerifyPresentationRow({
             holder,
             documentLoader,
           })
-          /*
+
           presentation.verifiableCredential = presentation.verifiableCredential.map(
             (_, i) => {
               if (i % 2) return _
