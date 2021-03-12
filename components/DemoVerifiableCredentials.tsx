@@ -87,9 +87,8 @@ export default function DemoVerifiableCredentials(props: {
           }
           const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
           key.id = key.controller + key.id
-          const suite = new Ed25519Signature2018({
-            key,
-          })
+          const suite = new Ed25519Signature2018({ key })
+          console.warn({ key, suite })
           const verifiableCredential = await vc.issue({
             credential,
             suite,
@@ -128,7 +127,7 @@ export default function DemoVerifiableCredentials(props: {
       return (
         <ReportRow readyState="success">
           <Panel variant="success">
-            Created <strong className="font-bold">{ids.length}</strong>
+            Created <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}

@@ -72,7 +72,7 @@ export default function ParseVerifiableCredentials(props: {
       return (
         <ReportRow readyState="success">
           <Panel variant="success">
-            Found <strong className="font-bold">{ids.length}</strong>
+            Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}

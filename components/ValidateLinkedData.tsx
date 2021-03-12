@@ -1,7 +1,11 @@
 import cx from 'classnames'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useImmer } from 'use-immer'
+import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
+import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
 import type { Interpreter } from '../lib/stateMachine'
+import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
@@ -9,10 +13,12 @@ function ValidateLinkedDataRow({
   id,
   state,
   send,
+  documentLoader,
 }: {
   id: string
   state: Interpreter['state']
   send: Interpreter['send']
+  documentLoader: DocumentLoader
 }) {
   const { ids, json } = state.context
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
@@ -24,36 +30,33 @@ function ValidateLinkedDataRow({
   useEffect(() => {
     let cancelled = false
 
-    Promise.all([
-      import('jsonld'),
-      import('jsonld-checker'),
-      import('../lib/documentLoader'),
-    ])
-      .then(
-        async ([
-          { default: jsonld },
-          jsonldChecker,
-          { default: documentLoader },
-        ]) => {
-          if (cancelled) return
-          const result = await jsonldChecker.check(json.get(id), documentLoader)
+    Promise.all([import('jsonld'), import('jsonld-checker')])
+      .then(async ([{ default: jsonld }, jsonldChecker]) => {
+        if (cancelled) return
 
-          if (!result.ok) {
-            throw result.error
-          }
-          if (cancelled) return
-          // throw new Error('oooh')
-          const expanded = await jsonld.expand(
-            JSON.parse(JSON.stringify(json.get(id))),
-            // @ts-expect-error
-            { documentLoader }
-          )
-          if (cancelled) return
-          setReadyState('success')
-          setExpanded(expanded)
-          send({ type: 'LINKING_DATA_SUCCESS', input: id })
+        const result = await jsonldChecker.check(
+          JSON.parse(JSON.stringify(json.get(id))),
+          documentLoader
+        )
+
+        if (!result.ok) {
+          const error = new Error(result.error.details)
+          error.name = result.error.type
+          console.error(error)
+          throw error
         }
-      )
+        if (cancelled) return
+        // throw new Error('oooh')
+        const expanded = await jsonld.expand(
+          JSON.parse(JSON.stringify(json.get(id))),
+          // @ts-expect-error
+          { documentLoader }
+        )
+        if (cancelled) return
+        setReadyState('success')
+        setExpanded(expanded)
+        send({ type: 'LINKING_DATA_SUCCESS', input: id })
+      })
       .catch((err) => {
         if (cancelled) return
         setReadyState('error')
@@ -64,6 +67,7 @@ function ValidateLinkedDataRow({
 
     return () => {
       cancelled = true
+      console.warn('JSON-LD validation cancelled')
     }
   }, [])
 
@@ -91,9 +95,11 @@ function ValidateLinkedDataRow({
         <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
       )}
       {readyState === 'error' && error && (
-        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">{`${error}: ${JSON.stringify(
-          error
-        )}`}</div>
+        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+          {error.message}
+          <br />
+          {error.stack}
+        </div>
       )}
     </Panel>
   )
@@ -108,6 +114,12 @@ export default function ValidateLinkedData({
 }) {
   const { ids, jsonld } = state.context
   const isCurrent = state.matches('linkingData')
+  const [log, updateLog] = useImmer<LogsMap>(new Map())
+  const documentLoader = useMemo(
+    () => createDocumentLoaderWithLogs(updateLog),
+    []
+  )
+  console.log('ValidateLinkedData', { log })
 
   useEffect(() => {
     if (isCurrent && jsonld.size === ids.length) {
@@ -118,8 +130,19 @@ export default function ValidateLinkedData({
   if (isCurrent || jsonld.size) {
     return (
       <ReportRow>
+        <DocumentLoaderLogs
+          loading={isCurrent}
+          log={log}
+          updateLog={updateLog}
+        />
         {ids.map((id) => (
-          <ValidateLinkedDataRow key={id} id={id} send={send} state={state} />
+          <ValidateLinkedDataRow
+            key={id}
+            id={id}
+            send={send}
+            state={state}
+            documentLoader={documentLoader}
+          />
         ))}
       </ReportRow>
     )

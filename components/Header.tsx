@@ -112,7 +112,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
     <>
       <header
         className={cx(
-          'sticky -top-2 -bottom-2 px-6 py-4 z-10 bg-gradient-to-t-to-b from-white dark:from-gray-900'
+          'sticky -top-2 -bottom-2 px-6 py-4 bg-gradient-to-t-to-b from-white dark:from-gray-900 z-50'
         )}
       >
         <div
@@ -124,7 +124,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
           <SubmitButton state={state} />
           {message && (
             <span
-              className={cx('self-center', {
+              className={cx('ml-3 md:ml-0 self-center', {
                 'text-gray-800 dark:text-gray-400': !failure && !success,
                 'text-red-800 dark:text-red-400': failure,
                 'text-green-800 dark:text-green-400': success,
@@ -135,7 +135,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
           )}
         </div>
       </header>
-      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900" />
+      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900 z-40 pointer-events-none" />
     </>
   )
 }

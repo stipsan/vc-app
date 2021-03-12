@@ -1,5 +1,11 @@
 import cx from 'classnames'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 export function Code({ children }: { children: React.ReactNode }) {
   return <code>{children}</code>
@@ -43,7 +49,7 @@ export function ReadonlyTextarea({
 
   useLayoutEffect(() => {
     if (ref.current) {
-      setHeight(ref.current.scrollHeight)
+      setHeight(ref.current.scrollHeight + 2)
     }
   }, [formatted])
 
@@ -127,4 +133,24 @@ export function Panel({
       {children}
     </div>
   )
+}
+
+export function useListFormat(list: React.ReactNode[]) {
+  const formatter = useCallback((list: React.ReactNode[]) => {
+    if (list.length === 0) return null
+    let cursor = 0
+    return 'ListFormat' in Intl
+      ? // @ts-expect-error
+        new Intl.ListFormat('en', { type: 'conjunction' })
+          .formatToParts(list.map((_, i) => `${i}`))
+          .map((part) =>
+            part.type === 'element' ? list[cursor++] : part.value
+          )
+      : list.reduce((accumulator, currentValue) => (
+          <>
+            {accumulator}, {currentValue}
+          </>
+        ))
+  }, [])
+  return <>{formatter(list.filter(Boolean))}</>
 }

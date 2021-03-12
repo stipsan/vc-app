@@ -2,6 +2,7 @@ import { useMachine } from '@xstate/react'
 import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
+import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
@@ -149,6 +150,17 @@ export default function Index() {
   // send and service are stable and return the same reference on every render, while state changes all the time
   // TODO: use xstate hooks on `service` to cut down on unnecessary rerenders
   const [state, send, service] = useMachine(defaultMachine)
+
+  useEffect(() => {
+    const listener = (event) => {
+      console.log('detail', event.detail)
+    }
+    console.log('setup detail', listener)
+
+    document.addEventListener('sticky-change', listener)
+
+    return () => document.removeEventListener('sticky-change', listener)
+  }, [])
 
   return (
     <>

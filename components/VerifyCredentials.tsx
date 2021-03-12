@@ -1,7 +1,11 @@
 import cx from 'classnames'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useImmer } from 'use-immer'
+import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
+import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
 import { Interpreter } from '../lib/stateMachine'
+import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
@@ -9,10 +13,12 @@ function VerifyCredentialsRow({
   id,
   state,
   send,
+  documentLoader,
 }: {
   id: string
   state: Interpreter['state']
   send: Interpreter['send']
+  documentLoader: DocumentLoader
 }) {
   const { ids, json, jsonld } = state.context
   const jsonldStatus = jsonld.get(id)
@@ -33,36 +39,31 @@ function VerifyCredentialsRow({
     Promise.all([
       import('@transmute/ed25519-signature-2018'),
       import('@transmute/vc.js'),
-      import('../lib/documentLoader'),
     ])
-      .then(
-        async ([
-          { Ed25519Signature2018 },
-          { ld: vc },
-          { default: documentLoader },
-        ]) => {
-          if (cancelled) return
-          const result = await vc.verifyCredential({
-            credential: JSON.parse(JSON.stringify(json.get(id))),
-            documentLoader,
-            suite: new Ed25519Signature2018({}),
-          })
-          // throw new Error('oooh')
-          if (cancelled) return
-          if (result.verified) {
-            setReadyState('success')
-            setExpanded(result.results)
-            send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
-          } else {
-            setReadyState('error')
-            setError(result.error)
-            toast.error(`${id} Failed verification`)
-            send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
-          }
+      .then(async ([{ Ed25519Signature2018 }, { ld: vc }]) => {
+        if (cancelled) return
+        const result = await vc.verifyCredential({
+          credential: JSON.parse(JSON.stringify(json.get(id))),
+          documentLoader,
+          suite: new Ed25519Signature2018({}),
+        })
+        // throw new Error('oooh')
+        if (cancelled) return
+        if (result.verified) {
+          setReadyState('success')
+          setExpanded(result.results)
+          send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
+        } else {
+          setReadyState('error')
+          setError(result.error)
+          toast.error(`${id} Failed verification`)
+          send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
         }
-      )
+        setExpanded(result)
+      })
       .catch((err) => {
         if (cancelled) return
+        alert(true)
         setReadyState('error')
         setError(err)
         toast.error(`${id} Failed verification`)
@@ -98,13 +99,13 @@ function VerifyCredentialsRow({
     >
       {ids.length > 1 ? `${id} ` : ''}
       {message}
-      {readyState === 'success' && expanded && (
-        <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
-      )}
+      {expanded && <SuperReadonlyTextarea value={JSON.stringify(expanded)} />}
       {readyState === 'error' && error && (
-        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">{`${error}: ${JSON.stringify(
-          error
-        )}`}</div>
+        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+          {error.message}
+          <br />
+          {error.stack}
+        </div>
       )}
     </Panel>
   )
@@ -119,6 +120,12 @@ export default function VerifyCredentials({
 }) {
   const { ids, verifiedCredentials } = state.context
   const isCurrent = state.matches('verifyingCredentials')
+  const [log, updateLog] = useImmer<LogsMap>(new Map())
+  const documentLoader = useMemo(
+    () => createDocumentLoaderWithLogs(updateLog),
+    []
+  )
+  console.log('VerifyCredentials', { log })
 
   useEffect(() => {
     if (isCurrent && verifiedCredentials.size === ids.length) {
@@ -129,8 +136,19 @@ export default function VerifyCredentials({
   if (isCurrent || verifiedCredentials.size) {
     return (
       <ReportRow>
+        <DocumentLoaderLogs
+          loading={isCurrent}
+          log={log}
+          updateLog={updateLog}
+        />
         {ids.map((id) => (
-          <VerifyCredentialsRow key={id} id={id} send={send} state={state} />
+          <VerifyCredentialsRow
+            key={id}
+            id={id}
+            send={send}
+            state={state}
+            documentLoader={documentLoader}
+          />
         ))}
       </ReportRow>
     )
