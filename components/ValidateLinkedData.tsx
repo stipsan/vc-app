@@ -67,23 +67,26 @@ function ValidateLinkedDataRow({
     }
   }, [])
 
+  const message =
+    readyState === 'loading'
+      ? 'Checking JSON-LD...'
+      : readyState === 'error'
+      ? 'Invalid JSON-LD'
+      : 'Valid JSON-LD'
+
   return (
     <Panel
-      className={cx({
-        'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse':
-          readyState === 'loading',
-        'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
-          readyState === 'error',
-        'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
-          readyState === 'success',
-      })}
+      className={cx({ 'animate-pulse': readyState === 'loading' })}
+      variant={
+        readyState === 'error'
+          ? 'error'
+          : readyState === 'success'
+          ? 'success'
+          : 'default'
+      }
     >
       {ids.length > 1 ? `${id} ` : ''}
-      {readyState === 'loading'
-        ? 'Checking JSON-LD...'
-        : readyState === 'error'
-        ? 'Invalid JSON-LD'
-        : 'Valid JSON-LD'}
+      {message}
       {readyState === 'success' && expanded && (
         <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
       )}

@@ -61,7 +61,7 @@ export function ReadonlyTextarea({
     ></textarea>
   )
 }
-//text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900
+
 export function SuperReadonlyTextarea({
   className = 'bg-green-100 dark:bg-opacity-25 dark:bg-green-900 focus:ring-inset focus:ring-green-200 dark:focus:ring-green-900 focus:ring-2',
   value,
@@ -99,10 +99,32 @@ export function ErrorMessage({ children }: { children: Error | string }) {
 
 export function Panel({
   children,
-  className = 'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80',
+  className,
+  style,
+  variant = 'default',
 }: {
   children: React.ReactNode
   className?: string
+  style?: any
+  variant?: 'default' | 'error' | 'success' | 'blank'
 }) {
-  return <div className={cx(className, 'rounded-lg py-2 px-3')}>{children}</div>
+  return (
+    <div
+      className={cx(
+        'rounded-lg py-2 px-3',
+        {
+          'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
+            variant === 'default',
+          'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900 break-words':
+            variant === 'error',
+          'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
+            variant === 'success',
+        },
+        className
+      )}
+      style={style}
+    >
+      {children}
+    </div>
+  )
 }

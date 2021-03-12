@@ -3,6 +3,7 @@ import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { Toaster } from 'react-hot-toast'
+import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
 import defaultMachine from '../lib/stateMachine'
@@ -33,19 +34,14 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
     )
     const tClassName =
       'px-6 pt-8 flex flex-initial items-center transition-opacity'
-    const bClassName = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
+    const bClassName = 'mx-6 mt-4 transition-colors'
     switch (true) {
       case !!error:
       case timedOut:
         return (
           <>
             <div className={cx(tClassName, 'opacity-0')}>{dots}</div>
-            <div
-              className={cx(
-                bClassName,
-                'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
-              )}
-            >
+            <Panel className={bClassName} variant="error">
               {error?.message || 'Loading failed'}
               {'! '}
               <button
@@ -61,7 +57,7 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
                   {error.stack}
                 </>
               )}
-            </div>
+            </Panel>
           </>
         )
 
@@ -69,15 +65,16 @@ const Strategy = dynamic(() => import('../components/Strategy'), {
         return (
           <>
             <div className={tClassName}>{dots}</div>
-            <div
+            <Panel
               className={cx(
                 bClassName,
                 'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse'
               )}
               style={{ animationDelay: '250ms' }}
+              variant="blank"
             >
               Loading...
-            </div>
+            </Panel>
           </>
         )
       default:
@@ -93,19 +90,14 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   delay: 3000,
   timeout: 10000,
   loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
-    const className = 'mx-6 mt-4 rounded-lg py-2 px-3 transition-colors'
+    const className = 'mx-6 mt-4 transition-colors'
     switch (true) {
       case !!error:
       case timedOut:
         return (
           <div className="transition-opacity">
             <HorisontalRuler />
-            <div
-              className={cx(
-                className,
-                'break-words text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900'
-              )}
-            >
+            <Panel className={className} variant="error">
               {error?.message || 'Loading failed'}
               {'! '}
               <button
@@ -124,7 +116,7 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
                   {error.stack}
                 </>
               )}
-            </div>
+            </Panel>
           </div>
         )
 
@@ -136,14 +128,15 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
             })}
           >
             <HorisontalRuler />
-            <div
+            <Panel
               className={cx(
                 className,
                 'animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
               )}
+              variant="blank"
             >
               {(pastDelay || retried) && 'Loading...'}
-            </div>
+            </Panel>
           </div>
         )
       default:

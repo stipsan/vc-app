@@ -83,35 +83,37 @@ function TamperingDetectorRow({
     }
   }, [])
 
+  const message =
+    jsonldStatus === 'failure'
+      ? `Skipped tampering detection because of the JSON-LD validation failing`
+      : verifiedCredentialStatus === 'failure'
+      ? `Skipped tampering detection because of the failed verification`
+      : readyState === 'loading'
+      ? 'Attempting to tamper with credentialSubject and fool the signature check...'
+      : readyState === 'error'
+      ? `Unexpected error`
+      : readyState === 'failure'
+      ? `Able to tamper with credentialSubject without failing the signature check`
+      : 'Tampering with credentialSubject successfully detected by the signature check'
+
   return (
     <Panel
       className={cx({
-        'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
-          readyState === 'loading' ||
-          verifiedCredentialStatus === 'failure' ||
-          jsonldStatus === 'failure',
         'animate-pulse':
           readyState === 'loading' &&
           verifiedCredentialStatus !== 'failure' &&
           jsonldStatus !== 'failure',
-        'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
-          readyState === 'error' || readyState === 'failure',
-        'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
-          readyState === 'success',
       })}
+      variant={
+        readyState === 'error' || readyState === 'failure'
+          ? 'error'
+          : readyState === 'success'
+          ? 'success'
+          : 'default'
+      }
     >
       {ids.length > 1 ? `${id} ` : ''}
-      {jsonldStatus === 'failure'
-        ? `Skipped tampering detection because of the JSON-LD validation failing`
-        : verifiedCredentialStatus === 'failure'
-        ? `Skipped tampering detection because of the failed verification`
-        : readyState === 'loading'
-        ? 'Attempting to tamper with credentialSubject and fool the signature check...'
-        : readyState === 'error'
-        ? `Unexpected error`
-        : readyState === 'failure'
-        ? `Able to tamper with credentialSubject without failing the signature check`
-        : 'Tampering with credentialSubject successfully detected by the signature check'}
+      {message}
       {readyState === 'success' && error && (
         <SuperReadonlyTextarea value={JSON.stringify(error)} />
       )}

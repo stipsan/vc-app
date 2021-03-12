@@ -64,10 +64,19 @@ export default function DemoVerifiableCredentials(props: {
               familyName: faker.name.lastName(),
               degree: {
                 type: 'BachelorDegree',
-                name: 'Bachelor of Science and Arts',
+                name: `Bachelor of ${faker.company
+                  .bsNoun()
+                  .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
+                    _.toUpperCase()
+                  )} and ${faker.company
+                  .bsNoun()
+                  .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
+                    _.toUpperCase()
+                  )}`,
               },
             },
           }
+
           const credential = {
             ...src,
             issuer: { id: didDoc.id },
@@ -109,7 +118,7 @@ export default function DemoVerifiableCredentials(props: {
     case !!error:
       return (
         <ReportRow readyState="error">
-          <Panel className="text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900">
+          <Panel variant="error">
             <ErrorMessage>{error}</ErrorMessage>
           </Panel>
         </ReportRow>
@@ -118,7 +127,7 @@ export default function DemoVerifiableCredentials(props: {
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel className="text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900">
+          <Panel variant="success">
             Created <strong className="font-bold">{ids.length}</strong>
             {ids.length === 1
               ? ' Verifiable Credential'
