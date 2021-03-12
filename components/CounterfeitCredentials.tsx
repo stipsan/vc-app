@@ -5,7 +5,7 @@ import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-function TamperingDetectorRow({
+function CounterfeitCredentialsRow({
   id,
   state,
   send,
@@ -132,7 +132,7 @@ function TamperingDetectorRow({
   )
 }
 
-export default function TamperingDetector({
+export default function CounterfeitCredentials({
   state,
   send,
 }: {
@@ -152,7 +152,12 @@ export default function TamperingDetector({
     return (
       <ReportRow>
         {ids.map((id) => (
-          <TamperingDetectorRow key={id} id={id} state={state} send={send} />
+          <CounterfeitCredentialsRow
+            key={id}
+            id={id}
+            state={state}
+            send={send}
+          />
         ))}
       </ReportRow>
     )
