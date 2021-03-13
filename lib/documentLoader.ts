@@ -9,7 +9,6 @@ import citizenship from './citizenship-v1.json'
 import didDoc from './did.json'
 //import { getResolver } from 'web-did-resolver'
 import { getResolver } from './webResolver'
-import { resolve } from '@transmute/did-key-ed25519/dist/driver'
 
 const webResolver = getResolver()
 // @ts-expect-error

@@ -26,7 +26,11 @@ export const Loadable = () => {
   return (
     <div className="grid w-full">
       <DynamicStrategy state={state} send={send} />
-      <StrategyLazy state={state} send={send} />
+      <StrategyLazy
+        // @ts-expect-error
+        state={state}
+        send={send}
+      />
     </div>
   )
 }
