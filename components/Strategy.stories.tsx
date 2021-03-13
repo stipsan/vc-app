@@ -1,5 +1,5 @@
 export const Primary = () => (
-  <button className="min-h-screen">Hello storybook!</button>
+  <button className="min-h-full">Hello storybook!</button>
 )
 
 export default {
