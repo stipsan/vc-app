@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "EXCLUDE_STORYBOOK=true next build",
     "test": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx,js,jsx --max-warnings 0",
     "start": "next start",
