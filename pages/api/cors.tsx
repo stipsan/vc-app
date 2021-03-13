@@ -6,6 +6,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const url = new URL(queryUrl)
   const proxyRes = await fetch(url.toString(), {
     method: req.method,
+    // @ts-expect-error
     headers: Object.assign(
       { 'x-forwarded-host': req.headers.host },
       req.headers,
@@ -38,6 +39,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   })
 
   req.on('abort', () => {
+    // @ts-expect-error
     proxyRes.body.destroy()
   })
 }
