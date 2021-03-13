@@ -14,6 +14,10 @@ export const Primary = () => (
 )
 
 export const Loadable = () => {
+  console.log('preload')
+  hello.preload(1, 2)
+  hello.preload(2, 3)
+
   console.log('once')
   hello.read(1, 2)
   const [load, ssetLoade] = useState(false)
@@ -39,9 +43,12 @@ export default {
   title: 'State Machine/Strategy',
   decorators: [
     (Story) => (
-      <Suspense fallback="Loading...">
-        <Story />
-      </Suspense>
+      <>
+        <button onClick={() => console.log('handle', hello)}>tap</button>
+        <Suspense fallback="Loading...">
+          <Story />
+        </Suspense>
+      </>
     ),
   ],
 }

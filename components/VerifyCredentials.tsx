@@ -1,14 +1,21 @@
 import cx from 'classnames'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useImmer } from 'use-immer'
 import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
-import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
-import { Interpreter } from '../lib/stateMachine'
+import type { LogsMap } from '../lib/documentLoader'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
+import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
+import create from 'zustand'
+
+const useLogs = create<LogsState>((set) => ({
+  urls: {},
+  set: (url, entry) => {
+    set((state) => ({ urls: { ...state.urls, [url]: entry } }))
+  },
+}))
 
 function VerifyCredentialsRow({
   id,
@@ -111,14 +118,29 @@ function VerifyCredentialsRow({
 }
 
 export default function VerifyCredentials() {
+  const log = useLogs((state) => state.urls)
+  const updateLog = useLogs((state) => state.set)
   const send = useMachineSend()
   const state = useMachineState()
   const { ids, verifiedCredentials } = state.context
   const isCurrent = state.matches('verifyingCredentials')
-  const [log, updateLog] = useImmer<LogsMap>(new Map())
-  const documentLoader = useMemo(
-    () => createDocumentLoaderWithLogs(updateLog),
-    []
+  const realDocumentLoader = documentLoaderStore(
+    (state) => state.documentLoader
+  )
+  const documentLoader = useCallback(
+    async (url: string) => {
+      updateLog(url, 'loading')
+      try {
+        const result = await realDocumentLoader(url)
+
+        updateLog(url, JSON.parse(JSON.stringify(result)))
+        return result
+      } catch (err) {
+        updateLog(url, err)
+        throw err
+      }
+    },
+    [updateLog]
   )
   console.log('VerifyCredentials', { log })
 

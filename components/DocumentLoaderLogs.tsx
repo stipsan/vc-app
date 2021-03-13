@@ -1,8 +1,9 @@
 import cx from 'classnames'
 import { Panel, useListFormat, ReadonlyTextarea } from './Formatted'
-import type { LogsMap, DocumentLoader } from '../lib/documentLoader'
+import type { LogsMap } from '../lib/documentLoader'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import type { Draft } from 'immer'
+import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
 
 function LogRow({
   url,
@@ -146,15 +147,11 @@ export default function DocumentLoaderLogs({
   updateLog,
 }: {
   loading?: boolean
-  log: LogsMap
-  updateLog: (f: (draft: Draft<LogsMap>) => void | LogsMap) => void
+  log: LogsState['urls']
+  updateLog: LogsState['set']
 }) {
-  useLayoutEffect(() => {
-    // Start by clearing out old logs
-    updateLog((drafts) => drafts.clear())
-  }, [])
   const [expanded, setExpanded] = useState(false)
-  const logs = useMemo(() => [...log.entries()], [log])
+  const logs = useMemo(() => Object.entries(log), [log])
   const loadingTotal = logs.reduce(
     (total, [, current]) => (current === 'loading' ? ++total : total),
     0
@@ -163,7 +160,7 @@ export default function DocumentLoaderLogs({
     (total, [, current]) => (current instanceof Error ? ++total : total),
     0
   )
-  const successTotal = log.size - loadingTotal - errorTotal
+  const successTotal = logs.length - loadingTotal - errorTotal
   const summaries = useListFormat([
     successTotal > 0 && (
       <span key="success">
@@ -198,14 +195,14 @@ export default function DocumentLoaderLogs({
     ),
   ])
 
-  if (!loading && log.size === 0) {
+  if (!loading && logs.length === 0) {
     return null
   }
 
   console.log({ summaries })
   return (
     <Panel>
-      {log.size > 0 ? (
+      {logs.length > 0 ? (
         <>The document loader {summaries} </>
       ) : (
         'The document loader is standby'

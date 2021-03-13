@@ -78,11 +78,7 @@ export function DemoVerifiableCredentials() {
   const ids = useIdsList()
   const json = useJsonMap()
 
-  const before = new Date().toISOString()
-  console.log('before', before)
   const result = state.value === 'demoing' ? work.read() : undefined
-  const after = new Date().toISOString()
-  console.log('after', { after, before })
 
   useEffect(() => {
     if (result?.ok === true) {

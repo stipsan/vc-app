@@ -20,7 +20,10 @@ function SelectStrategy() {
   switch (strategy) {
     case 'demo':
       return <DemoVerifiableCredentials />
-
+    case 'parse':
+      return <ParseVerifiableCredentials />
+    case 'fetch':
+      return <FetchVerifiableCredentials />
     default:
       throw new TypeError(`Unknown Strategy Type: ${strategy}`)
   }
@@ -32,9 +35,6 @@ export default function LazyBunch() {
       <Suspense fallback="TODO add fallback for SelectStrategy!">
         <SelectStrategy />
       </Suspense>
-      <FetchVerifiableCredentials />
-      <ParseVerifiableCredentials />
-
       <Suspense fallback="TODO add fallback for ValidateLinkedData!">
         <ValidateLinkedData />
       </Suspense>

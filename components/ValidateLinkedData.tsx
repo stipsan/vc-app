@@ -1,14 +1,19 @@
 import cx from 'classnames'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useImmer } from 'use-immer'
 import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
-import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
-import type { Interpreter } from '../lib/stateMachine'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
+import create from 'zustand'
+import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
+
+const useLogs = create<LogsState>((set) => ({
+  urls: {},
+  set: (url, entry) => {
+    set((state) => ({ urls: { ...state.urls, [url]: entry } }))
+  },
+}))
 
 function ValidateLinkedDataRow({
   id,
@@ -105,14 +110,29 @@ function ValidateLinkedDataRow({
 }
 
 export default function ValidateLinkedData() {
+  const log = useLogs((state) => state.urls)
+  const updateLog = useLogs((state) => state.set)
   const send = useMachineSend()
   const state = useMachineState()
   const { ids, jsonld } = state.context
   const isCurrent = state.matches('linkingData')
-  const [log, updateLog] = useImmer<LogsMap>(new Map())
-  const documentLoader = useMemo(
-    () => createDocumentLoaderWithLogs(updateLog),
-    []
+  const realDocumentLoader = documentLoaderStore(
+    (state) => state.documentLoader
+  )
+  const documentLoader = useCallback(
+    async (url: string) => {
+      updateLog(url, 'loading')
+      try {
+        const result = await realDocumentLoader(url)
+
+        updateLog(url, JSON.parse(JSON.stringify(result)))
+        return result
+      } catch (err) {
+        updateLog(url, err)
+        throw err
+      }
+    },
+    [updateLog]
   )
   console.log('ValidateLinkedData', { log })
 

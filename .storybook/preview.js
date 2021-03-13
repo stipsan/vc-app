@@ -2,7 +2,7 @@ import { themes } from '@storybook/theming'
 
 import { enableMapSet } from 'immer'
 import { Toaster } from 'react-hot-toast'
-
+import { MachineProvider } from '../lib/contexts'
 import 'tailwindcss/tailwind.css'
 import '../style.css'
 
@@ -87,7 +87,9 @@ export const parameters = {
 export const decorators = [
   (Story) => (
     <>
-      <Story />
+      <MachineProvider>
+        <Story />
+      </MachineProvider>
       <Toaster position="top-right" />
     </>
   ),

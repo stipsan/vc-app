@@ -1,6 +1,7 @@
+import { createAsset } from 'use-asset'
 import type { Draft } from 'immer'
 import {
-  contexts,
+  contexts as _contexts,
   documentLoaderFactory,
 } from '@transmute/jsonld-document-loader'
 import DataLoader from 'dataloader'
@@ -10,13 +11,19 @@ import didDoc from './did.json'
 //import { getResolver } from 'web-did-resolver'
 import { getResolver } from './webResolver'
 
+const contexts = {
+  ..._contexts.W3C_Verifiable_Credentials,
+  ..._contexts.W3ID_Security_Vocabulary,
+  ..._contexts.W3C_Decentralized_Identifiers,
+}
+
 const webResolver = getResolver()
 // @ts-expect-error
 const didResolver = new Resolver({ ...webResolver })
-let citizenshipPromise
 
 export const fetchLoader = new DataLoader(async (urls) =>
-  urls.map(async (url) => {
+  urls.map(async (url: string) => {
+   if(url in contexts) return contexts[url]
     console.debug(
       `Loading document ${url} using the /api/cors?url= reverse proxy to get around CORS limitations`
     )
@@ -31,14 +38,10 @@ export const fetchLoader = new DataLoader(async (urls) =>
   })
 )
 
+
+// TODO refactor this, it's not entirely optimal
 const documentLoader = documentLoaderFactory.pluginFactory
-  .build({
-    contexts: {
-      ...contexts.W3C_Verifiable_Credentials,
-      ...contexts.W3ID_Security_Vocabulary,
-      ...contexts.W3C_Decentralized_Identifiers,
-    },
-  })
+  .build({    contexts  })
   .addResolver({
     [didDoc.id]: {
       resolve: async (did: string) => {
@@ -70,10 +73,7 @@ const documentLoader = documentLoaderFactory.pluginFactory
 export default documentLoader
 
 export type LogsMap = Map<string, 'loading' | object | Error>
-export function createDocumentLoaderWithLogs(
-  updateLog: (f: (draft: Draft<LogsMap>) => void | LogsMap) => void
-) {
-  return async (url: string) => {
+export const documentLoaderWithLogger = createAsset(async (updateLog: (f: (draft: Draft<LogsMap>) => void | LogsMap) => void, url: string) => {
     updateLog((draft) => {
       if (!draft.has(url)) draft.set(url, 'loading')
     })
@@ -89,6 +89,4 @@ export function createDocumentLoaderWithLogs(
       })
       throw err
     }
-  }
-}
-export type DocumentLoader = ReturnType<typeof createDocumentLoaderWithLogs>
+})
