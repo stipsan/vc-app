@@ -1,5 +1,5 @@
 module.exports = {
-  stories: ['../stories/*.tsx'],
+  stories: ['../components/**/*.stories.tsx'],
   addons: ['@storybook/addon-links', '@storybook/addon-essentials'],
   /*
   webpackFinal: async (config) => {
