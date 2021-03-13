@@ -6,6 +6,8 @@ import {
   State as MachineState,
 } from 'xstate'
 
+// TODO rename this to the Progress Machine, as that's it's job.
+
 interface MachineSchema {
   states: {
     ready: {};

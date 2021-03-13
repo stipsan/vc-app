@@ -3,7 +3,8 @@ import scrollIntoView from 'smooth-scroll-into-view-if-needed'
 import { useMachineSelector } from '../lib/contexts'
 
 export default function ScrollTo() {
-  console.count('ScrollTo')
+  // TODO replace with logic that observes when things load before the fold, and show a down arrow that can be clicked
+  //      offer a checkbox to opt-out of auto scroll
   const value = useMachineSelector(useCallback((state) => state.value, []))
   const nodeRef = useRef()
 

@@ -1,134 +1,111 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useMachineSend, useMachineState } from '../lib/contexts'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
+import { createAsset } from 'use-asset'
+import { useIdsList, useJsonMap } from '../lib/selectors'
 
-export default function DemoVerifiableCredentials() {
+const work = createAsset(async () => {
+  try {
+    const tooMuchData =
+      process.env.NODE_ENV !== 'production'
+        ? await import('../fixtures.json')
+        : {}
+    const { default: faker } = await import('faker')
+    const { Ed25519KeyPair } = await import('@transmute/did-key-ed25519')
+    const { Ed25519Signature2018 } = await import(
+      '@transmute/ed25519-signature-2018'
+    )
+    const { ld: vc } = await import('@transmute/vc.js')
+    const didDoc = await import('../lib/did.json')
+    const { default: documentLoader } = await import('../lib/documentLoader')
+
+    const src = {
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://www.w3.org/2018/credentials/examples/v1',
+      ],
+      id: 'http://example.gov/credentials/3732',
+      type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+      issuer: { id: 'did:example:123' },
+      issuanceDate: new Date().toISOString(),
+      credentialSubject: {
+        id: 'did:example:456',
+        givenName: faker.name.firstName(),
+        familyName: faker.name.lastName(),
+        degree: {
+          type: 'BachelorDegree',
+          name: `Bachelor of ${faker.company
+            .bsNoun()
+            .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
+              _.toUpperCase()
+            )} and ${faker.company
+            .bsNoun()
+            .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
+              _.toUpperCase()
+            )}`,
+        },
+      },
+    }
+
+    const credential = {
+      ...src,
+      issuer: { id: didDoc.id },
+      credentialSubject: {
+        ...src.credentialSubject,
+        id: didDoc.id,
+      },
+    }
+    const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
+    key.id = key.controller + key.id
+    const suite = new Ed25519Signature2018({ key })
+    console.warn({ key, suite })
+    const verifiableCredential = await vc.issue({
+      credential,
+      suite,
+      documentLoader,
+    })
+
+    return { ok: true, data: [verifiableCredential].concat(tooMuchData) }
+  } catch (error) {
+    return { ok: false, error }
+  }
+})
+export function DemoVerifiableCredentials() {
   const send = useMachineSend()
   const state = useMachineState()
-  const { ids, json } = state.context
-  const demoing = state.matches('demoing')
-  const [error, setError] = useState('')
-  const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
+  const ids = useIdsList()
+  const json = useJsonMap()
+
+  const before = new Date().toISOString()
+  console.log('before', before)
+  const result = state.value === 'demoing' ? work.read() : undefined
+  const after = new Date().toISOString()
+  console.log('after', { after, before })
 
   useEffect(() => {
-    if (state.value === 'parsing' || state.value === 'fetching') {
-      setLastUsedStrategy(false)
-    }
-  }, [state.value])
-
-  useEffect(() => {
-    if (!demoing) {
-      return
-    }
-
-    setLastUsedStrategy(true)
-    setError('')
-
-    let cancelled = false
-
-    Promise.all([
-      process.env.NODE_ENV !== 'production'
-        ? import('../fixtures.json')
-        : Promise.resolve({}),
-      import('faker'),
-      import('@transmute/did-key-ed25519'),
-      import('@transmute/ed25519-signature-2018'),
-      import('@transmute/vc.js'),
-      import('../lib/did.json'),
-      import('../lib/documentLoader'),
-    ])
-      .then(
-        async ([
-          tooMuchData,
-          { default: faker },
-          { Ed25519KeyPair },
-          { Ed25519Signature2018 },
-          { ld: vc },
-          didDoc,
-          { default: documentLoader },
-        ]) => {
-          if (cancelled) return
-
-          const src = {
-            '@context': [
-              'https://www.w3.org/2018/credentials/v1',
-              'https://www.w3.org/2018/credentials/examples/v1',
-            ],
-            id: 'http://example.gov/credentials/3732',
-            type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-            issuer: { id: 'did:example:123' },
-            issuanceDate: new Date().toISOString(),
-            credentialSubject: {
-              id: 'did:example:456',
-              givenName: faker.name.firstName(),
-              familyName: faker.name.lastName(),
-              degree: {
-                type: 'BachelorDegree',
-                name: `Bachelor of ${faker.company
-                  .bsNoun()
-                  .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
-                    _.toUpperCase()
-                  )} and ${faker.company
-                  .bsNoun()
-                  .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
-                    _.toUpperCase()
-                  )}`,
-              },
-            },
-          }
-
-          const credential = {
-            ...src,
-            issuer: { id: didDoc.id },
-            credentialSubject: {
-              ...src.credentialSubject,
-              id: didDoc.id,
-            },
-          }
-          const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
-          key.id = key.controller + key.id
-          const suite = new Ed25519Signature2018({ key })
-          console.warn({ key, suite })
-          const verifiableCredential = await vc.issue({
-            credential,
-            suite,
-            documentLoader,
-          })
-
-          if (cancelled) return
-          send({
-            type: 'DEMO_SUCCESS',
-            input: [verifiableCredential].concat(tooMuchData),
-          })
-        }
-      )
-      .catch((reason) => {
-        send({ type: 'DEMO_FAILURE', input: `${reason}` })
-        toast.error(`Failed fetching Verifiable Credentials`)
-        setError(reason)
+    if (result?.ok === true) {
+      send({
+        type: 'DEMO_SUCCESS',
+        input: result.data,
       })
-
-    return () => {
-      cancelled = true
     }
-  }, [demoing])
-
+    if (result?.ok === false) {
+      send({ type: 'DEMO_FAILURE', input: result.error.message })
+      toast.error(`Failed fetching Verifiable Credentials`)
+    }
+  }, [result])
   switch (true) {
-    case !lastUsedStrategy && !state.matches('demoing'):
-      return null
-
-    case !!error:
+    case result?.ok === false:
       return (
         <ReportRow readyState="error">
           <Panel variant="error">
-            <ErrorMessage>{error}</ErrorMessage>
+            <ErrorMessage>{result.error}</ErrorMessage>
           </Panel>
         </ReportRow>
       )
-
-    case ids.length > 0:
+    case ids.length > 1:
       return (
         <ReportRow readyState="success">
           <Panel variant="success">
@@ -142,15 +119,20 @@ export default function DemoVerifiableCredentials() {
           ))}
         </ReportRow>
       )
-
-    case state.matches('demoing'):
-      return (
-        <ReportRow readyState="loading">
-          <Panel>Creating fake Verifiable Credentials...</Panel>
-        </ReportRow>
-      )
-
     default:
       return null
   }
+}
+export default function DemoVerifiableCredentialsSuspender() {
+  return (
+    <Suspense
+      fallback={
+        <ReportRow readyState="loading">
+          <Panel>Creating fake Verifiable Credentials...</Panel>
+        </ReportRow>
+      }
+    >
+      <DemoVerifiableCredentials />
+    </Suspense>
+  )
 }
