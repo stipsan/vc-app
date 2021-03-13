@@ -4,7 +4,7 @@ module.exports = {
   purge: [
     './pages/**/*.{ts,tsx}',
     process.env.EXCLUDE_STORYBOOK === 'true'
-      ? './components/**/*.!(.stories).{ts,tsx}'
+      ? './components/**/*!(.stories).{ts,tsx}'
       : './components/**/*.{ts,tsx}',
   ],
   darkMode: 'media',
