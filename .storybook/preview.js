@@ -78,6 +78,7 @@ export const parameters = {
           'VerifyPresentation',
           'Celebrate',
         ],
+        'App',
       ],
     },
   },

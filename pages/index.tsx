@@ -8,81 +8,10 @@ import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
 import defaultMachine from '../lib/stateMachine'
+import Strategy from '../components/Strategy.Lazy'
 
-const Strategy = dynamic(() => import('../components/Strategy'), {
-  ssr: false,
-  // @ts-expect-error
-  timeout: 10000,
-  loading: ({ error, isLoading, retry, timedOut }) => {
-    const dots = (
-      <>
-        <div className="animate-pulse bg-gray-100 dark:bg-gray-800 py-1 rounded-full w-16">
-          &nbsp;
-        </div>
-        <div
-          className="animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
-          style={{ animationDelay: '250ms' }}
-        >
-          &nbsp;
-        </div>
-        <div
-          className="animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
-          style={{ animationDelay: '500ms' }}
-        >
-          &nbsp;
-        </div>
-      </>
-    )
-    const tClassName =
-      'px-6 pt-8 flex flex-initial items-center transition-opacity'
-    const bClassName = 'mx-6 mt-4 transition-colors'
-    switch (true) {
-      case !!error:
-      case timedOut:
-        return (
-          <>
-            <div className={cx(tClassName, 'opacity-0')}>{dots}</div>
-            <Panel className={bClassName} variant="error">
-              {error?.message || 'Loading failed'}
-              {'! '}
-              <button
-                className="focus:outline-none focus:underline font-semibold hover:underline"
-                type="button"
-                onClick={retry}
-              >
-                Retry?
-              </button>
-              {error?.stack && (
-                <>
-                  <br />
-                  {error.stack}
-                </>
-              )}
-            </Panel>
-          </>
-        )
-
-      case isLoading:
-        return (
-          <>
-            <div className={tClassName}>{dots}</div>
-            <Panel
-              className={cx(
-                bClassName,
-                'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse'
-              )}
-              style={{ animationDelay: '250ms' }}
-              variant="blank"
-            >
-              Loading...
-            </Panel>
-          </>
-        )
-      default:
-        return null
-    }
-  },
-})
+// When React Suspense is stable we'll no longer need to specify both a Suspense boundary fallback
+// and a dynamic.loading. The single Suspense fallback will be enough
 
 let retried = false
 const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
@@ -150,17 +79,6 @@ export default function Index() {
   // send and service are stable and return the same reference on every render, while state changes all the time
   // TODO: use xstate hooks on `service` to cut down on unnecessary rerenders
   const [state, send, service] = useMachine(defaultMachine)
-
-  useEffect(() => {
-    const listener = (event) => {
-      console.log('detail', event.detail)
-    }
-    console.log('setup detail', listener)
-
-    document.addEventListener('sticky-change', listener)
-
-    return () => document.removeEventListener('sticky-change', listener)
-  }, [])
 
   return (
     <>

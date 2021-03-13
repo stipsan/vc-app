@@ -1,3 +1,4 @@
+import faker from 'faker'
 import dynamic from 'next/dynamic'
 import { useMachine } from '@xstate/react'
 import defaultMachine from '../lib/stateMachine'
@@ -43,7 +44,9 @@ export default function Viz() {
             case 'FETCH_SUCCESS':
               // uncomment this to test scenarios where *_COMPLETE events require multiple *_{SUCCESS|FAILURE} events to proceed
               // return send(event.eventType, { input: [{}, {}, {}] })
-              return send(event.eventType, { input: [{}] })
+              return send(event.eventType, {
+                input: [{ name: faker.name.findName() }],
+              })
             default:
               // @ts-expect-error
               return send(event.eventType, { input: {} })

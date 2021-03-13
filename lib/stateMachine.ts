@@ -1,10 +1,26 @@
+import {jsonChecksum} from '../lib/utils'
 import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
-  createMachine,
   Interpreter as MachineInterpreter,
+  Machine,
   State as MachineState,
 } from 'xstate'
 
+interface MachineSchema {
+  states: {
+    ready: {};
+    failure: {};
+    demoing: {},
+    parsing: {},
+    fetching: {},
+    linkingData: {},
+    verifyingCredentials: {},
+    counterfeitingCredentials:{},
+    verifyingPresentation:{},
+    counterfeitingPresentation: {},
+    success: {}
+  };
+}
 interface Context {
   strategy: 'demo' | 'parse' | 'fetch'
   count: number
@@ -126,9 +142,11 @@ const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -138,9 +156,11 @@ const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -150,9 +170,11 @@ const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -212,7 +234,7 @@ const counterfeitCredentialSuccess = createUpdater<
 export type State = MachineState<Context, MachineEvent>
 export type Interpreter = MachineInterpreter<Context, State, MachineEvent>
 
-export default createMachine<Context, MachineEvent>({
+const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
   context: {
     strategy: 'demo',
     count: 0,
@@ -541,3 +563,5 @@ export default createMachine<Context, MachineEvent>({
     },
   },
 })
+
+export default stateMachine

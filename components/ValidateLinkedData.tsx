@@ -20,6 +20,7 @@ function ValidateLinkedDataRow({
   send: Interpreter['send']
   documentLoader: DocumentLoader
 }) {
+  console.log('bloody ID stays the same between runs', id)
   const { ids, json } = state.context
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
     'loading'
