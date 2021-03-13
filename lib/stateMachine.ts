@@ -21,6 +21,8 @@ interface MachineSchema {
     success: {}
   };
 }
+export type StateValue = keyof MachineSchema['states']
+
 interface Context {
   strategy: 'demo' | 'parse' | 'fetch'
   count: number

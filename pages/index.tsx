@@ -1,13 +1,13 @@
-import { useMachine } from '@xstate/react'
 import cx from 'classnames'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { Toaster } from 'react-hot-toast'
+import ExecForm from '../components/ExecForm'
 import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
-import defaultMachine from '../lib/stateMachine'
 import Strategy from '../components/Strategy.Lazy'
+import { DocumentLoaderProvider, MachineProvider } from '../lib/contexts'
 
 // When React Suspense is stable we'll no longer need to specify both a Suspense boundary fallback
 // and a dynamic.loading. The single Suspense fallback will be enough
@@ -75,27 +75,20 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
 })
 
 export default function Index() {
-  // send and service are stable and return the same reference on every render, while state changes all the time
-  // TODO: use xstate hooks on `service` to cut down on unnecessary rerenders
-  const [state, send, service] = useMachine(defaultMachine)
-
   return (
     <>
       <Head>
         <title>Verifiable Credentials Verifier</title>
       </Head>
-      <form
-        className="min-h-screen"
-        onSubmit={(event) => {
-          event.preventDefault()
-
-          send({ type: 'EXEC', input: '' })
-        }}
-      >
-        <Strategy state={state} send={send} />
-        <Header state={state} />
-        <LazyBunch state={state} send={send} />
-      </form>
+      <DocumentLoaderProvider>
+        <MachineProvider>
+          <ExecForm>
+            <Strategy />
+            <Header />
+            <LazyBunch />
+          </ExecForm>
+        </MachineProvider>
+      </DocumentLoaderProvider>
       <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
         <a
           className="text-lg font-semibold"

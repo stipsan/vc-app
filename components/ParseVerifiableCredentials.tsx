@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function ParseVerifiableCredentials(props: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
-  const { send, state } = props
+export default function ParseVerifiableCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json } = state.context
   const parsing = state.matches('parsing')
   const editor = useStore((state) => state.editor)
@@ -17,10 +16,10 @@ export default function ParseVerifiableCredentials(props: {
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('fetching') || state.matches('demoing')) {
+    if (state.value === 'fetching' || state.value === 'demoing') {
       setLastUsedStrategy(false)
     }
-  }, [state])
+  }, [state.value])
 
   useEffect(() => {
     if (!parsing) {

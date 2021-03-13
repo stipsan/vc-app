@@ -1,19 +1,18 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import {
+  useMachineSelector,
+  useMachineSend,
+  useMachineState,
+} from '../lib/contexts'
 import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-function CounterfeitCredentialsRow({
-  id,
-  state,
-  send,
-}: {
-  id: string
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+function CounterfeitCredentialsRow({ id }: { id: string }) {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json, jsonld, verifiedCredentials } = state.context
   const jsonldStatus = jsonld.get(id)
   const verifiedCredentialStatus = verifiedCredentials.get(id)
@@ -132,15 +131,11 @@ function CounterfeitCredentialsRow({
   )
 }
 
-export default function CounterfeitCredentials({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function CounterfeitCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, counterfeitCredentials } = state.context
-  const isCurrent = state.matches('counterfeitingCredentials')
+  const isCurrent = state.value === 'counterfeitingCredentials'
 
   useEffect(() => {
     if (isCurrent && counterfeitCredentials.size === ids.length) {
@@ -152,12 +147,7 @@ export default function CounterfeitCredentials({
     return (
       <ReportRow>
         {ids.map((id) => (
-          <CounterfeitCredentialsRow
-            key={id}
-            id={id}
-            state={state}
-            send={send}
-          />
+          <CounterfeitCredentialsRow key={id} id={id} />
         ))}
       </ReportRow>
     )

@@ -2,6 +2,7 @@ import cx from 'classnames'
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useImmer } from 'use-immer'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
 import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
 import { Interpreter } from '../lib/stateMachine'
@@ -11,15 +12,13 @@ import ReportRow from './ReportRow'
 
 function VerifyCredentialsRow({
   id,
-  state,
-  send,
   documentLoader,
 }: {
   id: string
-  state: Interpreter['state']
-  send: Interpreter['send']
   documentLoader: DocumentLoader
 }) {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json, jsonld } = state.context
   const jsonldStatus = jsonld.get(id)
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
@@ -111,13 +110,9 @@ function VerifyCredentialsRow({
   )
 }
 
-export default function VerifyCredentials({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function VerifyCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, verifiedCredentials } = state.context
   const isCurrent = state.matches('verifyingCredentials')
   const [log, updateLog] = useImmer<LogsMap>(new Map())
@@ -145,8 +140,6 @@ export default function VerifyCredentials({
           <VerifyCredentialsRow
             key={id}
             id={id}
-            send={send}
-            state={state}
             documentLoader={documentLoader}
           />
         ))}

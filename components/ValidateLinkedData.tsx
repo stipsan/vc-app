@@ -2,6 +2,7 @@ import cx from 'classnames'
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useImmer } from 'use-immer'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { DocumentLoader, LogsMap } from '../lib/documentLoader'
 import { createDocumentLoaderWithLogs } from '../lib/documentLoader'
 import type { Interpreter } from '../lib/stateMachine'
@@ -11,16 +12,13 @@ import ReportRow from './ReportRow'
 
 function ValidateLinkedDataRow({
   id,
-  state,
-  send,
   documentLoader,
 }: {
   id: string
-  state: Interpreter['state']
-  send: Interpreter['send']
   documentLoader: DocumentLoader
 }) {
-  console.log('bloody ID stays the same between runs', id)
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json } = state.context
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
     'loading'
@@ -106,13 +104,9 @@ function ValidateLinkedDataRow({
   )
 }
 
-export default function ValidateLinkedData({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function ValidateLinkedData() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, jsonld } = state.context
   const isCurrent = state.matches('linkingData')
   const [log, updateLog] = useImmer<LogsMap>(new Map())
@@ -140,8 +134,6 @@ export default function ValidateLinkedData({
           <ValidateLinkedDataRow
             key={id}
             id={id}
-            send={send}
-            state={state}
             documentLoader={documentLoader}
           />
         ))}

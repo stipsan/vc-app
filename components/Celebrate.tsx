@@ -1,31 +1,32 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
-import useWindowSize from 'react-use/lib/useWindowSize'
-import { Interpreter } from '../lib/stateMachine'
+import { useMachineSelector } from '../lib/contexts'
 
-const Celebrate = (props: { state: Interpreter['state'] }) => {
-  const { state } = props
-  const { width, height } = useWindowSize()
-  const onceRef = useRef(false)
-  const success = state.matches('success')
+export default function Celebrate() {
+  const success = useMachineSelector(
+    useCallback((state) => state.value === 'success', [])
+  )
+  const [unmount, doUnmount] = useState(false)
 
   useEffect(() => {
     if (success) {
       return () => {
-        onceRef.current = true
+        setTimeout(() => doUnmount(true), 10000)
       }
     }
   }, [success])
 
-  if (success && !onceRef.current) {
-    return (
-      <div className="fixed top-0 left-0 z-20 pointer-events-none transform-gpu">
-        <Confetti recycle={false} width={width} height={height} />
-      </div>
-    )
+  if (unmount || !success) {
+    return null
   }
 
-  return null
+  return (
+    <div className="fixed top-0 left-0 z-20 pointer-events-none transform-gpu">
+      <Confetti
+        recycle={false}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+    </div>
+  )
 }
-
-export default Celebrate

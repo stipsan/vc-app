@@ -1,9 +1,10 @@
 import cx from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineState } from '../lib/contexts'
 
-function SubmitButton(props: { state: Interpreter['state'] }) {
+function SubmitButton() {
+  const state = useMachineState()
   const [mounted, setMounted] = useState(false)
   const [mountedComplete, setMountedComplete] = useState(false)
   useEffect(() => {
@@ -11,7 +12,7 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
     setTimeout(() => setMountedComplete(true), 150)
   }, [])
 
-  const loading = !['ready', 'success', 'failure'].some(props.state.matches)
+  const loading = !['ready', 'success', 'failure'].some(state.matches)
 
   return (
     <button
@@ -67,7 +68,8 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
   )
 }
 
-export default function Header({ state }: { state: Interpreter['state'] }) {
+export default function Header() {
+  const state = useMachineState()
   const loading = [
     'fetching',
     'linkingData',
@@ -121,7 +123,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
             { 'grid-rows-2': message }
           )}
         >
-          <SubmitButton state={state} />
+          <SubmitButton />
           {message && (
             <span
               className={cx('ml-3 md:ml-0 self-center', {

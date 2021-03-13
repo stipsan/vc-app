@@ -9,6 +9,7 @@ import {
 import cx from 'classnames'
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import Textarea from 'react-expanding-textarea'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 
@@ -31,7 +32,8 @@ function DemoStrategy() {
   )
 }
 
-function ParseStrategy({ state }: { state: Interpreter['state'] }) {
+function ParseStrategy() {
+  const state = useMachineState()
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const editingRef = useRef(false)
@@ -171,13 +173,8 @@ function AuthField({ loading }: { loading: boolean }) {
   )
 }
 
-function FetchStrategy({
-  send,
-  state,
-}: {
-  send: Interpreter['send']
-  state: Interpreter['state']
-}) {
+function FetchStrategy() {
+  const state = useMachineState()
   const loading = [
     'fetching',
     'linkingData',
@@ -209,7 +206,7 @@ function StrategyTab({
   index: number
   children: React.ReactNode
 }) {
-  const { selectedIndex, focusedIndex } = useTabsContext()
+  const { selectedIndex } = useTabsContext()
   return (
     <Tab
       className={cx(
@@ -226,13 +223,9 @@ function StrategyTab({
   )
 }
 
-export default function Strategy({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function Strategy() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const idle = ['ready', 'success', 'failure'].some(state.matches)
   const getIndex = useCallback((state: Interpreter['state']) => {
     switch (state.context.strategy) {
@@ -271,8 +264,8 @@ export default function Strategy({
       </TabList>
       <TabPanels className="mt-4">
         <DemoStrategy />
-        <ParseStrategy state={state} />
-        <FetchStrategy state={state} send={send} />
+        <ParseStrategy />
+        <FetchStrategy />
       </TabPanels>
     </Tabs>
   )

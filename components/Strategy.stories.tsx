@@ -24,13 +24,9 @@ export const Loadable = () => {
   hello.read(1, 2)
 
   return (
-    <div className="grid w-full">
-      <DynamicStrategy state={state} send={send} />
-      <StrategyLazy
-        // @ts-expect-error
-        state={state}
-        send={send}
-      />
+    <div className="grid grid-cols-3 grid-rows-3 gap-4">
+      <DynamicStrategy />
+      <StrategyLazy isLoading={true} />
     </div>
   )
 }

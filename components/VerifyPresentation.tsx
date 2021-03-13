@@ -5,14 +5,11 @@ import toast from 'react-hot-toast'
 import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 
-function VerifyPresentationRow({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+function VerifyPresentationRow() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json, jsonld, verifiedCredentials } = state.context
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
     'loading'
@@ -233,20 +230,15 @@ function VerifyPresentationRow({
   )
 }
 
-export default function VerifyPresentation({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function VerifyPresentation() {
+  const state = useMachineState()
   const { verifiedPresentation } = state.context
   const isCurrent = state.matches('verifyingPresentation')
 
   if (isCurrent || verifiedPresentation !== 'pending') {
     return (
       <ReportRow>
-        <VerifyPresentationRow state={state} send={send} />
+        <VerifyPresentationRow />
       </ReportRow>
     )
   }

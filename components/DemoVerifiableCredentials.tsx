@@ -1,24 +1,22 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function DemoVerifiableCredentials(props: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
-  const { send, state } = props
+export default function DemoVerifiableCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json } = state.context
   const demoing = state.matches('demoing')
   const [error, setError] = useState('')
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('parsing') || state.matches('fetching')) {
+    if (state.value === 'parsing' || state.value === 'fetching') {
       setLastUsedStrategy(false)
     }
-  }, [state])
+  }, [state.value])
 
   useEffect(() => {
     if (!demoing) {
@@ -31,6 +29,9 @@ export default function DemoVerifiableCredentials(props: {
     let cancelled = false
 
     Promise.all([
+      process.env.NODE_ENV !== 'production'
+        ? import('../fixtures.json')
+        : Promise.resolve({}),
       import('faker'),
       import('@transmute/did-key-ed25519'),
       import('@transmute/ed25519-signature-2018'),
@@ -40,6 +41,7 @@ export default function DemoVerifiableCredentials(props: {
     ])
       .then(
         async ([
+          tooMuchData,
           { default: faker },
           { Ed25519KeyPair },
           { Ed25519Signature2018 },
@@ -96,7 +98,10 @@ export default function DemoVerifiableCredentials(props: {
           })
 
           if (cancelled) return
-          send({ type: 'DEMO_SUCCESS', input: [verifiableCredential] })
+          send({
+            type: 'DEMO_SUCCESS',
+            input: [verifiableCredential].concat(tooMuchData),
+          })
         }
       )
       .catch((reason) => {
