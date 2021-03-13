@@ -3,6 +3,6 @@ export const Primary = () => (
 )
 
 export default {
-  title: 'Components/Button',
+  title: 'State Machine/01 Strategy',
   component: Primary,
 }

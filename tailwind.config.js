@@ -1,13 +1,15 @@
 const colors = require('tailwindcss/colors')
 
+const isStorybook = process.env.STORYBOOK === 'true'
+
 module.exports = {
   purge: [
     './pages/**/*.{ts,tsx}',
-    process.env.EXCLUDE_STORYBOOK === 'true'
-      ? './components/**/*!(.stories).{ts,tsx}'
-      : './components/**/*.{ts,tsx}',
+    isStorybook
+      ? './components/**/*.{ts,tsx}'
+      : './components/**/*!(.stories).{ts,tsx}',
   ],
-  darkMode: 'media',
+  darkMode: isStorybook ? 'class' : 'media',
   theme: {
     extend: {
       backgroundImage: {

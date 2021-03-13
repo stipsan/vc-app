@@ -1,14 +1,14 @@
 module.exports = {
   stories: ['../components/**/*.stories.tsx'],
-  addons: ['@storybook/addon-links', '@storybook/addon-essentials'],
-  /*
-  webpackFinal: async (config) => {
-    config.module.rules.push({
-      test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
-    })
-
-    return config
-  },
-  // */
+  addons: [
+    '@storybook/addon-links',
+    {
+      name: '@storybook/addon-essentials',
+      options: {
+        controls: false,
+        docs: false,
+      },
+    },
+    '@storybook/addon-postcss',
+  ],
 }

@@ -1,12 +1,12 @@
 {
   "scripts": {
     "dev": "next dev",
-    "build": "EXCLUDE_STORYBOOK=true next build",
+    "build": "next build",
     "test": "tsc --noEmit",
     "lint": "eslint . --ext ts,tsx,js,jsx --max-warnings 0",
     "start": "next start",
-    "storybook": "start-storybook -p 6006",
-    "storybook:build": "build-storybook"
+    "storybook": "STORYBOOK=true start-storybook -p 6006",
+    "storybook:build": "STORYBOOK=true build-storybook"
   },
   "dependencies": {
     "@reach/tabs": "^0.13.2",
@@ -69,6 +69,7 @@
     "postcss": "^8.2.7",
     "prettier": "^2.2.1",
     "prettier-package-json": "^2.1.3",
+    "storybook-dark-mode": "^1.0.7",
     "tailwindcss": "^2.0.3",
     "typescript": "^4.2.2"
   },
