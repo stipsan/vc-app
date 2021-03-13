@@ -1,13 +1,26 @@
 import cx from 'classnames'
+import type { GetStaticProps } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
+import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
+import resolveConfig from 'tailwindcss/resolveConfig'
 import ExecForm from '../components/ExecForm'
 import { Panel } from '../components/Formatted'
 import Header from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
 import Strategy from '../components/Strategy.Lazy'
 import { DocumentLoaderProvider, MachineProvider } from '../lib/contexts'
+import { useTheme } from '../lib/utils'
+import tailwindConfig from '../tailwind.config.js'
+console.log(tailwindConfig)
+export const getStaticProps: GetStaticProps = async () => {
+  // @ts-expect-error
+  const { theme } = resolveConfig(tailwindConfig)
+  return {
+    props: { theme }, // will be passed to the page component as props
+  }
+}
 
 // When React Suspense is stable we'll no longer need to specify both a Suspense boundary fallback
 // and a dynamic.loading. The single Suspense fallback will be enough
@@ -74,7 +87,11 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   },
 })
 
-export default function Index() {
+export default function Index({ theme }) {
+  const setTheme = useTheme((state) => state.set)
+  useEffect(() => {
+    setTheme(theme)
+  }, [])
   return (
     <>
       <Head>

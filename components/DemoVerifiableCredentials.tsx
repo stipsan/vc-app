@@ -9,9 +9,9 @@ import { useIdsList, useJsonMap } from '../lib/selectors'
 const work = createAsset(async () => {
   try {
     const tooMuchData =
-      process.env.NODE_ENV !== 'production'
+      process.env.NODE_ENV !== 'production' && false
         ? await import('../fixtures.json')
-        : {}
+        : null
     const { default: faker } = await import('faker')
     const { Ed25519KeyPair } = await import('@transmute/did-key-ed25519')
     const { Ed25519Signature2018 } = await import(
@@ -67,7 +67,10 @@ const work = createAsset(async () => {
       documentLoader,
     })
 
-    return { ok: true, data: [verifiableCredential].concat(tooMuchData) }
+    return {
+      ok: true,
+      data: [verifiableCredential].concat(tooMuchData).filter(Boolean),
+    }
   } catch (error) {
     return { ok: false, error }
   }

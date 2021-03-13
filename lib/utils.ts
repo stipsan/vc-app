@@ -32,6 +32,7 @@ import { unstable_batchedUpdates } from 'react-dom'
 
 import create from 'zustand'
 import type { State } from 'zustand';
+import type { TailwindConfig } from 'tailwindcss/tailwind-config'
 interface DocumentLoaderState extends State {
   documentLoader: typeof documentLoader,
   set: (next: typeof documentLoader) => void
@@ -42,6 +43,22 @@ export const documentLoaderStore = create<DocumentLoaderState>(set => ({
   set: documentLoader => set({documentLoader})
 }))
 export type DocumentLoader = typeof documentLoader
+
+export interface LogsState extends State {
+  urls: { [key: string]: 'loading' | Error | object }
+  set: (url: string, entry: 'loading' | object | Error) => void
+}
+
+
+interface ThemeLoaderState extends State {
+  theme:TailwindConfig,
+  set: (next: TailwindConfig) => void
+}
+
+export const useTheme = create<ThemeLoaderState>(set => ({
+  theme: undefined,
+  set: theme =>  set({theme,})
+}))
 
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }

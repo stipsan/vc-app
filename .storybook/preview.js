@@ -4,11 +4,15 @@ import { enableMapSet } from 'immer'
 import { Toaster } from 'react-hot-toast'
 import { MachineProvider } from '../lib/contexts'
 import 'tailwindcss/tailwind.css'
+import resolveConfig from 'tailwindcss/resolveConfig'
+import tailwindConfig from '../tailwind.config.js'
 import '../style.css'
+import { useTheme } from '../lib/utils'
 
 enableMapSet()
 
-import colors from 'tailwindcss/colors'
+const { theme } = resolveConfig(tailwindConfig)
+useTheme.setState({theme})
 
 /*
 const theme = require('tailwindcss/resolveConfig')(
@@ -34,7 +38,7 @@ const viewports = Object.keys(theme.theme.screens).reduce((viewport, name) => {
 
 console.log({ viewports, MINIMAL_VIEWPORTS })
 //*/
-
+console.log(theme)
 export const parameters = {
   layout: 'centered',
   //viewport: { viewports },
@@ -51,7 +55,7 @@ export const parameters = {
     dark: {
       ...themes.dark,
       //appContentBg: colors.coolGray[900],
-      appBg: colors.black,
+      appBg: themne.colors.gray.900,
     },
     light: { ...themes.normal },
     /*

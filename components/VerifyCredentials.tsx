@@ -19,9 +19,11 @@ const useLogs = create<LogsState>((set) => ({
 
 function VerifyCredentialsRow({
   id,
+  nu,
   documentLoader,
 }: {
   id: string
+  nu: string
   documentLoader: DocumentLoader
 }) {
   const send = useMachineSend()
@@ -62,7 +64,7 @@ function VerifyCredentialsRow({
         } else {
           setReadyState('error')
           setError(result.error)
-          toast.error(`${id} Failed verification`)
+          toast.error(`${nu} Failed verification`)
           send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
         }
         setExpanded(result)
@@ -72,7 +74,7 @@ function VerifyCredentialsRow({
         alert(true)
         setReadyState('error')
         setError(err)
-        toast.error(`${id} Failed verification`)
+        toast.error(`${nu} Failed verification`)
         send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
       })
 
@@ -103,7 +105,7 @@ function VerifyCredentialsRow({
           : 'default'
       }
     >
-      {ids.length > 1 ? `${id} ` : ''}
+      {ids.length > 1 ? `${nu} ` : ''}
       {message}
       {expanded && <SuperReadonlyTextarea value={JSON.stringify(expanded)} />}
       {readyState === 'error' && error && (
@@ -158,10 +160,11 @@ export default function VerifyCredentials() {
           log={log}
           updateLog={updateLog}
         />
-        {ids.map((id) => (
+        {ids.map((id, nu) => (
           <VerifyCredentialsRow
             key={id}
             id={id}
+            nu={`#${nu + 1}`}
             documentLoader={documentLoader}
           />
         ))}

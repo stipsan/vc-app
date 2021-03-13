@@ -17,9 +17,11 @@ const useLogs = create<LogsState>((set) => ({
 
 function ValidateLinkedDataRow({
   id,
+  nu,
   documentLoader,
 }: {
   id: string
+  nu: string
   documentLoader: DocumentLoader
 }) {
   const send = useMachineSend()
@@ -65,7 +67,7 @@ function ValidateLinkedDataRow({
         if (cancelled) return
         setReadyState('error')
         setError(err)
-        toast.error(`${id} Invalid JSON-LD`)
+        toast.error(`${nu} Invalid JSON-LD`)
         send({ type: 'LINKING_DATA_FAILURE', input: id })
       })
 
@@ -93,7 +95,7 @@ function ValidateLinkedDataRow({
           : 'default'
       }
     >
-      {ids.length > 1 ? `${id} ` : ''}
+      {ids.length > 1 ? `${nu} ` : ''}
       {message}
       {readyState === 'success' && expanded && (
         <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
@@ -150,10 +152,11 @@ export default function ValidateLinkedData() {
           log={log}
           updateLog={updateLog}
         />
-        {ids.map((id) => (
+        {ids.map((id, nu) => (
           <ValidateLinkedDataRow
             key={id}
             id={id}
+            nu={`#${nu + 1}`}
             documentLoader={documentLoader}
           />
         ))}

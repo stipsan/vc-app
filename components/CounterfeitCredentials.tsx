@@ -10,7 +10,7 @@ import { Interpreter } from '../lib/stateMachine'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-function CounterfeitCredentialsRow({ id }: { id: string }) {
+function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
   const send = useMachineSend()
   const state = useMachineState()
   const { ids, json, jsonld, verifiedCredentials } = state.context
@@ -60,7 +60,7 @@ function CounterfeitCredentialsRow({ id }: { id: string }) {
           if (result.verified) {
             setReadyState('failure')
             setExpanded(result.results)
-            toast.error(`${id} Failed to detect tampering`)
+            toast.error(`${nu} Failed to detect tampering`)
             send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
           } else {
             setReadyState('success')
@@ -73,7 +73,7 @@ function CounterfeitCredentialsRow({ id }: { id: string }) {
         if (cancelled) return
         setReadyState('error')
         setError(err)
-        toast.error(`${id} Failed to perform tampering check`)
+        toast.error(`${nu} Failed to perform tampering check`)
         send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
       })
 
@@ -111,7 +111,7 @@ function CounterfeitCredentialsRow({ id }: { id: string }) {
           : 'default'
       }
     >
-      {ids.length > 1 ? `${id} ` : ''}
+      {ids.length > 1 ? `${nu} ` : ''}
       {message}
       {readyState === 'success' && error && (
         <SuperReadonlyTextarea value={JSON.stringify(error)} />
@@ -146,8 +146,8 @@ export default function CounterfeitCredentials() {
   if (isCurrent || counterfeitCredentials.size) {
     return (
       <ReportRow>
-        {ids.map((id) => (
-          <CounterfeitCredentialsRow key={id} id={id} />
+        {ids.map((id, nu) => (
+          <CounterfeitCredentialsRow key={id} id={id} nu={`#${nu + 1}`} />
         ))}
       </ReportRow>
     )

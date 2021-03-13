@@ -60,7 +60,7 @@ function VerifyPresentationRow() {
 
           const documentLoader = async (url: string) => {
             console.warn(url.startsWith(key.controller), key.controller, url)
-            if (url.startsWith(key.controller) && false) {
+            if (url.startsWith(key.controller)) {
               return {
                 contextUrl: null,
                 document: {
@@ -109,7 +109,7 @@ function VerifyPresentationRow() {
             holder,
             documentLoader,
           })
-
+          /*
           presentation.verifiableCredential = presentation.verifiableCredential.map(
             (_, i) => {
               if (i % 2) return _
@@ -152,10 +152,12 @@ function VerifyPresentationRow() {
           if (presentationVerified.verified) {
             setReadyState('success')
             send({ type: 'VERIFIED_PRESENTATION_SUCCESS', input: id })
+            //Skip counterfeiting until implemented
+            send({ type: 'COUNTERFEIT_PRESENTATION_SUCCESS', input: id })
           } else {
             setReadyState('error')
             setError(presentationVerified.error)
-            toast.error(`${id} Failed verification`)
+            toast.error(` Failed verification`)
             send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
           }
         }
