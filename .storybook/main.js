@@ -5,10 +5,12 @@ module.exports = {
     {
       name: '@storybook/addon-essentials',
       options: {
+        backgrounds: false,
         controls: false,
         docs: false,
       },
     },
     '@storybook/addon-postcss',
+    'storybook-dark-mode',
   ],
 }

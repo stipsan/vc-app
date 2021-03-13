@@ -7,7 +7,8 @@ module.exports = {
     './pages/**/*.{ts,tsx}',
     isStorybook
       ? './components/**/*.{ts,tsx}'
-      : './components/**/*!(.stories).{ts,tsx}',
+      : // TODO https://github.com/FullHuman/purgecss/issues/158
+        './components/**/*!(.stories).{ts,tsx}',
   ],
   darkMode: isStorybook ? 'class' : 'media',
   theme: {

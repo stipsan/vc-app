@@ -1,3 +1,5 @@
+import { themes } from '@storybook/theming'
+
 import { enableMapSet } from 'immer'
 import { Toaster } from 'react-hot-toast'
 
@@ -5,6 +7,8 @@ import 'tailwindcss/tailwind.css'
 import '../style.css'
 
 enableMapSet()
+
+import colors from 'tailwindcss/colors'
 
 /*
 const theme = require('tailwindcss/resolveConfig')(
@@ -34,6 +38,27 @@ console.log({ viewports, MINIMAL_VIEWPORTS })
 export const parameters = {
   layout: 'centered',
   //viewport: { viewports },
+  darkMode: {
+    classTarget: 'html',
+    darkClass: 'dark',
+    lightClass: 'light',
+    stylePreview: true,
+    /*
+    current: window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light',
+      //*/
+    dark: {
+      ...themes.dark,
+      //appContentBg: colors.coolGray[900],
+      appBg: colors.black,
+    },
+    light: { ...themes.normal },
+    /*
+    // Override the default dark theme
+    // Override the default light theme
+    //*/
+  },
   options: {
     storySort: {
       method: 'alphabetical',
@@ -65,4 +90,5 @@ export const decorators = [
       <Toaster position="top-right" />
     </>
   ),
+  ,
 ]
