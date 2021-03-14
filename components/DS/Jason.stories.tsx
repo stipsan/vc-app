@@ -14,19 +14,21 @@ function Example({ exploded, value }: { exploded?: boolean; value: unknown }) {
   const [variant, setVariant] = useState('normal')
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-      <label className="inline-flex items-center">
-        Variant
-        <select
-          className="ml-2"
-          value={variant}
-          onChange={(event) => setVariant(event.target.value)}
-        >
-          {variants.map((variant) => (
-            <option key={variant}>{variant}</option>
-          ))}
-        </select>
-      </label>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {!exploded && (
+        <label className="inline-flex items-center">
+          Variant
+          <select
+            className="ml-2"
+            value={variant}
+            onChange={(event) => setVariant(event.target.value)}
+          >
+            {variants.map((variant) => (
+              <option key={variant}>{variant}</option>
+            ))}
+          </select>
+        </label>
+      )}
       <label className="inline-flex items-center">
         Quote properties
         <input
@@ -37,7 +39,11 @@ function Example({ exploded, value }: { exploded?: boolean; value: unknown }) {
         />
       </label>
 
-      <label className="inline-flex items-center">
+      <label
+        className={cx('inline-flex items-center', {
+          'md:col-span-2': exploded,
+        })}
+      >
         Sort keys
         <input
           className="ml-2"
@@ -47,7 +53,10 @@ function Example({ exploded, value }: { exploded?: boolean; value: unknown }) {
         />
       </label>
       {(exploded ? variants : [variant]).map((variant) => (
-        <div key={variant} className="sm:col-span-2 md:col-span-3">
+        <div
+          key={variant}
+          className={cx(exploded ? 'col-span-1' : 'col-span-4 md:col-span-6')}
+        >
           {[].concat(value).map((value, i) => (
             <div
               key={i}

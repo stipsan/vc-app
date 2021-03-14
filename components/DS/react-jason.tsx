@@ -1,76 +1,23 @@
+import { memo } from 'react'
 import { ReactJason } from 'react-jason'
 import type { JasonTheme } from 'react-jason'
-import { vscodeLight, vscodeDark } from 'react-jason/themes/index'
-import type { CSSProperties } from 'react'
 
-console.log({ vscodeLight, vscodeDark })
-
-export const sharedRoot: CSSProperties = {
-  fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-  fontFeatureSettings: '"liga" 0, "calt" 0',
-  lineHeight: '1.5em',
-  whiteSpace: 'pre',
-  margin: 0,
-}
-
-const dark = {
-  styles: {
-    root: Object.assign({}, sharedRoot, { backgroundColor: '#212121' }),
-    attribute: { color: '#a5e1ff' },
-    unquotedAttribute: { color: '#d9d9d9' },
-    string: { color: '#d49a81' },
-    nil: { color: '#5da8dd' },
-    number: { color: '#bed4b0' },
-    boolean: { color: '#5da8dd' },
-    punctuation: { color: '#d9d9d9' },
-  },
-}
-
-const light = {
-  styles: {
-    root: Object.assign({}, sharedRoot, { backgroundColor: '#fff' }),
-    attribute: { color: '#005db1' },
-    unquotedAttribute: { color: '#000' },
-    string: { color: '#ad0b04' },
-    nil: { color: '#141aff' },
-    number: { color: '#019162' },
-    boolean: { color: '#141aff' },
-    punctuation: { color: '#000' },
-  },
-}
-
-/**
- * export type TokenType =
-  | 'array'
-  | 'attribute'
-  | 'attributePair'
-  | 'boolean'
-  | 'nil'
-  | 'number'
-  | 'object'
-  | 'punctuation'
-  | 'quotation'
-  | 'root'
-  | 'string'
-  | 'unquotedAttribute'
-
-export type NodeType =
-  | 'array'
-  | 'attributePair'
-  | 'boolean'
-  | 'nil'
-  | 'number'
-  | 'object'
-  | 'string'
- */
+// TODO consider https://mac-s-g.github.io/react-json-view/demo/dist/ mode
 
 const twJasonTHeme: JasonTheme = {
   classes: {
     root: 'font-mono m-0 overflow-x-auto rounded-xl whitespace-pre',
+    attribute: 'text-blue-700 dark:text-blue-300',
+    unquotedAttribute: 'opacity-80 text-black dark:text-gray-100',
+    string: 'text-red-700 dark:text-red-300',
+    nil: 'text-blue-700 dark:text-blue-300',
+    number: 'text-green-700 dark:text-green-300',
+    boolean: 'text-blue-700 dark:text-blue-300',
+    punctuation: 'opacity-80 text-black dark:text-gray-100',
   },
 }
 
-export default function Jason({
+export default memo(function Jason({
   value,
   quoteAttributes = true,
   sortKeys = false,
@@ -81,10 +28,14 @@ export default function Jason({
 }) {
   return (
     <ReactJason
-      value={value}
+      value={
+        value instanceof Error
+          ? { name: value.name, message: value.message, stack: value.stack }
+          : value
+      }
       sortKeys={sortKeys}
       quoteAttributes={quoteAttributes}
       theme={twJasonTHeme}
     />
   )
-}
+})
