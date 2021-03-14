@@ -1,9 +1,10 @@
 import cx from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineState } from '../lib/contexts'
 
-function SubmitButton(props: { state: Interpreter['state'] }) {
+function SubmitButton() {
+  const state = useMachineState()
   const [mounted, setMounted] = useState(false)
   const [mountedComplete, setMountedComplete] = useState(false)
   useEffect(() => {
@@ -11,7 +12,7 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
     setTimeout(() => setMountedComplete(true), 150)
   }, [])
 
-  const loading = !['ready', 'success', 'failure'].some(props.state.matches)
+  const loading = !['ready', 'success', 'failure'].some(state.matches)
 
   return (
     <button
@@ -67,7 +68,8 @@ function SubmitButton(props: { state: Interpreter['state'] }) {
   )
 }
 
-export default function Header({ state }: { state: Interpreter['state'] }) {
+export default function Header() {
+  const state = useMachineState()
   const loading = [
     'fetching',
     'linkingData',
@@ -112,7 +114,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
     <>
       <header
         className={cx(
-          'sticky -top-2 -bottom-2 px-6 py-4 z-10 bg-gradient-to-t-to-b from-white dark:from-gray-900'
+          'sticky -top-2 -bottom-2 px-6 py-4 bg-gradient-to-t-to-b from-white dark:from-gray-900 z-50'
         )}
       >
         <div
@@ -121,10 +123,10 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
             { 'grid-rows-2': message }
           )}
         >
-          <SubmitButton state={state} />
+          <SubmitButton />
           {message && (
             <span
-              className={cx('self-center', {
+              className={cx('ml-3 md:ml-0 self-center', {
                 'text-gray-800 dark:text-gray-400': !failure && !success,
                 'text-red-800 dark:text-red-400': failure,
                 'text-green-800 dark:text-green-400': success,
@@ -135,7 +137,7 @@ export default function Header({ state }: { state: Interpreter['state'] }) {
           )}
         </div>
       </header>
-      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900" />
+      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900 z-40 pointer-events-none" />
     </>
   )
 }

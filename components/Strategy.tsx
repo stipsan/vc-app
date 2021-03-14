@@ -1,3 +1,4 @@
+import { unstable_batchedUpdates } from 'react-dom'
 import {
   Tab,
   TabList,
@@ -7,8 +8,15 @@ import {
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import Textarea from 'react-expanding-textarea'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 
@@ -31,7 +39,9 @@ function DemoStrategy() {
   )
 }
 
-function ParseStrategy({ state }: { state: Interpreter['state'] }) {
+function ParseStrategy() {
+  const state = useMachineState()
+  const [test, inc] = useState(0)
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const editingRef = useRef(false)
@@ -43,6 +53,9 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
     'counterfeitingCredentials',
   ].some(state.matches)
 
+  console.count('ParseStrategy render')
+  console.log(test)
+
   return (
     <StrategyPanel>
       <Textarea
@@ -52,12 +65,16 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
           'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity',
           { 'opacity-30 pointer-events-none': loading }
         )}
+        style={{ minHeight: '6rem' }}
         onFocus={() => {
           editingRef.current = true
         }}
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         onBlur={() => {
+          inc((i) => ++i)
+          inc((i) => ++i)
+          inc((i) => ++i)
           editingRef.current = false
           Promise.all([
             import('prettier/parser-babel'),
@@ -68,7 +85,11 @@ function ParseStrategy({ state }: { state: Interpreter['state'] }) {
             new Promise((resolve) => setTimeout(() => resolve(!0), 150)),
           ]).then(([{ default: babelParser }, { default: prettier }]) => {
             if (editingRef.current) return
-
+            unstable_batchedUpdates(() => {
+              inc((i) => ++i)
+              inc((i) => ++i)
+              inc((i) => ++i)
+            })
             setEditor(
               prettier
                 .format(editor, {
@@ -170,13 +191,8 @@ function AuthField({ loading }: { loading: boolean }) {
   )
 }
 
-function FetchStrategy({
-  send,
-  state,
-}: {
-  send: Interpreter['send']
-  state: Interpreter['state']
-}) {
+function FetchStrategy() {
+  const state = useMachineState()
   const loading = [
     'fetching',
     'linkingData',
@@ -208,7 +224,7 @@ function StrategyTab({
   index: number
   children: React.ReactNode
 }) {
-  const { selectedIndex, focusedIndex } = useTabsContext()
+  const { selectedIndex } = useTabsContext()
   return (
     <Tab
       className={cx(
@@ -225,13 +241,9 @@ function StrategyTab({
   )
 }
 
-export default function Strategy({
-  state,
-  send,
-}: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
+export default function Strategy() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const idle = ['ready', 'success', 'failure'].some(state.matches)
   const getIndex = useCallback((state: Interpreter['state']) => {
     switch (state.context.strategy) {
@@ -270,8 +282,8 @@ export default function Strategy({
       </TabList>
       <TabPanels className="mt-4">
         <DemoStrategy />
-        <ParseStrategy state={state} />
-        <FetchStrategy state={state} send={send} />
+        <ParseStrategy />
+        <FetchStrategy />
       </TabPanels>
     </Tabs>
   )

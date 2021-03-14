@@ -1,3 +1,4 @@
+import faker from 'faker'
 import dynamic from 'next/dynamic'
 import { useMachine } from '@xstate/react'
 import defaultMachine from '../lib/stateMachine'
@@ -9,19 +10,21 @@ const MachineViz = dynamic(
   { ssr: false }
 )
 
+let needle = 0
+
 export default function Viz() {
   const [state, send, service] = useMachine(defaultMachine)
 
-  console.log(state.event.type, state.event.input, state.context)
-  console.debug({
-    context: state.context,
-    value: state.value,
-    event: state.event,
-  })
+  console.group(state.event.type)
+  console.log('event.input', state.event.input)
+  console.log('state.value', state.value)
+  console.debug({ state })
+  console.log('...state.context', { ...state.context })
+  console.groupEnd()
 
   return (
     <>
-      <style>{`html,body,#__next{height:100%;width: 100%;font-size: 12px;}`}</style>
+      <style>{`html,body,#__next{height:100%;width: 100%;font-size: 10px;}`}</style>
       <MachineViz
         machine={defaultMachine}
         state={state}
@@ -34,15 +37,16 @@ export default function Viz() {
             case 'COUNTERFEIT_CREDENTIAL_FAILURE':
             case 'COUNTERFEIT_CREDENTIAL_SUCCESS':
               return send(event.eventType, {
-                input:
-                  state.context.ids[
-                    ~~(Math.random() * state.context.ids.length)
-                  ],
+                input: state.context.ids[needle++ % state.context.ids.length],
               })
             case 'DEMO_SUCCESS':
             case 'PARSE_SUCCESS':
             case 'FETCH_SUCCESS':
-              return send(event.eventType, { input: [{}] })
+              // uncomment this to test scenarios where *_COMPLETE events require multiple *_{SUCCESS|FAILURE} events to proceed
+              // return send(event.eventType, { input: [{}, {}, {}] })
+              return send(event.eventType, {
+                input: [{ name: faker.name.findName() }],
+              })
             default:
               // @ts-expect-error
               return send(event.eventType, { input: {} })

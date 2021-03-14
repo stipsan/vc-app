@@ -1,8 +1,16 @@
 const colors = require('tailwindcss/colors')
 
+const isStorybook = process.env.STORYBOOK === 'true'
+
 module.exports = {
-  purge: ['./pages/**/*.{js,ts,jsx,tsx}', './components/**/*.{js,ts,jsx,tsx}'],
-  darkMode: 'media',
+  purge: [
+    './pages/**/*.{ts,tsx}',
+    isStorybook
+      ? './components/**/*.{ts,tsx}'
+      : // TODO https://github.com/FullHuman/purgecss/issues/158
+        './components/**/*!(.stories).{ts,tsx}',
+  ],
+  darkMode: isStorybook ? 'class' : 'media',
   theme: {
     extend: {
       backgroundImage: {
@@ -39,5 +47,5 @@ module.exports = {
       textOpacity: ['focus-visible'],
     },
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/line-clamp')],
 }

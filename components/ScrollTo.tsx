@@ -1,41 +1,33 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed'
-import { Interpreter } from '../lib/stateMachine'
+import { useMachineSelector } from '../lib/contexts'
 
-export default function ScrollTo({ state }: { state: Interpreter['state'] }) {
+export default function ScrollTo() {
+  // TODO replace with logic that observes when things load before the fold, and show a down arrow that can be clicked
+  //      offer a checkbox to opt-out of auto scroll
+  const value = useMachineSelector(useCallback((state) => state.value, []))
   const nodeRef = useRef()
-  const fetching = state.matches('fetching')
-  const linkingData = state.matches('linkingData')
-  const verifyingCredentials = state.matches('verifyingCredentials')
-  const counterfeitingCredentials = state.matches('counterfeitingCredentials')
-  const failure = state.matches('failure')
-  const success = state.matches('success')
 
   useEffect(() => {
-    switch (true) {
-      case fetching:
-      case linkingData:
-      case verifyingCredentials:
-      case counterfeitingCredentials:
-      case failure:
-      case success:
+    switch (value) {
+      case 'linkingData':
+      case 'verifyingCredentials':
+      case 'counterfeitingCredentials':
+      case 'verifyingPresentation':
+      case 'counterfeitingPresentation':
+      case 'failure':
+      case 'success':
         return (
           nodeRef.current &&
           scrollIntoView(nodeRef.current, {
             behavior: 'smooth',
             scrollMode: 'if-needed',
             block: 'nearest',
-          })
+          }) &&
+          console.log('scrolled')
         )
     }
-  }, [
-    fetching,
-    linkingData,
-    verifyingCredentials,
-    counterfeitingCredentials,
-    failure,
-    success,
-  ])
+  }, [value])
 
   return <span ref={nodeRef} />
 }

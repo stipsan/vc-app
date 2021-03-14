@@ -1,9 +1,29 @@
+import {jsonChecksum} from '../lib/utils'
 import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
-  createMachine,
   Interpreter as MachineInterpreter,
+  Machine,
   State as MachineState,
 } from 'xstate'
+
+// TODO rename this to the Progress Machine, as that's it's job.
+
+interface MachineSchema {
+  states: {
+    ready: {};
+    failure: {};
+    demoing: {},
+    parsing: {},
+    fetching: {},
+    linkingData: {},
+    verifyingCredentials: {},
+    counterfeitingCredentials:{},
+    verifyingPresentation:{},
+    counterfeitingPresentation: {},
+    success: {}
+  };
+}
+export type StateValue = keyof MachineSchema['states']
 
 interface Context {
   strategy: 'demo' | 'parse' | 'fetch'
@@ -14,31 +34,9 @@ interface Context {
   jsonld: Map<string, 'success' | 'failure'>
   verifiedCredentials: Map<string, 'success' | 'failure'>
   counterfeitCredentials: Map<string, 'success' | 'failure'>
+  verifiedPresentation: 'success' | 'failure' | 'pending'
+  counterfeitPresentation: 'success' | 'failure' | 'pending'
 }
-
-/**
- * Control flow states
- * ready
- * fetching | parsing | uploading
- * linkingData
- * verifyingCredentials
- * counterfeitingCredentials
- * creatingPresentation (with all the vcs) https://github.com/transmute-industries/vc.js/blob/43440d7465fe6126460e89be3db6267c90c3bac5/packages/web-app-smoke-tester/src/test-ld.js#L33-L40
- * signingPresentation (with all the vcs) https://github.com/transmute-industries/vc.js/blob/43440d7465fe6126460e89be3db6267c90c3bac5/packages/web-app-smoke-tester/src/test-ld.js#L42-L47
- * verifyingPresentation https://github.com/transmute-industries/vc.js/blob/43440d7465fe6126460e89be3db6267c90c3bac5/packages/web-app-smoke-tester/src/test-ld.js#L49-L55
- * counterfeitingPresentation (adding a bogus credential)
- * success
- * failure
- */
-
-/**
- * Context
- * items: [#1, #2, #3]
- * json: Map<#1, {}>()
- * jsonld: Map<#1, 'success' | 'failure'>()
- * verifiedCredentials: Map<#1, 'success' | 'failure'>()
- * counterfeitCredentials: Map<#1, 'success' | 'failure'>()
- */
 
 type ExecEvent = ImmerUpdateEvent<'EXEC'>
 type DemoEvent = ImmerUpdateEvent<'DEMO'>
@@ -80,6 +78,22 @@ type CounterfeitCredentialCompleteEvent = ImmerUpdateEvent<
   'COUNTERFEIT_CREDENTIAL_COMPLETE',
   string
 >
+type VerifiedPresentationSuccessEvent = ImmerUpdateEvent<
+  'VERIFIED_PRESENTATION_SUCCESS',
+  string
+>
+type VerifiedPresentationFailureEvent = ImmerUpdateEvent<
+  'VERIFIED_PRESENTATION_FAILURE',
+  string
+>
+type CounterfeitPresentationSuccessEvent = ImmerUpdateEvent<
+  'COUNTERFEIT_PRESENTATION_SUCCESS',
+  string
+>
+type CounterfeitPresentationFailureEvent = ImmerUpdateEvent<
+  'COUNTERFEIT_PRESENTATION_FAILURE',
+  string
+>
 
 export type MachineEvent =
   | ExecEvent
@@ -101,6 +115,10 @@ export type MachineEvent =
   | CounterfeitCredentialFailureEvent
   | CounterfeitCredentialSuccessEvent
   | CounterfeitCredentialCompleteEvent
+  | VerifiedPresentationFailureEvent
+  | VerifiedPresentationSuccessEvent
+  | CounterfeitPresentationFailureEvent
+  | CounterfeitPresentationSuccessEvent
 
 const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
   ctx.status =
@@ -119,6 +137,8 @@ const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
   ctx.jsonld.clear()
   ctx.verifiedCredentials.clear()
   ctx.counterfeitCredentials.clear()
+  ctx.verifiedPresentation = 'pending'
+  ctx.counterfeitPresentation = 'pending'
 })
 
 const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
@@ -126,9 +146,11 @@ const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -138,9 +160,11 @@ const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -150,9 +174,11 @@ const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
   (ctx, { input }) => {
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
-      const id = `#${i + 1}`
-      ctx.ids.push(id)
-      ctx.json.set(id, item)
+      const id = jsonChecksum(item)
+      if(!ctx.json.has(id)) {
+        ctx.ids.push(id)
+        ctx.json.set(id, item)
+      }
     })
   }
 )
@@ -212,7 +238,7 @@ const counterfeitCredentialSuccess = createUpdater<
 export type State = MachineState<Context, MachineEvent>
 export type Interpreter = MachineInterpreter<Context, State, MachineEvent>
 
-export default createMachine<Context, MachineEvent>({
+const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
   context: {
     strategy: 'demo',
     count: 0,
@@ -222,6 +248,8 @@ export default createMachine<Context, MachineEvent>({
     jsonld: new Map(),
     verifiedCredentials: new Map(),
     counterfeitCredentials: new Map(),
+    verifiedPresentation: 'pending',
+    counterfeitPresentation: 'pending',
   },
   initial: 'ready',
   states: {
@@ -362,7 +390,14 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.jsonld.has(id))
             },
-            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Verifying Credential...' : 'Verifying Credentials...')),
+            actions: assign(
+              (ctx) =>
+                (ctx.status =
+                  [...ctx.jsonld.values()].filter((_) => _ === 'success')
+                    .length === 1
+                    ? 'Verifying Credential...'
+                    : 'Verifying Credentials...')
+            ),
             target: 'verifyingCredentials',
           },
         ],
@@ -396,7 +431,14 @@ export default createMachine<Context, MachineEvent>({
             cond: function allSettled(ctx) {
               return ctx.ids.every((id) => ctx.verifiedCredentials.has(id))
             },
-            actions: assign((ctx) => (ctx.status = [...ctx.jsonld.values()].filter(_ => _ === 'success').length === 1 ? 'Counterfeiting Credential...' : 'Counterfeiting Credentials...')),
+            actions: assign(
+              (ctx) =>
+                (ctx.status =
+                  [...ctx.jsonld.values()].filter((_) => _ === 'success')
+                    .length === 1
+                    ? 'Counterfeiting Credential...'
+                    : 'Counterfeiting Credentials...')
+            ),
             target: 'counterfeitingCredentials',
           },
         ],
@@ -431,17 +473,53 @@ export default createMachine<Context, MachineEvent>({
               return ctx.ids.every((id) => ctx.counterfeitCredentials.has(id))
             },
             actions: assign((ctx) => {
+              ctx.status = 'Verifying Presentation...'
+            }),
+            target: 'verifyingPresentation',
+          },
+        ],
+      },
+    },
+    verifyingPresentation: {
+      on: {
+        VERIFIED_PRESENTATION_FAILURE: {
+          actions: assign((ctx) => {
+            ctx.status = 'Verification failed!'
+            ctx.verifiedPresentation = 'failure'
+          }),
+          target: 'failure',
+        },
+        VERIFIED_PRESENTATION_SUCCESS: [
+          {
+            actions: assign((ctx) => {
+              ctx.status = 'Counterfeiting Presentation...'
+              ctx.verifiedPresentation = 'success'
+            }),
+            target: 'counterfeitingPresentation',
+          },
+        ],
+      },
+    },
+    counterfeitingPresentation: {
+      on: {
+        COUNTERFEIT_PRESENTATION_FAILURE: {
+          actions: assign((ctx) => {
+            ctx.status = 'Verification failed!'
+            ctx.counterfeitPresentation = 'failure'
+          }),
+          target: 'failure',
+        },
+        COUNTERFEIT_PRESENTATION_SUCCESS: [
+          {
+            actions: assign((ctx) => {
               ctx.status = 'Verification successful!'
+              ctx.counterfeitPresentation = 'success'
             }),
             target: 'success',
           },
         ],
       },
     },
-    //creatingPresentation: {},
-    //signingPresentation: {},
-    //verifyingPresentation: {},
-    //counterfeitingPresentation: {},
     success: {
       on: {
         DEMO: {
@@ -489,3 +567,5 @@ export default createMachine<Context, MachineEvent>({
     },
   },
 })
+
+export default stateMachine

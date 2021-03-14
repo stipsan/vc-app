@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function ParseVerifiableCredentials(props: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
-  const { send, state } = props
+export default function ParseVerifiableCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json } = state.context
   const parsing = state.matches('parsing')
   const editor = useStore((state) => state.editor)
@@ -17,10 +16,10 @@ export default function ParseVerifiableCredentials(props: {
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('fetching') || state.matches('demoing')) {
+    if (state.value === 'fetching' || state.value === 'demoing') {
       setLastUsedStrategy(false)
     }
-  }, [state])
+  }, [state.value])
 
   useEffect(() => {
     if (!parsing) {
@@ -32,13 +31,19 @@ export default function ParseVerifiableCredentials(props: {
 
     try {
       const data = JSON.parse(editor)
-      const items = [].concat(data?.items || data)
+      const items = [].concat(data?.verifiableCredential || data?.items || data)
 
       if (!items.length) {
         throw new Error(`Failed to find Verifiable Credentials in the editor`)
       }
 
-      send({ type: 'PARSE_SUCCESS', input: items })
+      send({
+        type: 'PARSE_SUCCESS',
+        input: items.map((item) => {
+          if ('verifiableCredential' in item) return item.verifiableCredential
+          return item
+        }),
+      })
     } catch (err) {
       send({
         type: 'PARSE_FAILURE',
@@ -66,7 +71,7 @@ export default function ParseVerifiableCredentials(props: {
       return (
         <ReportRow readyState="success">
           <Panel variant="success">
-            Found <strong className="font-bold">{ids.length}</strong>
+            Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}

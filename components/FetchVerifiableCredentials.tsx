@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-export default function FetchVerifiableCredentials(props: {
-  state: Interpreter['state']
-  send: Interpreter['send']
-}) {
-  const { send, state } = props
+export default function FetchVerifiableCredentials() {
+  const send = useMachineSend()
+  const state = useMachineState()
   const { ids, json } = state.context
   const fetching = state.matches('fetching')
   const auth = useStore((state) => state.auth)
@@ -18,10 +16,10 @@ export default function FetchVerifiableCredentials(props: {
   const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
 
   useEffect(() => {
-    if (state.matches('parsing') || state.matches('demoing')) {
+    if (state.value === 'parsing' || state.value === 'demoing') {
       setLastUsedStrategy(false)
     }
-  }, [state])
+  }, [state.value])
 
   useEffect(() => {
     if (!fetching) {
@@ -42,7 +40,9 @@ export default function FetchVerifiableCredentials(props: {
         const data = await response.json()
         if (cancelled) return
 
-        const items = [].concat(data?.items || data)
+        const items = [].concat(
+          data?.verifiableCredential || data?.items || data
+        )
 
         if (!items.length) {
           throw new Error(
@@ -88,7 +88,7 @@ export default function FetchVerifiableCredentials(props: {
       return (
         <ReportRow readyState="success">
           <Panel variant="success">
-            Found <strong className="font-bold">{ids.length}</strong>
+            Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}

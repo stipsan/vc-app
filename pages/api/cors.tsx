@@ -1,20 +1,56 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
+import fetch from 'node-fetch'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const [url] = [].concat(req.query.url)
-  const proxy = await fetch(url, {
+  if (!req.query.url) {
+    res.status(400)
+    return res.send('Invalid URL: undefined')
+  }
+
+  let [url] = [].concat(req.query.url)
+  try {
+    url = new URL(url)
+  } catch {
+    res.status(400)
+    return res.send('Invalid URL')
+  }
+
+  const proxyRes = await fetch(url.toString(), {
+    method: req.method,
     // @ts-expect-error
-    headers: {
-      authorization: req.headers.authorization,
-      accept: req.headers.accept,
-      'user-agent': req.headers['user-agent'],
-      'accept-encoding': req.headers['accept-encoding'],
-    },
+    headers: Object.assign(
+      { 'x-forwarded-host': req.headers.host },
+      req.headers,
+      { host: url.host }
+    ),
+    //body: req,
+    compress: false,
+    redirect: 'manual',
   })
 
-  Object.entries(proxy.headers).forEach(([key, value]) => {
-    res.setHeader(key, value)
+  // Forward status code
+  res.statusCode = proxyRes.status
+
+  // Forward headers
+  const headers = proxyRes.headers.raw()
+  for (const key of Object.keys(headers)) {
+    res.setHeader(key, headers[key])
+  }
+  if (res.hasHeader('location')) {
+    const [location] = [].concat(res.getHeader('location'))
+    res.setHeader('Location', `/api/cors?url=${location}`)
+  }
+
+  // Stream the proxy response
+  proxyRes.body.pipe(res)
+  proxyRes.body.on('error', (err) => {
+    console.error(`Error on proxying url: ${url}`)
+    console.error(err.stack)
+    res.end()
   })
 
-  res.status(proxy.status).send(proxy.body)
+  req.on('abort', () => {
+    // @ts-expect-error
+    proxyRes.body.destroy()
+  })
 }
