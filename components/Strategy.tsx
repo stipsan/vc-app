@@ -261,7 +261,7 @@ export default function Strategy() {
 
   return (
     <Tabs
-      className="px-6 pt-8"
+      className="px-4 md:px-6 pt-8"
       index={getIndex(state)}
       onChange={(index) => {
         switch (index) {

@@ -34,8 +34,8 @@ export function StrategyLazy({
   timedOut?: boolean
 }) {
   const tClassName =
-    'px-6 pt-8 flex flex-initial items-center transition-opacity'
-  const bClassName = 'mx-6 mt-4 transition-colors'
+    'px-4 md:px-6 pt-8 flex flex-initial items-center transition-opacity'
+  const bClassName = 'mx-4 md:mx-6 mt-4 transition-colors'
   switch (true) {
     case !!error:
     case timedOut:

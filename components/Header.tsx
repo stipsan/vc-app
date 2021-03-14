@@ -18,7 +18,7 @@ function SubmitButton() {
     <button
       type={mounted ? 'submit' : 'button'}
       className={cx(
-        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50',
+        'relative focus:outline-none border border-transparent group flex items-center justify-center rounded-md text-base font-medium px-4 md:px-6 h-10 md:place-self-end focus-visible:bg-blue-200 dark:focus-visible:bg-blue-800 focus-visible:ring focus-visible:ring-blue-100 dark:focus-visible:ring-blue-900 focus-visible:ring-opacity-50',
         {
           'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 cursor-wait': loading,
           'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-800 dark:hover:text-blue-200 active:bg-blue-300 dark:active:bg-blue-700': !loading,
@@ -116,7 +116,7 @@ export default function Header() {
     <>
       <header
         className={cx(
-          'sticky -top-2 -bottom-2 px-6 py-4 bg-gradient-to-t-to-b from-white dark:from-gray-900 z-50'
+          'sticky -top-2 -bottom-2 px-4 md:px-6 py-4 bg-gradient-to-t-to-b from-white dark:from-gray-900 z-50'
         )}
       >
         <div
@@ -139,7 +139,7 @@ export default function Header() {
           )}
         </div>
       </header>
-      <div className="sticky bottom-0 top-0 h-6 -mt-6 bg-white dark:bg-gray-900 z-40 pointer-events-none" />
+      <div className="sticky bottom-0 top-0 h-6 -mt-4 nd:-mt-6 bg-white dark:bg-gray-900 z-40 pointer-events-none" />
     </>
   )
 }

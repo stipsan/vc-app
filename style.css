@@ -6,6 +6,11 @@ html {
   scroll-padding-top: 6rem;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     background: theme('colors.gray.900');

@@ -32,7 +32,7 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   delay: 3000,
   timeout: 10000,
   loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
-    const className = 'mx-6 mt-4 transition-colors'
+    const className = 'mx-4 md:mx-6 mt-4 transition-colors'
     switch (true) {
       case !!error:
       case timedOut:
@@ -107,7 +107,7 @@ export default function Index({ theme }) {
           </ExecForm>
         </MachineProvider>
       </DocumentLoaderProvider>
-      <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
+      <footer className="bg-gradient-to-t from-gray-200 dark:from-gray-800 py-10 px-4 md:px-6 grid place-items-center opacity-50 transition-opacity hover:opacity-100 active:opacity-100 focus-within:opacity-100">
         <a
           className="text-lg font-semibold"
           href="https://github.com/stipsan/vc-app"
