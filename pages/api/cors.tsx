@@ -2,8 +2,19 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import fetch from 'node-fetch'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const [queryUrl] = [].concat(req.query.url)
-  const url = new URL(queryUrl)
+  if (!req.query.url) {
+    res.status(400)
+    return res.send('Invalid URL: undefined')
+  }
+
+  let [url] = [].concat(req.query.url)
+  try {
+    url = new URL(url)
+  } catch {
+    res.status(400)
+    return res.send('Invalid URL')
+  }
+
   const proxyRes = await fetch(url.toString(), {
     method: req.method,
     // @ts-expect-error
