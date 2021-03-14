@@ -1,18 +1,19 @@
 import { themes } from '@storybook/theming'
-
+import { transparentize, darken } from 'polished'
 import { enableMapSet } from 'immer'
 import { Toaster } from 'react-hot-toast'
 import { MachineProvider } from '../lib/contexts'
 import 'tailwindcss/tailwind.css'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from '../tailwind.config.js'
-import '../style.css'
+import './style.css'
 import { useTheme } from '../lib/utils'
 
 enableMapSet()
 
-const { theme } = resolveConfig(tailwindConfig)
-useTheme.setState({theme})
+const config = resolveConfig(tailwindConfig)
+const { theme } = config
+useTheme.setState({ theme })
 
 /*
 const theme = require('tailwindcss/resolveConfig')(
@@ -38,7 +39,14 @@ const viewports = Object.keys(theme.theme.screens).reduce((viewport, name) => {
 
 console.log({ viewports, MINIMAL_VIEWPORTS })
 //*/
-console.log(theme)
+console.log(
+  config,
+  'verify storybook claim',
+  theme.colors.gray[900],
+  themes.normal,
+  transparentize(0.9, theme.colors.gray[900])
+)
+console.warn(themes.dark)
 export const parameters = {
   layout: 'centered',
   //viewport: { viewports },
@@ -54,8 +62,10 @@ export const parameters = {
       //*/
     dark: {
       ...themes.dark,
-      //appContentBg: colors.coolGray[900],
-      appBg: themne.colors.gray.900,
+      appBg: darken(0.01, theme.colors.gray[900]),
+      appContentBg: theme.colors.gray[900],
+      barBg: darken(0.015, theme.colors.gray[900]),
+      barSelectedColor: theme.colors.blue[600],
     },
     light: { ...themes.normal },
     /*

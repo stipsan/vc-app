@@ -60,6 +60,7 @@ export const useTheme = create<ThemeLoaderState>(set => ({
   set: theme =>  set({theme,})
 }))
 
+
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }
   set: (url: string, entry: 'loading' | object | Error) => void

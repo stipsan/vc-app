@@ -13,7 +13,7 @@ import Strategy from '../components/Strategy.Lazy'
 import { DocumentLoaderProvider, MachineProvider } from '../lib/contexts'
 import { useTheme } from '../lib/utils'
 import tailwindConfig from '../tailwind.config.js'
-console.log(tailwindConfig)
+
 export const getStaticProps: GetStaticProps = async () => {
   // @ts-expect-error
   const { theme } = resolveConfig(tailwindConfig)
@@ -92,6 +92,7 @@ export default function Index({ theme }) {
   useEffect(() => {
     setTheme(theme)
   }, [])
+  console.warn(theme)
   return (
     <>
       <Head>
