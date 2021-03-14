@@ -97,7 +97,7 @@ function LogRow({
       <div className="sticky top-16 md:top-10 h-9 md:h-7 -mb-9 md:-mb-7 rounded-sm bg-white dark:bg-gray-900 z-20  pointer-events-none" />
       <div
         className={cx(
-          'px-3 py-2 flex break-words items-center sticky top-24 md:top-16 z-30 rounded-sm bg-green-50 dark:bg-green-900'
+          'px-3 py-2 flex break-words items-center sticky top-24 md:top-14 z-30 rounded-sm bg-green-50 dark:bg-green-900'
         )}
       >
         <svg
