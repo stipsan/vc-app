@@ -1,12 +1,12 @@
 import cx from 'classnames'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import create from 'zustand'
 import { useMachineSend, useMachineState } from '../lib/contexts'
+import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import create from 'zustand'
-import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
 
 const useLogs = create<LogsState>((set) => ({
   urls: {},
@@ -75,6 +75,7 @@ function ValidateLinkedDataRow({
       cancelled = true
       console.warn('JSON-LD validation cancelled')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const message =
@@ -134,6 +135,7 @@ export default function ValidateLinkedData() {
         throw err
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [updateLog]
   )
   console.log('ValidateLinkedData', { log })
@@ -142,6 +144,7 @@ export default function ValidateLinkedData() {
     if (isCurrent && jsonld.size === ids.length) {
       send({ type: 'LINKING_DATA_COMPLETE', input: '' })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrent, jsonld.size, ids.length])
 
   if (isCurrent || jsonld.size) {

@@ -1,9 +1,7 @@
 import cx from 'classnames'
-import { Panel, useListFormat, ReadonlyTextarea } from './Formatted'
-import type { LogsMap } from '../lib/documentLoader'
-import { useLayoutEffect, useMemo, useState } from 'react'
-import type { Draft } from 'immer'
-import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
+import { useMemo, useState } from 'react'
+import { LogsState } from '../lib/utils'
+import { Panel, ReadonlyTextarea, useListFormat } from './Formatted'
 
 function LogRow({
   url,

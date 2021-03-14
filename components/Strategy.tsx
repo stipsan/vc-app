@@ -1,4 +1,3 @@
-import { unstable_batchedUpdates } from 'react-dom'
 import {
   Tab,
   TabList,
@@ -15,6 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import { unstable_batchedUpdates } from 'react-dom'
 import Textarea from 'react-expanding-textarea'
 import { useMachineSend, useMachineState } from '../lib/contexts'
 import type { Interpreter } from '../lib/stateMachine'
@@ -124,6 +124,7 @@ function UrlField({ loading }: { loading: boolean }) {
   const url = useStore((state) => state.url)
 
   useLayoutEffect(() => {
+    // eslint-disable-next-line no-restricted-globals
     const searchParams = new URLSearchParams(location.search)
     if (searchParams.has('url')) {
       try {
@@ -133,6 +134,7 @@ function UrlField({ loading }: { loading: boolean }) {
         // we ignore any URL parser errors
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -168,6 +170,7 @@ function AuthField({ loading }: { loading: boolean }) {
         // we ignore any URL parser errors
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

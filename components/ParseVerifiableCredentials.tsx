@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { Interpreter } from '../lib/stateMachine'
 import { useStore } from '../lib/useStore'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -52,7 +51,7 @@ export default function ParseVerifiableCredentials() {
       toast.error(`Failed finding Verifiable Credentials in the editor`)
       setError(err)
     }
-  }, [parsing, editor])
+  }, [parsing, editor, send])
 
   switch (true) {
     case !lastUsedStrategy && !state.matches('parsing'):

@@ -1,14 +1,12 @@
 import cx from 'classnames'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useImmer } from 'use-immer'
+import create from 'zustand'
 import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { LogsMap } from '../lib/documentLoader'
+import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import { documentLoaderStore, DocumentLoader, LogsState } from '../lib/utils'
-import create from 'zustand'
 
 const useLogs = create<LogsState>((set) => ({
   urls: {},
@@ -81,6 +79,7 @@ function VerifyCredentialsRow({
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const message =
@@ -142,6 +141,7 @@ export default function VerifyCredentials() {
         throw err
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [updateLog]
   )
   console.log('VerifyCredentials', { log })
@@ -150,6 +150,7 @@ export default function VerifyCredentials() {
     if (isCurrent && verifiedCredentials.size === ids.length) {
       send({ type: 'VERIFIED_CREDENTIAL_COMPLETE', input: '' })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrent, verifiedCredentials.size, ids.length])
 
   if (isCurrent || verifiedCredentials.size) {

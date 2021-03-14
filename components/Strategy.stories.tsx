@@ -20,11 +20,11 @@ export const Loadable = () => {
 
   console.log('once')
   hello.read(1, 2)
-  const [load, ssetLoade] = useState(false)
-  console.log('twice')
+  const [load, setLoad] = useState(false)
+  console.log('twice', load, setLoad)
   hello.read(2, 3)
   const [state, send, service] = useMachine(defaultMachine)
-  console.log('thrice')
+  console.log('thrice', state, send, service)
   hello.read(1, 2)
 
   return (

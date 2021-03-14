@@ -3,7 +3,8 @@
     "dev": "next dev",
     "build": "next build",
     "test": "tsc --noEmit",
-    "lint": "eslint . --ext ts,tsx,js,jsx --max-warnings 0",
+    "lint": "eslint . --ext ts,tsx,js,jsx",
+    "lint:strict": "npm run lint -- --max-warnings 0",
     "start": "next start",
     "storybook": "STORYBOOK=true start-storybook -p 6006",
     "storybook:build": "STORYBOOK=true build-storybook"

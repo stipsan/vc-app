@@ -1,12 +1,7 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import {
-  useMachineSelector,
-  useMachineSend,
-  useMachineState,
-} from '../lib/contexts'
-import { Interpreter } from '../lib/stateMachine'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
@@ -80,6 +75,7 @@ function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const message =
@@ -141,7 +137,7 @@ export default function CounterfeitCredentials() {
     if (isCurrent && counterfeitCredentials.size === ids.length) {
       send({ type: 'COUNTERFEIT_CREDENTIAL_COMPLETE', input: '' })
     }
-  }, [isCurrent, counterfeitCredentials.size, ids.length])
+  }, [isCurrent, counterfeitCredentials.size, ids.length, send])
 
   if (isCurrent || counterfeitCredentials.size) {
     return (

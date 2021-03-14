@@ -69,7 +69,7 @@ export default function FetchVerifiableCredentials() {
     return () => {
       cancelled = true
     }
-  }, [fetching, url, auth])
+  }, [fetching, url, auth, send])
 
   switch (true) {
     case !lastUsedStrategy && !state.matches('fetching'):

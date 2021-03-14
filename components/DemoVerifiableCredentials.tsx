@@ -1,10 +1,10 @@
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { createAsset } from 'use-asset'
 import { useMachineSend, useMachineState } from '../lib/contexts'
+import { useIdsList, useJsonMap } from '../lib/selectors'
 import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import { createAsset } from 'use-asset'
-import { useIdsList, useJsonMap } from '../lib/selectors'
 
 const work = createAsset(async () => {
   try {
@@ -38,13 +38,11 @@ const work = createAsset(async () => {
           type: 'BachelorDegree',
           name: `Bachelor of ${faker.company
             .bsNoun()
-            .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
+            .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) =>
               _.toUpperCase()
             )} and ${faker.company
             .bsNoun()
-            .replace(/(^\w{1})|(\s+\w{1})|(\-\w{1})/g, (_) =>
-              _.toUpperCase()
-            )}`,
+            .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) => _.toUpperCase())}`,
         },
       },
     }
@@ -94,7 +92,7 @@ export function DemoVerifiableCredentials() {
       send({ type: 'DEMO_FAILURE', input: result.error.message })
       toast.error(`Failed fetching Verifiable Credentials`)
     }
-  }, [result])
+  }, [result, send])
   switch (true) {
     case result?.ok === false:
       return (

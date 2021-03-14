@@ -1,16 +1,15 @@
-import { useImmer } from 'use-immer'
 import cx from 'classnames'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Interpreter } from '../lib/stateMachine'
+import { useImmer } from 'use-immer'
+import { useMachineSend, useMachineState } from '../lib/contexts'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import { useMachineSend, useMachineState } from '../lib/contexts'
 
 function VerifyPresentationRow() {
   const send = useMachineSend()
   const state = useMachineState()
-  const { ids, json, jsonld, verifiedCredentials } = state.context
+  const { json } = state.context
   const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
     'loading'
   )
@@ -173,6 +172,7 @@ function VerifyPresentationRow() {
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const message =

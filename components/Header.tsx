@@ -84,8 +84,9 @@ export default function Header() {
   useEffect(() => {
     if (!failure && !success && status) {
       document.title = status
+      const backup = titleRef.current
       return () => {
-        document.title = titleRef.current
+        document.title = backup
       }
     }
   }, [failure, success, status])
@@ -100,6 +101,7 @@ export default function Header() {
         timeout.then(() => toast.dismiss(toastId))
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [success])
 
   const message = status

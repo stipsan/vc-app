@@ -87,12 +87,12 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   },
 })
 
+const selectSetTheme = (state) => state.set
 export default function Index({ theme }) {
-  const setTheme = useTheme((state) => state.set)
+  const setTheme = useTheme(selectSetTheme)
   useEffect(() => {
     setTheme(theme)
-  }, [])
-  console.warn(theme)
+  }, [setTheme, theme])
   return (
     <>
       <Head>

@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import Confetti from 'react-confetti'
 import { useMachineSelector } from '../lib/contexts'
-import * as React from 'react'
 
-console.log({ React })
-
+/*
 function Celebration() {
   return //
 }
+*/
 
 export default function CelebrateGate() {
   const success = useMachineSelector(

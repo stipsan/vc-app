@@ -1,12 +1,11 @@
-import { createAsset } from 'use-asset'
-import type { Draft } from 'immer'
 import {
   contexts as _contexts,
-  documentLoaderFactory,
+  documentLoaderFactory
 } from '@transmute/jsonld-document-loader'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
-import citizenship from './citizenship-v1.json'
+import type { Draft } from 'immer'
+import { createAsset } from 'use-asset'
 import didDoc from './did.json'
 //import { getResolver } from 'web-did-resolver'
 import { getResolver } from './webResolver'
@@ -50,7 +49,7 @@ const documentLoader = documentLoaderFactory.pluginFactory
     },
   })
   .addResolver({
-    ['did:web']: {
+    'did:web': {
       resolve: (did: string) => {
         return didResolver.resolve(did)
       },
@@ -58,11 +57,11 @@ const documentLoader = documentLoaderFactory.pluginFactory
   })
   
   .addResolver({
-    ['https:']: { resolve: async (url: string) => await fetchLoader.load(url) },
+    'https:': { resolve: async (url: string) => await fetchLoader.load(url) },
   })
   .addResolver({
     // Fallback to local cache until it's published
-    ['https://proxy.com/citizenship/v1']: {
+    'https://proxy.com/citizenship/v1': {
       resolve: async () => {
         return (await import('./citizenship-v1.json')).default
       },

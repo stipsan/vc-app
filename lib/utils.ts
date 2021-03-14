@@ -1,9 +1,22 @@
-import * as JSum from 'jsum'
-import documentLoader from './documentLoader'
+import * as JSum from 'jsum';
+import type { TailwindConfig } from 'tailwindcss/tailwind-config';
+import type { State } from 'zustand';
+import create from 'zustand';
+import documentLoader from './documentLoader';
+
+
+
+
+
 
 export function jsonChecksum(json: unknown): string {
   return JSum.digest(json, 'SHA256', 'hex')
 }
+
+//import { unstable_batchedUpdates } from 'react-dom'
+// TODO
+// pipe all batch calls through import { unstable_batchedUpdates } from 'react-dom'
+// maybe in context? to check if it does anything
 
 /*
 
@@ -22,17 +35,6 @@ useEffect(() => {
 // Instead of fchecking results of previous runs, simply fire FAILURE events for future stepps in the ladder.
 
 export const wait = delay => new Promise(resolve => setTimeout(resolve, delay))
-
-
-
-import { unstable_batchedUpdates } from 'react-dom'
-// TODO
-// pipe all batch calls through import { unstable_batchedUpdates } from 'react-dom'
-// maybe in context? to check if it does anything
-
-import create from 'zustand'
-import type { State } from 'zustand';
-import type { TailwindConfig } from 'tailwindcss/tailwind-config'
 interface DocumentLoaderState extends State {
   documentLoader: typeof documentLoader,
   set: (next: typeof documentLoader) => void
@@ -56,6 +58,8 @@ interface ThemeLoaderState extends State {
 }
 
 export const useTheme = create<ThemeLoaderState>(set => ({
+  // TODO add prefers-color-scheme observer
+  // scheme: 'light' | 'dark',
   theme: undefined,
   set: theme =>  set({theme,})
 }))

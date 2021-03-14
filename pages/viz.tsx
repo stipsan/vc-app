@@ -13,7 +13,7 @@ const MachineViz = dynamic(
 let needle = 0
 
 export default function Viz() {
-  const [state, send, service] = useMachine(defaultMachine)
+  const [state, send] = useMachine(defaultMachine)
 
   console.group(state.event.type)
   console.log('event.input', state.event.input)
