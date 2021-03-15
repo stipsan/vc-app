@@ -32,25 +32,13 @@ function SelectStrategy() {
 export default function LazyBunch() {
   return (
     <>
-      <Suspense fallback="TODO add fallback for SelectStrategy!">
-        <SelectStrategy />
-      </Suspense>
-      <Suspense fallback="TODO add fallback for ValidateLinkedData!">
-        <ValidateLinkedData />
-      </Suspense>
-      <Suspense fallback="TODO add fallback for VerifyCredentials!">
-        <VerifyCredentials />
-      </Suspense>
-      <Suspense fallback="TODO add fallback for CounterfeitCredentials!">
-        <CounterfeitCredentials />
-      </Suspense>
-      <Suspense fallback="TODO add fallback for VerifyPresentation!">
-        <VerifyPresentation />
-      </Suspense>
+      <SelectStrategy />
+      <ValidateLinkedData />
+      <VerifyCredentials />
+      <CounterfeitCredentials />
+      <VerifyPresentation />
       <ScrollTo />
-      <Suspense fallback="TODO add fallback for Celebrate!">
-        <Celebrate />
-      </Suspense>
+      <Celebrate />
     </>
   )
 }

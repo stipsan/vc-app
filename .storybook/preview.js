@@ -47,14 +47,7 @@ const viewports = Object.keys(theme.theme.screens).reduce((viewport, name) => {
 
 console.log({ viewports, MINIMAL_VIEWPORTS })
 //*/
-console.log(
-  config,
-  'verify storybook claim',
-  theme.colors.gray[900],
-  themes.normal,
-  transparentize(0.9, theme.colors.gray[900])
-)
-console.warn(themes.dark)
+
 export const parameters = {
   layout: 'centered',
   //viewport: { viewports },

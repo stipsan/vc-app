@@ -136,7 +136,7 @@ extraLinesSurroundingDiff
           )}
         >
           Heading
-          <div className="overflow-auto">
+          <div className="overflow-auto rounded py-1 my-1 bg-white dark:bg-gray-900 dark:text-white">
             <ReactDiffViewer
               original={original}
               modification={modification}
