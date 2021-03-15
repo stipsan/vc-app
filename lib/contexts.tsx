@@ -13,10 +13,6 @@ export function MachineProvider({ children }: { children: React.ReactNode }) {
   const { Provider } = context.machine
   const service = useInterpret(() => defaultMachine)
 
-  useEffect(() => {
-    console.log('MachineProvider service changed!', service)
-  }, [service])
-
   return <Provider value={service}>{children}</Provider>
 }
 const ugh = () => {
@@ -45,6 +41,7 @@ export function useMachineSend() {
   if (service === null) ugh()
   return service.send
 }
+export type SendType = Parameters<ReturnType<typeof useMachineSend>>
 
 export function DocumentLoaderProvider({
   children,

@@ -1,53 +1,103 @@
-import defaultMachine from '../lib/stateMachine'
-import { useMachine } from '@xstate/react'
-import { useState, Suspense } from 'react'
-import DynamicStrategy, { StrategyLazy } from './Strategy.Lazy'
-import { createAsset } from 'use-asset'
+import { MachineProvider } from '../lib/storybook'
+import DemoVerifiableCredentials from './DemoVerifiableCredentials'
 
-const hello = createAsset(async (foo, bar) => {
-  console.log({ foo, bar })
-  await new Promise((resolve) => setTimeout(() => resolve(void 0), 3000))
-})
-
-export const Primary = () => (
-  <button className="min-h-full dark:text-white">Hello storybook!</button>
-)
-
-export const Loadable = () => {
-  console.log('preload')
-  hello.preload(1, 2)
-  hello.preload(2, 3)
-
-  console.log('once')
-  hello.read(1, 2)
-  const [load, setLoad] = useState(false)
-  console.log('twice', load, setLoad)
-  hello.read(2, 3)
-  const [state, send, service] = useMachine(defaultMachine)
-  console.log('thrice', state, send, service)
-  hello.read(1, 2)
-
+function Example({ batch, result }: { batch: any[]; result?: any }) {
   return (
-    <div className="grid grid-cols-3 grid-rows-3 gap-4">
-      <DynamicStrategy />
-      <StrategyLazy isLoading={true} />
-    </div>
+    <MachineProvider batch={batch}>
+      <DemoVerifiableCredentials defaultResult={result} />
+    </MachineProvider>
   )
 }
 
-// Fallback + Mock
-// Fallback + Loadable
-// Fallback + Suspense
+export const Failure = () => {
+  return (
+    <Example
+      batch={[{ type: 'DEMO' }, { type: 'EXEC' }, { type: 'DEMO_FAILURE' }]}
+      result={{
+        ok: false,
+        error: new TypeError('Failed for the sake of failing!'),
+      }}
+    />
+  )
+}
+
+export const Success = () => {
+  const data = [
+    {
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://www.w3.org/2018/credentials/examples/v1',
+      ],
+      type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+      credentialSubject: {},
+      id: 'http://example.gov/credentials/3732',
+      issuer: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+      issuanceDate: '2021-03-15T05:32:18.145Z',
+      proof: {
+        type: 'Ed25519Signature2018',
+        created: '2021-03-15T05:32:18.306Z',
+        jws:
+          'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..HSM4a-itfO8ySeXlR56DwlhcJDQbKVx91fG7_VJFWX9TACKwrl3a8LZlvftYSrx-C9jcModbhGltOTSpiST6Ag',
+        proofPurpose: 'assertionMethod',
+        verificationMethod:
+          'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+      },
+    },
+    {
+      '@context': [
+        'https://www.w3.org/2018/credentials/v1',
+        'https://www.w3.org/2018/credentials/examples/v1',
+      ],
+      id: 'http://example.gov/credentials/3732',
+      type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+      issuer: {
+        id: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+      },
+      issuanceDate: '2021-03-15T05:34:22.984Z',
+      credentialSubject: {
+        id: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+        givenName: 'Tamara',
+        familyName: 'Schaefer',
+        degree: {
+          type: 'BachelorDegree',
+          name: 'Bachelor of Portals and Mindshare',
+        },
+      },
+      proof: {
+        type: 'Ed25519Signature2018',
+        created: '2021-03-15T05:34:23.101Z',
+        jws:
+          'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..DSPD8lICqZOUcT-_exFup75ZWwSU2KcPaAFHYtdARXa603812gVfqFAbGDWqOeKTvSAvYvLncF1N8d6b5G5BBA',
+        proofPurpose: 'assertionMethod',
+        verificationMethod:
+          'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+      },
+    },
+  ]
+  return (
+    <Example
+      batch={[
+        { type: 'DEMO' },
+        { type: 'EXEC' },
+        { type: 'DEMO_SUCCESS', input: data },
+      ]}
+      result={{ ok: true, data }}
+    />
+  )
+}
+
+export const E2E = () => {
+  return <Example batch={[{ type: 'DEMO' }, { type: 'EXEC' }]} />
+}
 
 export default {
   title: 'State Machine/DemoVerifiableCredentials',
   decorators: [
     (Story) => (
       <>
-        <button onClick={() => console.log('handle', hello)}>tap</button>
-        <Suspense fallback="Loading...">
+        <div className="w-screen min-h-screen pt-20">
           <Story />
-        </Suspense>
+        </div>
       </>
     ),
   ],

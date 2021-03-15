@@ -7,13 +7,7 @@ import {
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
 import Textarea from 'react-expanding-textarea'
 import { useMachineSend, useMachineState } from '../lib/contexts'
@@ -41,7 +35,6 @@ function DemoStrategy() {
 
 function ParseStrategy() {
   const state = useMachineState()
-  const [test, inc] = useState(0)
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const editingRef = useRef(false)
@@ -52,9 +45,6 @@ function ParseStrategy() {
     'verifyingCredentials',
     'counterfeitingCredentials',
   ].some(state.matches)
-
-  console.count('ParseStrategy render')
-  console.log(test)
 
   return (
     <StrategyPanel>
@@ -72,9 +62,6 @@ function ParseStrategy() {
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         onBlur={() => {
-          inc((i) => ++i)
-          inc((i) => ++i)
-          inc((i) => ++i)
           editingRef.current = false
           Promise.all([
             import('prettier/parser-babel'),
@@ -86,19 +73,16 @@ function ParseStrategy() {
           ]).then(([{ default: babelParser }, { default: prettier }]) => {
             if (editingRef.current) return
             unstable_batchedUpdates(() => {
-              inc((i) => ++i)
-              inc((i) => ++i)
-              inc((i) => ++i)
+              setEditor(
+                prettier
+                  .format(editor, {
+                    tabWidth: 4,
+                    parser: 'json',
+                    plugins: [babelParser],
+                  })
+                  .trim()
+              )
             })
-            setEditor(
-              prettier
-                .format(editor, {
-                  tabWidth: 4,
-                  parser: 'json',
-                  plugins: [babelParser],
-                })
-                .trim()
-            )
           })
         }}
         value={editor}

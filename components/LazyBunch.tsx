@@ -12,7 +12,6 @@ import VerifyCredentials from './VerifyCredentials'
 import VerifyPresentation from './VerifyPresentation'
 import { useMachineSelector } from '../lib/contexts'
 import type { StateMachineState } from '../lib/types'
-import { Suspense } from 'react'
 
 const strategySelector = (state: StateMachineState) => state.context.strategy
 function SelectStrategy() {

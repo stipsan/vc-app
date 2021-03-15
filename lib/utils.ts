@@ -52,7 +52,7 @@ interface ThemeLoaderState extends State {
   scheme: 'light' | 'dark'
   setScheme: (next: 'light' | 'dark') => void
   theme: TailwindConfig['theme']
-  set: (next: TailwindConfig) => void
+  set: (next: TailwindConfig['theme']) => void
 }
 
 export const themeStore = create<ThemeLoaderState>((set) => ({
@@ -74,7 +74,7 @@ export const useColorScheme = () => themeStore(selectColorScheme)
 
 const selectSetTheme = (state: ThemeLoaderState) => state.set
 const selectSetScheme = (state: ThemeLoaderState) => state.setScheme
-export function useTheme(theme: TailwindConfig) {
+export function useTheme(theme: TailwindConfig['theme']) {
   // Handles theme rehydration from nextjs pages' getStaticProps callbacks
   const setTheme = themeStore(selectSetTheme)
   useEffect(() => {

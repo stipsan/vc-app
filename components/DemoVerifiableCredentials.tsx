@@ -26,11 +26,9 @@ const work = createAsset(async () => {
         'https://www.w3.org/2018/credentials/v1',
         'https://www.w3.org/2018/credentials/examples/v1',
       ],
-      id: 'http://example.gov/credentials/3732',
       type: ['VerifiableCredential', 'UniversityDegreeCredential'],
-      issuer: { id: 'did:example:123' },
-      issuanceDate: new Date().toISOString(),
       credentialSubject: {
+        /*
         id: 'did:example:456',
         givenName: faker.name.firstName(),
         familyName: faker.name.lastName(),
@@ -44,15 +42,19 @@ const work = createAsset(async () => {
             .bsNoun()
             .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) => _.toUpperCase())}`,
         },
+        // */
       },
+      id: 'http://example.gov/credentials/3732',
+      issuer: 'did:example:123',
+      issuanceDate: new Date().toISOString(),
     }
 
     const credential = {
       ...src,
-      issuer: { id: didDoc.id },
+      issuer: didDoc.id,
       credentialSubject: {
         ...src.credentialSubject,
-        id: didDoc.id,
+        // id: didDoc.id,
       },
     }
     const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
@@ -73,13 +75,17 @@ const work = createAsset(async () => {
     return { ok: false, error }
   }
 })
-export function DemoVerifiableCredentials() {
+export function DemoVerifiableCredentials({
+  defaultResult = undefined,
+}: {
+  defaultResult?: any
+}) {
   const send = useMachineSend()
   const state = useMachineState()
   const ids = useIdsList()
   const json = useJsonMap()
 
-  const result = state.value === 'demoing' ? work.read() : undefined
+  const result = state.value === 'demoing' ? work.read() : defaultResult
 
   useEffect(() => {
     if (result?.ok === true) {
@@ -120,7 +126,11 @@ export function DemoVerifiableCredentials() {
       return null
   }
 }
-export default function DemoVerifiableCredentialsSuspender() {
+export default function DemoVerifiableCredentialsSuspender({
+  defaultResult,
+}: {
+  defaultResult?: any
+}) {
   return (
     <Suspense
       fallback={
@@ -129,7 +139,7 @@ export default function DemoVerifiableCredentialsSuspender() {
         </ReportRow>
       }
     >
-      <DemoVerifiableCredentials />
+      <DemoVerifiableCredentials defaultResult={defaultResult} />
     </Suspense>
   )
 }

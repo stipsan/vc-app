@@ -19,3 +19,7 @@ html.dark [type='text'] {
   background: theme('colors.gray.900');
   border-radius: theme('borderRadius.lg');
 }
+
+.sb-show-main #root {
+  padding: 0 !important;
+}

@@ -166,6 +166,36 @@ export const CounterfeitCredentialsChangingTheID = () => {
   )
 }
 
+export const CounterfeitCredentialAddingAnID = () => {
+  const original = {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      'https://www.w3.org/2018/credentials/examples/v1',
+    ],
+    type: ['VerifiableCredential', 'UniversityDegreeCredential'],
+    credentialSubject: {},
+    id: 'http://example.gov/credentials/3732',
+    issuer: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+    issuanceDate: '2021-03-15T04:09:24.056Z',
+    proof: {
+      type: 'Ed25519Signature2018',
+      created: '2021-03-15T04:09:24.126Z',
+      jws:
+        'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..IlcaQul4FYAC5IhSCOCt_abfF60OoffZQTjo81GxfIJ3dWDwAnsHVmUTkEOanL3-a-pUDSEXPV1jXu8fGuZ2Bw',
+      proofPurpose: 'assertionMethod',
+      verificationMethod:
+        'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+    },
+  }
+  const modified = {
+    ...original,
+    credentialSubject: { id: new Date().toISOString() },
+  }
+  return (
+    <Example original={original} modification={modified} variant="normal" />
+  )
+}
+
 export const CounterfeitCredentialsExtendingExpiry = () => {
   const original = verifiableCredentials[0]
   const expirationDate = original.expirationDate
