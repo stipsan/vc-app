@@ -15,7 +15,6 @@ const contexts = {
   ..._contexts.W3ID_Security_Vocabulary,
   ..._contexts.W3C_Decentralized_Identifiers,
 }
-
 const webResolver = getResolver()
 // @ts-expect-error
 const didResolver = new Resolver({ ...webResolver })
@@ -60,11 +59,16 @@ const documentLoader = documentLoaderFactory.pluginFactory
     'https:': { resolve: async (url: string) => await fetchLoader.load(url) },
   })
   .addResolver({
+    // Defined down here instead of in the `contexts` object because it shouldn't bloat the default JS bundles
+    'https://w3id.org/did/v0.11': {
+      resolve: async () =>  (await import('./contexts/did-v0.11.json')).default
+    }
+  })
+  .addResolver({
     // Fallback to local cache until it's published
     'https://proxy.com/citizenship/v1': {
-      resolve: async () => {
-        return (await import('./citizenship-v1.json')).default
-      },
+      resolve: async () =>  (await import('./contexts/proxy-citizenship-v1.json')).default
+      ,
     },
   })
   .buildDocumentLoader()

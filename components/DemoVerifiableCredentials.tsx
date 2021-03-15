@@ -102,7 +102,7 @@ export function DemoVerifiableCredentials() {
           </Panel>
         </ReportRow>
       )
-    case ids.length > 1:
+    case ids.length > 0:
       return (
         <ReportRow readyState="success">
           <Panel variant="success">

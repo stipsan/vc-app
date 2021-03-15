@@ -2,7 +2,6 @@ import cx from 'classnames'
 import type { GetStaticProps } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import ExecForm from '../components/ExecForm'
@@ -87,12 +86,8 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   },
 })
 
-const selectSetTheme = (state) => state.set
 export default function Index({ theme }) {
-  const setTheme = useTheme(selectSetTheme)
-  useEffect(() => {
-    setTheme(theme)
-  }, [setTheme, theme])
+  useTheme(theme)
   return (
     <>
       <Head>

@@ -17,7 +17,7 @@ const twJasonTHeme: JasonTheme = {
   },
 }
 
-export default memo(function Jason({
+export default memo(function CustomReactJason({
   value,
   quoteAttributes = true,
   sortKeys = false,

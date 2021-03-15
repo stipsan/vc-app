@@ -7,13 +7,21 @@ import 'tailwindcss/tailwind.css'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from '../tailwind.config.js'
 import './style.css'
-import { useTheme } from '../lib/utils'
+import { themeStore } from '../lib/utils'
+import addons from '@storybook/addons'
 
 enableMapSet()
 
+// Simulate rehydrating state
 const config = resolveConfig(tailwindConfig)
 const { theme } = config
-useTheme.setState({ theme })
+themeStore.setState({ theme })
+
+// get channel to listen to event emitter
+const channel = addons.getChannel()
+channel.on('DARK_MODE', (dark) =>
+  themeStore.setState({ scheme: dark ? 'dark' : 'light' })
+)
 
 /*
 const theme = require('tailwindcss/resolveConfig')(
