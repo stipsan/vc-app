@@ -107,7 +107,7 @@ function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
           : 'default'
       }
     >
-      {ids.length > 1 ? `${nu} ` : ''}
+      {nu}
       {message}
       {readyState === 'success' && error && (
         <SuperReadonlyTextarea value={JSON.stringify(error)} />

@@ -30,8 +30,8 @@ useEffect(() => {
 // move out of context, into zustand instead, so much simpler. first, make the Sequencer and use-asset
 // Instead of fchecking results of previous runs, simply fire FAILURE events for future stepps in the ladder.
 
-export const wait = (delay) =>
-  new Promise((resolve) => setTimeout(resolve, delay))
+export const wait = (min, max = min) =>
+  new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min))
 interface DocumentLoaderState extends State {
   documentLoader: typeof documentLoader
   set: (next: typeof documentLoader) => void
@@ -94,5 +94,5 @@ export function useTheme(theme: TailwindConfig['theme']) {
 
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }
-  set: (url: string, entry: 'loading' | object | Error) => void
+  set: (url: string, entry: 'loading' | object | Error) => void,
 }

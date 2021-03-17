@@ -48,22 +48,7 @@ function Example({
   const variants = ['normal', 'failure', 'success']
   const [splitView, setSplitView] = useReducer((prev) => !prev, false)
   const [selected, setVariant] = useState(variant)
-  const [diffMethod, setDiffMethod] = useState('diffChars')
-  console.warn({ diffMethod })
-  /**
-  * compareMethod
-  * enum DiffMethod {
-  CHARS = 'diffChars',
-  WORDS = 'diffWords',
-  WORDS_WITH_SPACE = 'diffWordsWithSpace',
-  LINES = 'diffLines',
-  TRIMMED_LINES = 'diffTrimmedLines',
-  SENTENCES = 'diffSentences',
-  CSS = 'diffCss',
-}
-
-extraLinesSurroundingDiff
-  */
+  const [diffMethod, setDiffMethod] = useState('diffWords')
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -125,7 +110,7 @@ extraLinesSurroundingDiff
           className={cx(
             'rounded-lg py-2 px-3 mb-4',
             {
-              'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
+              'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
                 variant === 'normal',
               'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
                 variant === 'failure',
@@ -213,6 +198,124 @@ export const CounterfeitCredentialsRemovedExpiry = () => {
   const { expirationDate, ...modified } = original
   return (
     <Example original={original} modification={modified} variant="normal" />
+  )
+}
+
+export const JSONLD = () => {
+  return (
+    <Example
+      original={[
+        {
+          'https://www.w3.org/2018/credentials#credentialSubject': [
+            {
+              '@id': 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+            },
+          ],
+          '@id': 'http://example.gov/credentials/3732',
+          'https://www.w3.org/2018/credentials#issuanceDate': [
+            {
+              '@type': 'http://www.w3.org/2001/XMLSchema#dateTime',
+              '@value': '2021-03-15T10:04:45.807Z',
+            },
+          ],
+          'https://www.w3.org/2018/credentials#issuer': [
+            {
+              '@id': 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+            },
+          ],
+          'https://w3id.org/security#proof': [
+            {
+              '@graph': [
+                {
+                  'http://purl.org/dc/terms/created': [
+                    {
+                      '@type': 'http://www.w3.org/2001/XMLSchema#dateTime',
+                      '@value': '2021-03-15T10:04:45.983Z',
+                    },
+                  ],
+                  'https://w3id.org/security#jws': [
+                    {
+                      '@value':
+                        'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..sxBwOYfrXb2xF4cPerwXys7PfY3La2lZLmBM4Cdn1D_n8GZ3j_44LU_80KY-7NTm8t_Qw8Q_rNylxQFkbIezAw',
+                    },
+                  ],
+                  'https://w3id.org/security#proofPurpose': [
+                    { '@id': 'https://w3id.org/security#assertionMethod' },
+                  ],
+                  '@type': ['https://w3id.org/security#Ed25519Signature2018'],
+                  'https://w3id.org/security#verificationMethod': [
+                    {
+                      '@id':
+                        'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          '@type': [
+            'https://www.w3.org/2018/credentials#VerifiableCredential',
+            'https://example.org/examples#UniversityDegreeCredential',
+          ],
+        },
+      ]}
+      modification={[
+        {
+          'https://www.w3.org/2018/credentials#credentialSubject': [
+            {
+              '@id': 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+            },
+          ],
+          '@id': '079a4a7c-9246-4877-99e8-fc882ff6c0b7',
+          'https://www.w3.org/2018/credentials#issuanceDate': [
+            {
+              '@type': 'http://www.w3.org/2001/XMLSchema#dateTime',
+              '@value': '2021-03-15T10:05:54.767Z',
+            },
+          ],
+          'https://www.w3.org/2018/credentials#issuer': [
+            {
+              '@id': 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+            },
+          ],
+          'https://w3id.org/security#proof': [
+            {
+              '@graph': [
+                {
+                  'http://purl.org/dc/terms/created': [
+                    {
+                      '@type': 'http://www.w3.org/2001/XMLSchema#dateTime',
+                      '@value': '2021-03-15T10:05:54.876Z',
+                    },
+                  ],
+                  'https://w3id.org/security#jws': [
+                    {
+                      '@value':
+                        'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..A5y1WWPJiUTYebxhgjV08FwhYzbBBBv_Z8zj8JaFK_mCgjW-XqY_N0NuhmaqsW8qJUgZj9ZDMvB2vJFRVpP5AQ',
+                    },
+                  ],
+                  'https://w3id.org/security#proofPurpose': [
+                    { '@id': 'https://w3id.org/security#assertionMethod' },
+                  ],
+                  '@type': ['https://w3id.org/security#Ed25519Signature2018'],
+                  'https://w3id.org/security#verificationMethod': [
+                    {
+                      '@id':
+                        'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          '@type': [
+            'https://www.w3.org/2018/credentials#VerifiableCredential',
+            'https://example.org/examples#UniversityDegreeCredential',
+          ],
+        },
+      ]}
+      variant="normal"
+    />
   )
 }
 

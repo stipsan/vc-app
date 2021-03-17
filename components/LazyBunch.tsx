@@ -5,7 +5,6 @@ import Celebrate from './Celebrate'
 import DemoVerifiableCredentials from './DemoVerifiableCredentials'
 import FetchVerifiableCredentials from './FetchVerifiableCredentials'
 import ParseVerifiableCredentials from './ParseVerifiableCredentials'
-import ScrollTo from './ScrollTo'
 import CounterfeitCredentials from './CounterfeitCredentials'
 import ValidateLinkedData from './ValidateLinkedData'
 import VerifyCredentials from './VerifyCredentials'
@@ -36,7 +35,6 @@ export default function LazyBunch() {
       <VerifyCredentials />
       <CounterfeitCredentials />
       <VerifyPresentation />
-      <ScrollTo />
       <Celebrate />
     </>
   )

@@ -1,75 +1,82 @@
-import { Suspense, useEffect } from 'react'
+import { Suspense, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
-import { useMachineSend, useMachineState } from '../lib/contexts'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useIdsList, useJsonMap } from '../lib/selectors'
-import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { ErrorMessage, Panel } from './Formatted'
 import ReportRow from './ReportRow'
+import styles from './uglyworkarounds.module.css'
 
 const work = createAsset(async () => {
   try {
-    const tooMuchData =
-      process.env.NODE_ENV !== 'production' && false
-        ? await import('../fixtures.json')
-        : null
-    const { default: faker } = await import('faker')
-    const { Ed25519KeyPair } = await import('@transmute/did-key-ed25519')
-    const { Ed25519Signature2018 } = await import(
-      '@transmute/ed25519-signature-2018'
-    )
-    const { ld: vc } = await import('@transmute/vc.js')
-    const didDoc = await import('../lib/did.json')
-    const { default: documentLoader } = await import('../lib/documentLoader')
+    const [
+      { default: faker },
+      { Ed25519KeyPair },
+      { Ed25519Signature2018 },
+      { ld: vc },
+      didDoc,
+      { default: documentLoader },
+    ] = await Promise.all([
+      import('faker'),
+      import('@transmute/did-key-ed25519'),
+      import('@transmute/ed25519-signature-2018'),
+      import('@transmute/vc.js'),
+      import('../lib/did.json'),
+      import('../lib/documentLoader'),
+    ])
 
-    const src = {
+    const create = (credentialSubject: any) => ({
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
         'https://www.w3.org/2018/credentials/examples/v1',
       ],
       type: ['VerifiableCredential', 'UniversityDegreeCredential'],
       credentialSubject: {
-        /*
-        id: 'did:example:456',
-        givenName: faker.name.firstName(),
-        familyName: faker.name.lastName(),
-        degree: {
-          type: 'BachelorDegree',
-          name: `Bachelor of ${faker.company
-            .bsNoun()
-            .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) =>
-              _.toUpperCase()
-            )} and ${faker.company
-            .bsNoun()
-            .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) => _.toUpperCase())}`,
-        },
-        // */
+        id: didDoc.id,
+        ...credentialSubject,
       },
       id: 'http://example.gov/credentials/3732',
-      issuer: 'did:example:123',
-      issuanceDate: new Date().toISOString(),
-    }
-
-    const credential = {
-      ...src,
       issuer: didDoc.id,
-      credentialSubject: {
-        ...src.credentialSubject,
-        // id: didDoc.id,
-      },
-    }
+      issuanceDate: new Date().toISOString(),
+      // TODO: add expirationDate or not?
+      expirationDate: new Date(1647443812695).toISOString(),
+    })
+
     const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
     key.id = key.controller + key.id
     const suite = new Ed25519Signature2018({ key })
-    console.warn({ key, suite })
-    const verifiableCredential = await vc.issue({
-      credential,
-      suite,
-      documentLoader,
-    })
 
     return {
       ok: true,
-      data: [verifiableCredential].concat(tooMuchData).filter(Boolean),
+      data: [
+        await vc.issue({
+          credential: create({
+            givenName: faker.name.firstName(),
+            familyName: faker.name.lastName(),
+          }),
+          suite,
+          documentLoader,
+        }),
+        await vc.issue({
+          credential: create({
+            degree: {
+              type: 'BachelorDegree',
+              name: `Bachelor of ${faker.company
+                .bsNoun()
+                .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) =>
+                  _.toUpperCase()
+                )} and ${faker.company
+                .bsNoun()
+                .replace(/(^\w{1})|(\s+\w{1})|(-\w{1})/g, (_) =>
+                  _.toUpperCase()
+                )}`,
+            },
+          }),
+          suite,
+          documentLoader,
+        }),
+      ],
     }
   } catch (error) {
     return { ok: false, error }
@@ -81,11 +88,13 @@ export function DemoVerifiableCredentials({
   defaultResult?: any
 }) {
   const send = useMachineSend()
-  const state = useMachineState()
   const ids = useIdsList()
   const json = useJsonMap()
+  const isCurrent = useMachineSelector(
+    useCallback((state) => state.value === 'demoing', [])
+  )
 
-  const result = state.value === 'demoing' ? work.read() : defaultResult
+  const result = isCurrent ? work.read() : defaultResult
 
   useEffect(() => {
     if (result?.ok === true) {
@@ -93,10 +102,13 @@ export function DemoVerifiableCredentials({
         type: 'DEMO_SUCCESS',
         input: result.data,
       })
+      // TODO move to machineReset?
+      work.clear()
     }
     if (result?.ok === false) {
+      console.error('DEMO_FAILURE', result.error)
       send({ type: 'DEMO_FAILURE', input: result.error.message })
-      toast.error(`Failed fetching Verifiable Credentials`)
+      toast.error(`Failed creating Verifiable Credentials`)
     }
   }, [result, send])
   switch (true) {
@@ -118,7 +130,9 @@ export function DemoVerifiableCredentials({
               : ' Verifiable Credentials'}
           </Panel>
           {ids.map((id) => (
-            <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
+            <Panel key={id} className={styles.maxWidth2}>
+              <ReactJason value={json.get(id)} />
+            </Panel>
           ))}
         </ReportRow>
       )

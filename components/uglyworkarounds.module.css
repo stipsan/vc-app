@@ -1,0 +1,11 @@
+/* Until there's time to find better ways.... */
+
+.maxWidth2 {
+  width: calc(100vw - 2rem);
+}
+
+@screen md {
+  .maxWidth2 {
+    width: calc(100vw - 3rem);
+  }
+}

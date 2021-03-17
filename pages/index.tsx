@@ -6,10 +6,11 @@ import { Toaster } from 'react-hot-toast'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import ExecForm from '../components/ExecForm'
 import { Panel } from '../components/Formatted'
-import Header from '../components/Header'
+import Header, { StatusMessage } from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
+import ScrollTo from '../components/ScrollTo'
 import Strategy from '../components/Strategy.Lazy'
-import { DocumentLoaderProvider, MachineProvider } from '../lib/contexts'
+import { MachineProvider } from '../lib/contexts'
 import { useTheme } from '../lib/utils'
 import tailwindConfig from '../tailwind.config.js'
 
@@ -93,15 +94,15 @@ export default function Index({ theme }) {
       <Head>
         <title>Verifiable Credentials Verifier</title>
       </Head>
-      <DocumentLoaderProvider>
-        <MachineProvider>
-          <ExecForm>
-            <Strategy />
-            <Header />
-            <LazyBunch />
-          </ExecForm>
-        </MachineProvider>
-      </DocumentLoaderProvider>
+      <MachineProvider>
+        <ExecForm>
+          <Strategy />
+          <Header />
+          <LazyBunch />
+        </ExecForm>
+        <StatusMessage className="md:hidden pointer-events-none bg-gradient-to-t block bottom-0 -mt-4 pb-4 pt-10 px-7 sticky z-40 from-white dark:from-gray-900 via-white dark:via-gray-900" />
+        <ScrollTo />
+      </MachineProvider>
       <footer className="bg-gradient-to-t from-gray-200 dark:from-gray-800 py-10 px-4 md:px-6 grid place-items-center opacity-50 transition-opacity hover:opacity-100 active:opacity-100 focus-within:opacity-100">
         <a
           className="text-lg font-semibold"

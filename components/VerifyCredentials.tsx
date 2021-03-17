@@ -1,18 +1,35 @@
+import { unstable_batchedUpdates } from 'react-dom'
 import cx from 'classnames'
-import { useCallback, useEffect, useState } from 'react'
+import produce from 'immer'
+import { useCallback, useEffect, useState, memo, Suspense } from 'react'
 import toast from 'react-hot-toast'
 import create from 'zustand'
-import { useMachineSend, useMachineState } from '../lib/contexts'
+import {
+  useMachineSelector,
+  useMachineSend,
+  useMachineState,
+} from '../lib/contexts'
 import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
+import { useJsonld } from '../lib/selectors'
 
 const useLogs = create<LogsState>((set) => ({
   urls: {},
-  set: (url, entry) => {
-    set((state) => ({ urls: { ...state.urls, [url]: entry } }))
-  },
+  set: (url, entry) =>
+    set(
+      produce((state) => {
+        if (entry === 'loading' && url in state.urls) {
+          return
+        }
+        if (entry !== 'loading' && state.urls[url] !== 'loading') {
+          return
+        }
+
+        state.urls[url] = entry
+      })
+    ),
 }))
 
 function VerifyCredentialsRow({
@@ -69,7 +86,6 @@ function VerifyCredentialsRow({
       })
       .catch((err) => {
         if (cancelled) return
-        alert(true)
         setReadyState('error')
         setError(err)
         toast.error(`${nu} Failed verification`)
@@ -118,33 +134,80 @@ function VerifyCredentialsRow({
   )
 }
 
+function VerifyCredentialsRowSuspender({
+  id,
+  nu,
+  documentLoader,
+}: {
+  id: string
+  nu: string
+  documentLoader: DocumentLoader
+}) {
+  const send = useMachineSend()
+  const jsonld = useJsonld()
+  const jsonldStatus = jsonld.get(id)
+
+  useEffect(() => {
+    if (jsonldStatus === 'failure') {
+      send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
+    }
+  }, [id, jsonldStatus, send])
+
+  if (jsonldStatus === 'failure') {
+    return <Panel>{nu} Skipping verification because of invalid JSON-LD</Panel>
+  }
+
+  return (
+    <Suspense
+      key={id}
+      fallback={
+        <Panel className="animate-pulse">{nu} Verifying Credential...</Panel>
+      }
+    >
+      <VerifyCredentialsRow id={id} nu={nu} documentLoader={documentLoader} />
+    </Suspense>
+  )
+}
+
+const VerifyCredentialsDocumentLoaderLogs = memo(
+  ({ loading }: { loading: boolean }) => {
+    const log = useLogs(useCallback((state) => state.urls, []))
+
+    return <DocumentLoaderLogs loading={loading} log={log} />
+  }
+)
+
 export default function VerifyCredentials() {
-  const log = useLogs((state) => state.urls)
-  const updateLog = useLogs((state) => state.set)
+  const updateLog = useLogs(useCallback((state) => state.set, []))
   const send = useMachineSend()
   const state = useMachineState()
   const { ids, verifiedCredentials } = state.context
   const isCurrent = state.matches('verifyingCredentials')
   const realDocumentLoader = documentLoaderStore(
-    (state) => state.documentLoader
+    useCallback((state) => state.documentLoader, [])
   )
   const documentLoader = useCallback(
     async (url: string) => {
-      updateLog(url, 'loading')
+      unstable_batchedUpdates(() => {
+        updateLog(url, 'loading')
+      })
       try {
         const result = await realDocumentLoader(url)
 
-        updateLog(url, JSON.parse(JSON.stringify(result)))
+        unstable_batchedUpdates(() => {
+          updateLog(url, JSON.parse(JSON.stringify(result)))
+        })
         return result
       } catch (err) {
-        updateLog(url, err)
+        unstable_batchedUpdates(() => {
+          updateLog(url, err)
+        })
         throw err
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [updateLog]
   )
-  console.log('VerifyCredentials', { log })
 
   useEffect(() => {
     if (isCurrent && verifiedCredentials.size === ids.length) {
@@ -156,16 +219,12 @@ export default function VerifyCredentials() {
   if (isCurrent || verifiedCredentials.size) {
     return (
       <ReportRow>
-        <DocumentLoaderLogs
-          loading={isCurrent}
-          log={log}
-          updateLog={updateLog}
-        />
+        <VerifyCredentialsDocumentLoaderLogs loading={isCurrent} />
         {ids.map((id, nu) => (
-          <VerifyCredentialsRow
+          <VerifyCredentialsRowSuspender
             key={id}
             id={id}
-            nu={`#${nu + 1}`}
+            nu={`#${nu + 1} `}
             documentLoader={documentLoader}
           />
         ))}

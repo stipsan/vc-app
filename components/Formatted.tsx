@@ -12,7 +12,7 @@ export function Code({ children }: { children: React.ReactNode }) {
 }
 
 export function ReadonlyTextarea({
-  className = 'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 border-0 focus:ring-inset focus:ring-blue-200 dark:focus:ring-blue-800 focus:ring-2',
+  className = 'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 rounded-lg py-2 px-3 border-0 focus:ring-inset focus:ring-blue-200 dark:focus:ring-blue-800 focus:ring-2',
   value,
 }: {
   className?: string
@@ -119,7 +119,7 @@ export function Panel({
       className={cx(
         'rounded-lg py-2 px-3',
         {
-          'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
+          'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
             variant === 'default',
           'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900 break-words':
             variant === 'error',

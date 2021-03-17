@@ -19,7 +19,6 @@ interface MachineSchema {
     verifyingCredentials: {},
     counterfeitingCredentials:{},
     verifyingPresentation:{},
-    counterfeitingPresentation: {},
     success: {}
   };
 }
@@ -35,7 +34,6 @@ interface Context {
   verifiedCredentials: Map<string, 'success' | 'failure'>
   counterfeitCredentials: Map<string, 'success' | 'failure'>
   verifiedPresentation: 'success' | 'failure' | 'pending'
-  counterfeitPresentation: 'success' | 'failure' | 'pending'
 }
 
 type ExecEvent = ImmerUpdateEvent<'EXEC'>
@@ -86,14 +84,6 @@ type VerifiedPresentationFailureEvent = ImmerUpdateEvent<
   'VERIFIED_PRESENTATION_FAILURE',
   string
 >
-type CounterfeitPresentationSuccessEvent = ImmerUpdateEvent<
-  'COUNTERFEIT_PRESENTATION_SUCCESS',
-  string
->
-type CounterfeitPresentationFailureEvent = ImmerUpdateEvent<
-  'COUNTERFEIT_PRESENTATION_FAILURE',
-  string
->
 
 export type MachineEvent =
   | ExecEvent
@@ -117,8 +107,6 @@ export type MachineEvent =
   | CounterfeitCredentialCompleteEvent
   | VerifiedPresentationFailureEvent
   | VerifiedPresentationSuccessEvent
-  | CounterfeitPresentationFailureEvent
-  | CounterfeitPresentationSuccessEvent
 
 const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
   ctx.status =
@@ -138,7 +126,6 @@ const exec = createUpdater<Context, ExecEvent>('EXEC', (ctx, event) => {
   ctx.verifiedCredentials.clear()
   ctx.counterfeitCredentials.clear()
   ctx.verifiedPresentation = 'pending'
-  ctx.counterfeitPresentation = 'pending'
 })
 
 const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
@@ -249,7 +236,6 @@ const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
     verifiedCredentials: new Map(),
     counterfeitCredentials: new Map(),
     verifiedPresentation: 'pending',
-    counterfeitPresentation: 'pending',
   },
   initial: 'ready',
   states: {
@@ -458,8 +444,8 @@ const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
         ],
         COUNTERFEIT_CREDENTIAL_COMPLETE: [
           {
-            cond: function someFailures(ctx) {
-              return ctx.ids.some(
+            cond: function onlyFailures(ctx) {
+              return ctx.ids.every(
                 (id) => ctx.counterfeitCredentials.get(id) === 'failure'
               )
             },
@@ -491,29 +477,21 @@ const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
         },
         VERIFIED_PRESENTATION_SUCCESS: [
           {
+            cond: function someFailures(ctx) {
+              return ctx.ids.some(
+                (id) => ctx.jsonld.get(id) === 'failure' || ctx.verifiedCredentials.get(id) === 'failure' || ctx.counterfeitCredentials.get(id) === 'failure'
+              )
+            },
             actions: assign((ctx) => {
-              ctx.status = 'Counterfeiting Presentation...'
+              ctx.status = 'Verification failed!'
               ctx.verifiedPresentation = 'success'
             }),
-            target: 'counterfeitingPresentation',
+            target: 'failure',
           },
-        ],
-      },
-    },
-    counterfeitingPresentation: {
-      on: {
-        COUNTERFEIT_PRESENTATION_FAILURE: {
-          actions: assign((ctx) => {
-            ctx.status = 'Verification failed!'
-            ctx.counterfeitPresentation = 'failure'
-          }),
-          target: 'failure',
-        },
-        COUNTERFEIT_PRESENTATION_SUCCESS: [
           {
             actions: assign((ctx) => {
               ctx.status = 'Verification successful!'
-              ctx.counterfeitPresentation = 'success'
+              ctx.verifiedPresentation = 'success'
             }),
             target: 'success',
           },

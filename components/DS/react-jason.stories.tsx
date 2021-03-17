@@ -62,7 +62,7 @@ function Example({
             <div
               key={i}
               className={cx('rounded-lg py-2 px-3 mb-4', {
-                'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
+                'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
                   variant === 'normal',
                 'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900':
                   variant === 'failure',
@@ -73,7 +73,7 @@ function Example({
               #{i + 1} Heading
               <div
                 className={cx('overflow-hidden rounded py-2 my-1 px-3', {
-                  'bg-blue-100 dark:bg-gray-700': variant === 'normal',
+                  'bg-gray-100 dark:bg-gray-700': variant === 'normal',
                   'bg-red-100 dark:bg-red-900 dark:bg-opacity-20':
                     variant === 'failure',
                   'bg-green-100 dark:bg-opacity-25 dark:bg-green-900':

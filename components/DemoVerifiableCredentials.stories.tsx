@@ -1,11 +1,15 @@
 import { MachineProvider } from '../lib/storybook'
 import DemoVerifiableCredentials from './DemoVerifiableCredentials'
+import Header from './Header'
 
 function Example({ batch, result }: { batch: any[]; result?: any }) {
   return (
-    <MachineProvider batch={batch}>
-      <DemoVerifiableCredentials defaultResult={result} />
-    </MachineProvider>
+    <div className="w-screen min-h-screen pt-20">
+      <MachineProvider batch={batch}>
+        <Header />
+        <DemoVerifiableCredentials defaultResult={result} />
+      </MachineProvider>
+    </div>
   )
 }
 
@@ -92,13 +96,4 @@ export const E2E = () => {
 
 export default {
   title: 'State Machine/DemoVerifiableCredentials',
-  decorators: [
-    (Story) => (
-      <>
-        <div className="w-screen min-h-screen pt-20">
-          <Story />
-        </div>
-      </>
-    ),
-  ],
 }

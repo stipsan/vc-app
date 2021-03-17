@@ -6,7 +6,7 @@ import type { JasonTheme } from 'react-jason'
 
 const twJasonTHeme: JasonTheme = {
   classes: {
-    root: 'font-mono m-0 overflow-x-auto rounded-xl whitespace-pre',
+    root: 'font-mono m-0 overflow-x-auto whitespace-pre',
     attribute: 'text-blue-700 dark:text-blue-300',
     unquotedAttribute: 'opacity-80 text-black dark:text-gray-100',
     string: 'text-red-700 dark:text-red-300',

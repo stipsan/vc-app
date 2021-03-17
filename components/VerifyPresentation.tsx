@@ -151,8 +151,6 @@ function VerifyPresentationRow() {
           if (presentationVerified.verified) {
             setReadyState('success')
             send({ type: 'VERIFIED_PRESENTATION_SUCCESS', input: id })
-            //Skip counterfeiting until implemented
-            send({ type: 'COUNTERFEIT_PRESENTATION_SUCCESS', input: id })
           } else {
             setReadyState('error')
             setError(presentationVerified.error)

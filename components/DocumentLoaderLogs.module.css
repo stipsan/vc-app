@@ -1,0 +1,9 @@
+.maxWidth {
+  width: calc(100vw - 3.25rem);
+}
+
+@screen md {
+  .maxWidth {
+    width: calc(100vw - 4.25rem);
+  }
+}

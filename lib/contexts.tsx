@@ -1,8 +1,15 @@
-import defaultMachine from './stateMachine'
-import { useInterpret, useService, useSelector } from '@xstate/react'
-import type { Interpreter, StateValue, State } from './stateMachine'
+import { useInterpret, useSelector, useService } from '@xstate/react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react'
+import { unstable_batchedUpdates } from 'react-dom'
 import documentLoader from './documentLoader'
-import React, { createContext, useContext, useEffect } from 'react'
+import type { Interpreter, State, StateValue } from './stateMachine'
+import defaultMachine from './stateMachine'
 
 export const context = {
   machine: createContext<Interpreter>(null),
@@ -27,8 +34,9 @@ export function useMachineState() {
   }
 }
 
+type SelectorState = Exclude<State, 'value'> & { value: StateValue }
 export function useMachineSelector<T>(
-  selector: (emitted: Exclude<State, 'value'> & { value: StateValue }) => T,
+  selector: (emitted: SelectorState) => T,
   compare?,
   getSnapshot?
 ) {
@@ -39,14 +47,47 @@ export function useMachineSelector<T>(
 export function useMachineSend() {
   const service = useContext(context.machine)
   if (service === null) ugh()
-  return service.send
+
+  //return service.send
+
+  return useCallback(
+    (...args: Parameters<typeof service.send>) =>
+      // wrapping it in batchedUpdates cuts the amount of renders in more than half
+      unstable_batchedUpdates(() => service.send(...args)),
+    [service]
+  )
 }
 export type SendType = Parameters<ReturnType<typeof useMachineSend>>
 
-export function DocumentLoaderProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <>{children}</>
+// Fire some cleanup logic when the state machine is starting over
+export function useOnMachineReset(cb: Function) {
+  const mounted = useRef(false)
+  const idle = useMachineSelector(selectIdle)
+  useEffect(() => {
+    if (!idle) {
+      if (!mounted.current) {
+        mounted.current = true
+      } else {
+        unstable_batchedUpdates(() => cb())
+      }
+    }
+  }, [idle, cb])
+  // TODO: temporary debugger
+  const debugRef = useRef(0)
+  useEffect(() => {
+    if (debugRef.current++ > 1) {
+      console.error('cb changed!!', cb)
+    }
+  }, [cb])
+}
+function selectIdle(state: SelectorState) {
+  switch (state.value) {
+    case 'ready':
+    case 'success':
+    case 'failure':
+      return true
+
+    default:
+      return false
+  }
 }

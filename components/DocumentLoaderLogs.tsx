@@ -1,14 +1,16 @@
 import cx from 'classnames'
 import { useMemo, useState } from 'react'
 import { LogsState } from '../lib/utils'
-import { Panel, ReadonlyTextarea, useListFormat } from './Formatted'
+import styles from './DocumentLoaderLogs.module.css'
+import ReactJason from './DS/react-jason'
+import { Panel, useListFormat } from './Formatted'
 
 function LogRow({
   url,
   value,
 }: {
   url: string
-  value: 'loading' | Error | object
+  value: 'loading' | Error | any
 }) {
   const [view, setView] = useState(false)
   const urlClamped = (
@@ -18,7 +20,7 @@ function LogRow({
     return (
       <div
         className={cx('rounded-sm', {
-          'bg-blue-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse': true,
+          'bg-gray-100 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse': true,
         })}
       >
         <div className={cx('px-3 py-2 flex break-words items-center')}>
@@ -62,7 +64,7 @@ function LogRow({
             viewBox="0 0 16 16"
           >
             <path
-              fill-rule="evenodd"
+              fillRule="evenodd"
               d="M3.404 12.596a6.5 6.5 0 119.192-9.192 6.5 6.5 0 01-9.192 9.192zM2.344 2.343a8 8 0 1011.313 11.314A8 8 0 002.343 2.343zM6.03 4.97a.75.75 0 00-1.06 1.06L6.94 8 4.97 9.97a.75.75 0 101.06 1.06L8 9.06l1.97 1.97a.75.75 0 101.06-1.06L9.06 8l1.97-1.97a.75.75 0 10-1.06-1.06L8 6.94 6.03 4.97z"
             ></path>
           </svg>
@@ -94,10 +96,10 @@ function LogRow({
         'text-green-900 dark:text-green-500 bg-green-200 bg-opacity-20 dark:bg-opacity-25 dark:bg-green-900': true,
       })}
     >
-      <div className="sticky top-16 md:top-10 h-9 md:h-7 -mb-9 md:-mb-7 rounded-sm bg-white dark:bg-gray-900 z-20  pointer-events-none" />
+      <div className="sticky top-10 h-7 -mb-7 rounded-sm bg-white dark:bg-gray-900 z-20 pointer-events-none" />
       <div
         className={cx(
-          'px-3 py-2 flex break-words items-center sticky top-24 md:top-14 z-30 rounded-sm bg-green-50 dark:bg-green-900'
+          'px-3 py-2 flex break-words items-center sticky top-14 z-30 rounded-sm bg-green-50 dark:bg-green-900'
         )}
       >
         <svg
@@ -106,7 +108,7 @@ function LogRow({
           viewBox="0 0 16 16"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM0 8a8 8 0 1116 0A8 8 0 010 8zm11.78-1.72a.75.75 0 00-1.06-1.06L6.75 9.19 5.28 7.72a.75.75 0 00-1.06 1.06l2 2a.75.75 0 001.06 0l4.5-4.5z"
           ></path>
         </svg>
@@ -128,11 +130,13 @@ function LogRow({
         </button>
       </div>
       {view && (
-        <div className="mx-1">
-          <ReadonlyTextarea
-            className="bg-green-100 dark:bg-opacity-25 dark:bg-green-900 focus:ring-green-200 dark:focus:ring-green-900 focus:ring-2 rounded-sm mb-1 py-2 px-2 border-0 block w-full"
-            value={JSON.stringify(value)}
-          />
+        <div
+          className={cx(
+            'bg-white dark:bg-gray-900 overflow-hidden px-3 py-2 rounded-sm',
+            styles.maxWidth
+          )}
+        >
+          <ReactJason value={value.document || value} />
         </div>
       )}
     </section>
@@ -142,11 +146,9 @@ function LogRow({
 export default function DocumentLoaderLogs({
   loading,
   log,
-  updateLog,
 }: {
   loading?: boolean
   log: LogsState['urls']
-  updateLog: LogsState['set']
 }) {
   const [expanded, setExpanded] = useState(false)
   const logs = useMemo(() => Object.entries(log), [log])
@@ -197,7 +199,6 @@ export default function DocumentLoaderLogs({
     return null
   }
 
-  console.log({ summaries })
   return (
     <Panel>
       {logs.length > 0 ? (

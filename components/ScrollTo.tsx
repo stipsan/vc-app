@@ -10,21 +10,24 @@ export default function ScrollTo() {
 
   useEffect(() => {
     switch (value) {
+      case 'demoing':
+      case 'parsing':
+      case 'fetching':
       case 'linkingData':
       case 'verifyingCredentials':
       case 'counterfeitingCredentials':
       case 'verifyingPresentation':
-      case 'counterfeitingPresentation':
       case 'failure':
       case 'success':
         return (
           nodeRef.current &&
-          scrollIntoView(nodeRef.current, {
-            behavior: 'smooth',
-            scrollMode: 'if-needed',
-            block: 'nearest',
-          }) &&
-          console.log('scrolled')
+          requestAnimationFrame(() =>
+            scrollIntoView(nodeRef.current, {
+              behavior: 'smooth',
+              scrollMode: 'if-needed',
+              block: 'nearest',
+            })
+          )
         )
     }
   }, [value])

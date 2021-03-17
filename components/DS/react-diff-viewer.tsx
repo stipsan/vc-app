@@ -1,4 +1,4 @@
-import ReactDiffViewer from 'react-diff-viewer'
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer'
 import type { ReactDiffViewerProps } from 'react-diff-viewer'
 import { memo, useMemo } from 'react'
 import { useColorScheme, useThemeVariables } from '../../lib/utils'
@@ -6,6 +6,7 @@ import { useColorScheme, useThemeVariables } from '../../lib/utils'
 export default memo(function CustomReactDiffViewer({
   original,
   modification,
+  compareMethod = 'diffWords' as DiffMethod,
   ...extra
 }: {
   original: object
@@ -82,6 +83,7 @@ export default memo(function CustomReactDiffViewer({
       hideLineNumbers
       extraLinesSurroundingDiff={1}
       styles={styles}
+      compareMethod={compareMethod}
       {...extra}
     />
   )
