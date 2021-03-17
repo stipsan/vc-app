@@ -32,6 +32,11 @@ const work = createAsset(async (json: object) => {
     const results = await Promise.all(
       [
         async (credential) => {
+          credential.id = await faker.random.uuid()
+
+          return { name: 'Modifying the id', credential }
+        },
+        async (credential) => {
           credential.credentialSubject.id = await faker.random.uuid()
 
           return { name: 'Modifying the credentialSubject.id', credential }
