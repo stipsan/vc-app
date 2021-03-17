@@ -1,7 +1,11 @@
 import { Suspense, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
-import { useMachineSelector, useMachineSend } from '../lib/contexts'
+import {
+  useMachineSelector,
+  useMachineSend,
+  useOnMachineReset,
+} from '../lib/contexts'
 import { useIdsList, useJsonMap } from '../lib/selectors'
 import ReactJason from './DS/react-jason'
 import { ErrorMessage, Panel } from './Formatted'
@@ -87,6 +91,7 @@ export function DemoVerifiableCredentials({
 }: {
   defaultResult?: any
 }) {
+  useOnMachineReset(() => work.clear())
   const send = useMachineSend()
   const ids = useIdsList()
   const json = useJsonMap()
@@ -102,8 +107,6 @@ export function DemoVerifiableCredentials({
         type: 'DEMO_SUCCESS',
         input: result.data,
       })
-      // TODO move to machineReset?
-      work.clear()
     }
     if (result?.ok === false) {
       console.error('DEMO_FAILURE', result.error)
@@ -111,6 +114,7 @@ export function DemoVerifiableCredentials({
       toast.error(`Failed creating Verifiable Credentials`)
     }
   }, [result, send])
+
   switch (true) {
     case result?.ok === false:
       return (

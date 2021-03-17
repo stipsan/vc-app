@@ -3,7 +3,6 @@ import { useEffect } from 'react'
 import type { TailwindConfig } from 'tailwindcss/tailwind-config'
 import type { State } from 'zustand'
 import create from 'zustand'
-import documentLoader from './documentLoader'
 
 export function jsonChecksum(json: unknown): string {
   return JSum.digest(json, 'SHA256', 'hex')
@@ -32,16 +31,7 @@ useEffect(() => {
 
 export const wait = (min, max = min) =>
   new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min))
-interface DocumentLoaderState extends State {
-  documentLoader: typeof documentLoader
-  set: (next: typeof documentLoader) => void
-}
 
-export const documentLoaderStore = create<DocumentLoaderState>((set) => ({
-  documentLoader,
-  set: (documentLoader) => set({ documentLoader }),
-}))
-export type DocumentLoader = typeof documentLoader
 
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }

@@ -75,21 +75,3 @@ const documentLoader = documentLoaderFactory.pluginFactory
 
 export default documentLoader
 
-export type LogsMap = Map<string, 'loading' | object | Error>
-export const documentLoaderWithLogger = createAsset(async (updateLog: (f: (draft: Draft<LogsMap>) => void | LogsMap) => void, url: string) => {
-    updateLog((draft) => {
-      if (!draft.has(url)) draft.set(url, 'loading')
-    })
-    try {
-      const result = await documentLoader(url)
-      updateLog((draft) => {
-        draft.set(url, JSON.parse(JSON.stringify(result)))
-      })
-      return result
-    } catch (err) {
-      updateLog((draft) => {
-        if (draft.get(url) === 'loading') draft.set(url, err)
-      })
-      throw err
-    }
-})

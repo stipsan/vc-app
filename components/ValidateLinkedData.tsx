@@ -1,5 +1,5 @@
 import produce from 'immer'
-import { Suspense, useCallback, useEffect, memo } from 'react'
+import { memo, Suspense, useCallback, useEffect } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
 import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
@@ -9,14 +9,15 @@ import {
   useMachineSend,
   useOnMachineReset,
 } from '../lib/contexts'
+import _documentLoader from '../lib/documentLoader'
 import { useIdsList, useJsonld, useJsonMap } from '../lib/selectors'
-import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
+import { LogsState, wait } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
 const work = createAsset(
-  async (documentLoader: DocumentLoader, json: object) => {
+  async (documentLoader: typeof _documentLoader, json: object) => {
     try {
       const [{ default: jsonld }, jsonldChecker] = await Promise.all([
         import('jsonld'),
@@ -41,7 +42,9 @@ const work = createAsset(
         { documentLoader }
       )
 
-      // await wait(1000, 20000)
+      if (process.env.NODE_ENV !== 'production') {
+        await wait(1000, 10000)
+      }
 
       return {
         ok: true,
@@ -77,7 +80,7 @@ function ValidateLinkedDataRow({
 }: {
   id: string
   nu: string
-  documentLoader: DocumentLoader
+  documentLoader: typeof _documentLoader
 }) {
   const send = useMachineSend()
   const json = useJsonMap().get(id)
@@ -110,7 +113,6 @@ function ValidateLinkedDataRow({
           </div>
         </Panel>
       )
-
     case true:
       return (
         <Panel variant="success">
@@ -143,9 +145,7 @@ export default function ValidateLinkedData() {
   const isCurrent = useMachineSelector(
     useCallback((state) => state.value === 'linkingData', [])
   )
-  const realDocumentLoader = documentLoaderStore(
-    useCallback((state) => state.documentLoader, [])
-  )
+
   const updateLog = useLogs(useCallback((state) => state.set, []))
   const documentLoader = useCallback(
     async (url: string) => {
@@ -153,7 +153,7 @@ export default function ValidateLinkedData() {
         updateLog(url, 'loading')
       })
       try {
-        const result = await realDocumentLoader(url)
+        const result = await _documentLoader(url)
         unstable_batchedUpdates(() => {
           updateLog(url, JSON.parse(JSON.stringify(result)))
         })

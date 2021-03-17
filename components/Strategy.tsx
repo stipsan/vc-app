@@ -10,8 +10,7 @@ import cx from 'classnames'
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
 import Textarea from 'react-expanding-textarea'
-import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useStore } from '../lib/useStore'
 
 function StrategyPanel({ children }: { children: React.ReactNode }) {
@@ -34,17 +33,24 @@ function DemoStrategy() {
 }
 
 function ParseStrategy() {
-  const state = useMachineState()
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const editingRef = useRef(false)
-  const { strategy } = state.context
-  const loading = [
-    'parsing',
-    'linkingData',
-    'verifyingCredentials',
-    'counterfeitingCredentials',
-  ].some(state.matches)
+  const strategy = useMachineSelector(
+    useCallback((state) => state.context.strategy, [])
+  )
+  const loading = useMachineSelector(
+    useCallback(
+      (state) =>
+        [
+          'parsing',
+          'linkingData',
+          'verifyingCredentials',
+          'counterfeitingCredentials',
+        ].some(state.matches),
+      []
+    )
+  )
 
   return (
     <StrategyPanel>
@@ -179,14 +185,21 @@ function AuthField({ loading }: { loading: boolean }) {
 }
 
 function FetchStrategy() {
-  const state = useMachineState()
-  const loading = [
-    'fetching',
-    'linkingData',
-    'verifyingCredentials',
-    'counterfeitingCredentials',
-  ].some(state.matches)
-  const { strategy } = state.context
+  const loading = useMachineSelector(
+    useCallback(
+      (state) =>
+        [
+          'fetching',
+          'linkingData',
+          'verifyingCredentials',
+          'counterfeitingCredentials',
+        ].some(state.matches),
+      []
+    )
+  )
+  const strategy = useMachineSelector(
+    useCallback((state) => state.context.strategy, [])
+  )
 
   return (
     <StrategyPanel>
@@ -230,23 +243,29 @@ function StrategyTab({
 
 export default function Strategy() {
   const send = useMachineSend()
-  const state = useMachineState()
-  const idle = ['ready', 'success', 'failure'].some(state.matches)
-  const getIndex = useCallback((state: Interpreter['state']) => {
-    switch (state.context.strategy) {
-      case 'demo':
-        return 0
-      case 'parse':
-        return 1
-      case 'fetch':
-        return 2
-    }
-  }, [])
+  const index = useMachineSelector(
+    useCallback((state) => {
+      switch (state.context.strategy) {
+        case 'demo':
+          return 0
+        case 'parse':
+          return 1
+        case 'fetch':
+          return 2
+      }
+    }, [])
+  )
+  const idle = useMachineSelector(
+    useCallback(
+      (state) => ['ready', 'success', 'failure'].some(state.matches),
+      []
+    )
+  )
 
   return (
     <Tabs
       className="px-4 md:px-6 pt-8"
-      index={getIndex(state)}
+      index={index}
       onChange={(index) => {
         switch (index) {
           case 0:
