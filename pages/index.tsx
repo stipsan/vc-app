@@ -2,15 +2,15 @@ import cx from 'classnames'
 import type { GetStaticProps } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import ExecForm from '../components/ExecForm'
 import { Panel } from '../components/Formatted'
-import Header from '../components/Header'
+import Header, { StatusMessage } from '../components/Header'
 import HorisontalRuler from '../components/HorizontalRuler'
+import ScrollTo from '../components/ScrollTo'
 import Strategy from '../components/Strategy.Lazy'
-import { DocumentLoaderProvider, MachineProvider } from '../lib/contexts'
+import { MachineProvider } from '../lib/contexts'
 import { useTheme } from '../lib/utils'
 import tailwindConfig from '../tailwind.config.js'
 
@@ -32,7 +32,7 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   delay: 3000,
   timeout: 10000,
   loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
-    const className = 'mx-6 mt-4 transition-colors'
+    const className = 'mx-4 md:mx-6 mt-4 transition-colors'
     switch (true) {
       case !!error:
       case timedOut:
@@ -87,27 +87,23 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
   },
 })
 
-const selectSetTheme = (state) => state.set
 export default function Index({ theme }) {
-  const setTheme = useTheme(selectSetTheme)
-  useEffect(() => {
-    setTheme(theme)
-  }, [setTheme, theme])
+  useTheme(theme)
   return (
     <>
       <Head>
         <title>Verifiable Credentials Verifier</title>
       </Head>
-      <DocumentLoaderProvider>
-        <MachineProvider>
-          <ExecForm>
-            <Strategy />
-            <Header />
-            <LazyBunch />
-          </ExecForm>
-        </MachineProvider>
-      </DocumentLoaderProvider>
-      <footer className="bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 py-10 px-6 grid place-items-center">
+      <MachineProvider>
+        <ExecForm>
+          <Strategy />
+          <Header />
+          <LazyBunch />
+        </ExecForm>
+        <StatusMessage className="md:hidden pointer-events-none bg-gradient-to-t block bottom-0 -mt-4 pb-4 pt-10 px-7 sticky z-40 from-white dark:from-gray-900 via-white dark:via-gray-900" />
+        <ScrollTo />
+      </MachineProvider>
+      <footer className="bg-gradient-to-t from-gray-200 dark:from-gray-800 py-10 px-4 md:px-6 grid place-items-center opacity-50 transition-opacity hover:opacity-100 active:opacity-100 focus-within:opacity-100">
         <a
           className="text-lg font-semibold"
           href="https://github.com/stipsan/vc-app"

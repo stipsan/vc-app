@@ -12,7 +12,7 @@ export default function ReportRow({
     <>
       <HorizontalRuler />
       <article
-        className={cx('px-6 mb-4 grid gap-4', {
+        className={cx('px-4 md:px-6 mb-4 grid gap-4', {
           'animate-pulse': readyState === 'loading',
         })}
       >

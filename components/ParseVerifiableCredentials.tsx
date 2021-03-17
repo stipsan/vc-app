@@ -1,94 +1,114 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { useMachineSend, useMachineState } from '../lib/contexts'
+import { createAsset } from 'use-asset'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
+import { useIdsList, useJsonMap } from '../lib/selectors'
 import { useStore } from '../lib/useStore'
-import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { ErrorMessage, Panel } from './Formatted'
 import ReportRow from './ReportRow'
+import styles from './uglyworkarounds.module.css'
 
-export default function ParseVerifiableCredentials() {
+const work = createAsset(async (editor: string) => {
+  try {
+    const [
+      { default: babelParser },
+      { default: prettier },
+    ] = await Promise.all([
+      import('prettier/parser-babel'),
+      import('prettier/standalone'),
+    ])
+    // Prettier will handle annoying things like forgetting to use double quotes on keys, or forgetting to remove trailing slashes
+    const formatted = prettier
+      .format(editor, {
+        tabWidth: 4,
+        parser: 'json',
+        plugins: [babelParser],
+      })
+      .trim()
+
+    const data = JSON.parse(formatted)
+    const items = [].concat(data?.verifiableCredential || data?.items || data)
+
+    if (!items.length) {
+      throw new Error(`Failed to find Verifiable Credentials in the editor`)
+    }
+
+    return { ok: true, data: items }
+  } catch (error) {
+    return { ok: false, error }
+  }
+}, 15000)
+
+function ParseVerifiableCredentials() {
   const send = useMachineSend()
-  const state = useMachineState()
-  const { ids, json } = state.context
-  const parsing = state.matches('parsing')
+  const ids = useIdsList()
+  const json = useJsonMap()
+
+  const isCurrent = useMachineSelector(
+    useCallback((state) => state.value === 'parsing', [])
+  )
   const editor = useStore((state) => state.editor)
-  const [error, setError] = useState('')
-  const [lastUsedStrategy, setLastUsedStrategy] = useState(false)
+
+  const result = isCurrent ? work.read(editor) : undefined
 
   useEffect(() => {
-    if (state.value === 'fetching' || state.value === 'demoing') {
-      setLastUsedStrategy(false)
-    }
-  }, [state.value])
-
-  useEffect(() => {
-    if (!parsing) {
-      return
-    }
-
-    setLastUsedStrategy(true)
-    setError('')
-
-    try {
-      const data = JSON.parse(editor)
-      const items = [].concat(data?.verifiableCredential || data?.items || data)
-
-      if (!items.length) {
-        throw new Error(`Failed to find Verifiable Credentials in the editor`)
-      }
-
+    if (result?.ok === true) {
       send({
         type: 'PARSE_SUCCESS',
-        input: items.map((item) => {
+        input: result.data.map((item) => {
           if ('verifiableCredential' in item) return item.verifiableCredential
           return item
         }),
       })
-    } catch (err) {
-      send({
-        type: 'PARSE_FAILURE',
-        input: `Couldn't find Verifiable Credentials in the editor`,
-      })
-      toast.error(`Failed finding Verifiable Credentials in the editor`)
-      setError(err)
     }
-  }, [parsing, editor, send])
+    if (result?.ok === false) {
+      send({ type: 'PARSE_FAILURE', input: result.error.message })
+      toast.error(`Failed finding Verifiable Credentials in the editor`)
+    }
+  }, [result, send])
 
   switch (true) {
-    case !lastUsedStrategy && !state.matches('parsing'):
-      return null
-
-    case !!error:
+    case result?.ok === false:
       return (
         <ReportRow readyState="error">
           <Panel variant="error">
-            <ErrorMessage>{error}</ErrorMessage>
+            <ErrorMessage>{result.error}</ErrorMessage>
           </Panel>
         </ReportRow>
       )
-
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel variant="success">
+          <Panel>
             Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}
           </Panel>
           {ids.map((id) => (
-            <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
+            <Panel key={id} className={styles.maxWidth2}>
+              <ReactJason value={json.get(id)} />
+            </Panel>
           ))}
-        </ReportRow>
-      )
-
-    case state.matches('parsing'):
-      return (
-        <ReportRow readyState="loading">
-          <Panel>Parsing Verifiable Credentials from editor...</Panel>
         </ReportRow>
       )
 
     default:
       return null
   }
+}
+
+export default function ParseVerifiableCredentialsSuspender() {
+  return (
+    <Suspense
+      fallback={
+        <ReportRow readyState="loading">
+          <Panel>Parsing Verifiable Credentials from editor...</Panel>
+        </ReportRow>
+      }
+    >
+      <ParseVerifiableCredentials />
+    </Suspense>
+  )
 }

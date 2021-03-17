@@ -2,4 +2,4 @@
 
 > [State Machine Visualization](https://vcv.cocody.dev/viz)
 
-[![GUI screenshot](https://user-images.githubusercontent.com/81981/110862688-f2df0a80-82bf-11eb-8524-df6eadce7ada.png)](https://vcv.cocody.dev)
+[![GUI screenshot](https://user-images.githubusercontent.com/81981/111428363-ad737080-86f7-11eb-8754-3c405a48b830.png)](https://vcv.cocody.dev)

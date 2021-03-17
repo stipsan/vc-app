@@ -14,3 +14,24 @@ function jsonSelector(state: StateMachineState) {
 export function useJsonMap() {
   return useMachineSelector(jsonSelector)
 }
+
+function jsonldSelector(state: StateMachineState) {
+  return state.context.jsonld
+}
+export function useJsonld() {
+  return useMachineSelector(jsonldSelector)
+}
+
+function verifiedCredentialsSelector(state: StateMachineState) {
+  return state.context.verifiedCredentials
+}
+export function useVerifiedCredentials() {
+  return useMachineSelector(verifiedCredentialsSelector)
+}
+
+function counterfeitCredentialsSelector(state: StateMachineState) {
+  return state.context.counterfeitCredentials
+}
+export function useCounterfeitCredentials() {
+  return useMachineSelector(counterfeitCredentialsSelector)
+}

@@ -15,7 +15,6 @@ const contexts = {
   ..._contexts.W3ID_Security_Vocabulary,
   ..._contexts.W3C_Decentralized_Identifiers,
 }
-
 const webResolver = getResolver()
 // @ts-expect-error
 const didResolver = new Resolver({ ...webResolver })
@@ -60,32 +59,20 @@ const documentLoader = documentLoaderFactory.pluginFactory
     'https:': { resolve: async (url: string) => await fetchLoader.load(url) },
   })
   .addResolver({
+    // Defined down here instead of in the `contexts` object because it shouldn't bloat the default JS bundles
+    'https://w3id.org/did/v0.11': {
+      resolve: async () =>  (await import('./contexts/did-v0.11.json')).default
+    }
+  })
+  .addResolver({
     // Fallback to local cache until it's published
     'https://proxy.com/citizenship/v1': {
-      resolve: async () => {
-        return (await import('./citizenship-v1.json')).default
-      },
+      resolve: async () =>  (await import('./contexts/proxy-citizenship-v1.json')).default
+      ,
     },
   })
   .buildDocumentLoader()
 
 export default documentLoader
 
-export type LogsMap = Map<string, 'loading' | object | Error>
-export const documentLoaderWithLogger = createAsset(async (updateLog: (f: (draft: Draft<LogsMap>) => void | LogsMap) => void, url: string) => {
-    updateLog((draft) => {
-      if (!draft.has(url)) draft.set(url, 'loading')
-    })
-    try {
-      const result = await documentLoader(url)
-      updateLog((draft) => {
-        draft.set(url, JSON.parse(JSON.stringify(result)))
-      })
-      return result
-    } catch (err) {
-      updateLog((draft) => {
-        if (draft.get(url) === 'loading') draft.set(url, err)
-      })
-      throw err
-    }
-})
+export type DocumentLoader = typeof documentLoader

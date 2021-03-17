@@ -7,17 +7,10 @@ import {
   useTabsContext,
 } from '@reach/tabs'
 import cx from 'classnames'
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
 import Textarea from 'react-expanding-textarea'
-import { useMachineSend, useMachineState } from '../lib/contexts'
-import type { Interpreter } from '../lib/stateMachine'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useStore } from '../lib/useStore'
 
 function StrategyPanel({ children }: { children: React.ReactNode }) {
@@ -40,21 +33,24 @@ function DemoStrategy() {
 }
 
 function ParseStrategy() {
-  const state = useMachineState()
-  const [test, inc] = useState(0)
   const setEditor = useStore((state) => state.setEditor)
   const editor = useStore((state) => state.editor)
   const editingRef = useRef(false)
-  const { strategy } = state.context
-  const loading = [
-    'parsing',
-    'linkingData',
-    'verifyingCredentials',
-    'counterfeitingCredentials',
-  ].some(state.matches)
-
-  console.count('ParseStrategy render')
-  console.log(test)
+  const strategy = useMachineSelector(
+    useCallback((state) => state.context.strategy, [])
+  )
+  const loading = useMachineSelector(
+    useCallback(
+      (state) =>
+        [
+          'parsing',
+          'linkingData',
+          'verifyingCredentials',
+          'counterfeitingCredentials',
+        ].some(state.matches),
+      []
+    )
+  )
 
   return (
     <StrategyPanel>
@@ -72,9 +68,6 @@ function ParseStrategy() {
         // @ts-expect-error
         onChange={(event) => setEditor(event.target.value)}
         onBlur={() => {
-          inc((i) => ++i)
-          inc((i) => ++i)
-          inc((i) => ++i)
           editingRef.current = false
           Promise.all([
             import('prettier/parser-babel'),
@@ -86,19 +79,16 @@ function ParseStrategy() {
           ]).then(([{ default: babelParser }, { default: prettier }]) => {
             if (editingRef.current) return
             unstable_batchedUpdates(() => {
-              inc((i) => ++i)
-              inc((i) => ++i)
-              inc((i) => ++i)
+              setEditor(
+                prettier
+                  .format(editor, {
+                    tabWidth: 4,
+                    parser: 'json',
+                    plugins: [babelParser],
+                  })
+                  .trim()
+              )
             })
-            setEditor(
-              prettier
-                .format(editor, {
-                  tabWidth: 4,
-                  parser: 'json',
-                  plugins: [babelParser],
-                })
-                .trim()
-            )
           })
         }}
         value={editor}
@@ -195,14 +185,21 @@ function AuthField({ loading }: { loading: boolean }) {
 }
 
 function FetchStrategy() {
-  const state = useMachineState()
-  const loading = [
-    'fetching',
-    'linkingData',
-    'verifyingCredentials',
-    'counterfeitingCredentials',
-  ].some(state.matches)
-  const { strategy } = state.context
+  const loading = useMachineSelector(
+    useCallback(
+      (state) =>
+        [
+          'fetching',
+          'linkingData',
+          'verifyingCredentials',
+          'counterfeitingCredentials',
+        ].some(state.matches),
+      []
+    )
+  )
+  const strategy = useMachineSelector(
+    useCallback((state) => state.context.strategy, [])
+  )
 
   return (
     <StrategyPanel>
@@ -246,23 +243,29 @@ function StrategyTab({
 
 export default function Strategy() {
   const send = useMachineSend()
-  const state = useMachineState()
-  const idle = ['ready', 'success', 'failure'].some(state.matches)
-  const getIndex = useCallback((state: Interpreter['state']) => {
-    switch (state.context.strategy) {
-      case 'demo':
-        return 0
-      case 'parse':
-        return 1
-      case 'fetch':
-        return 2
-    }
-  }, [])
+  const index = useMachineSelector(
+    useCallback((state) => {
+      switch (state.context.strategy) {
+        case 'demo':
+          return 0
+        case 'parse':
+          return 1
+        case 'fetch':
+          return 2
+      }
+    }, [])
+  )
+  const idle = useMachineSelector(
+    useCallback(
+      (state) => ['ready', 'success', 'failure'].some(state.matches),
+      []
+    )
+  )
 
   return (
     <Tabs
-      className="px-6 pt-8"
-      index={getIndex(state)}
+      className="px-4 md:px-6 pt-8"
+      index={index}
       onChange={(index) => {
         switch (index) {
           case 0:

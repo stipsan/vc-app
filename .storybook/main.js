@@ -10,7 +10,26 @@ module.exports = {
         docs: false,
       },
     },
-    '@storybook/addon-postcss',
+    {
+      name: '@storybook/addon-postcss',
+      options: {
+        rule: { test: /(?<!\.module)\.css$/ },
+        cssLoaderOptions: {
+          modules: false,
+        },
+      },
+    },
+    {
+      name: '@storybook/addon-postcss',
+      options: {
+        rule: { test: /\.module\.css$/ },
+        cssLoaderOptions: {
+          modules: {
+            mode: 'pure',
+          },
+        },
+      },
+    },
     'storybook-dark-mode',
   ],
 }

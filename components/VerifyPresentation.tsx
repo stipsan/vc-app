@@ -1,192 +1,147 @@
-import cx from 'classnames'
-import { useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
-import { useImmer } from 'use-immer'
-import { useMachineSend, useMachineState } from '../lib/contexts'
+import { createAsset } from 'use-asset'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
+import { useJsonMap } from '../lib/selectors'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-function VerifyPresentationRow() {
-  const send = useMachineSend()
-  const state = useMachineState()
-  const { json } = state.context
-  const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
-    'loading'
-  )
-  const [verifiablePresentation, setVerifiablePresentation] = useState(null)
-  const [expanded, setExpanded] = useState(null)
-  const [error, setError] = useState(null)
-  const [log, updateLog] = useImmer(new Map<string, string | object>())
-  console.log(log)
-  useEffect(() => {
-    let cancelled = false
-
-    Promise.all([
+const work = createAsset(async (json: Map<string, object>) => {
+  try {
+    const [
+      { Ed25519KeyPair },
+      { Ed25519Signature2018 },
+      { ld: vc },
+      { default: documentLoaderFactory },
+    ] = await Promise.all([
       import('@transmute/did-key-ed25519'),
       import('@transmute/ed25519-signature-2018'),
       import('@transmute/vc.js'),
       import('../lib/documentLoader'),
     ])
-      .then(
-        async ([
-          { Ed25519KeyPair },
-          { Ed25519Signature2018 },
-          { ld: vc },
-          { default: documentLoaderFactory },
-        ]) => {
-          if (cancelled) return
 
-          ///* figure out why this fails
-          const key = await Ed25519KeyPair.generate({
-            secureRandom: () =>
-              window.crypto.getRandomValues(new Uint8Array(32)),
-          })
-          //*/
-          //const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
-          // TODO temp workaround issue with libs out of sync
-          ///*
-          Object.defineProperty(key, 'publicKeyBase58', {
-            get() {
-              console.log('get!')
-              return key.toKeyPair().publicKeyBase58
-            },
-          })
-          //*/
-          key.id = key.controller + key.id
-          console.log({ key }, key.id)
-          const suite = new Ed25519Signature2018({ key })
-          console.log({ suite })
+    const key = await Ed25519KeyPair.generate({
+      secureRandom: () => window.crypto.getRandomValues(new Uint8Array(32)),
+    })
+    /*
+    Object.defineProperty(key, 'publicKeyBase58', {
+      get() {
+        console.log('get!')
+        return key.toKeyPair().publicKeyBase58
+      },
+    })
+    //*/
+    key.id = key.controller + key.id
+    const suite = new Ed25519Signature2018({ key })
 
-          const documentLoader = async (url: string) => {
-            console.warn(url.startsWith(key.controller), key.controller, url)
-            if (url.startsWith(key.controller)) {
-              return {
-                contextUrl: null,
-                document: {
-                  '@context': [
-                    'https://w3id.org/did/v0.11',
-                    {
-                      '@base': key.controller,
-                    },
-                  ],
-                  id: key.controller,
-                  publicKey: [key.toKeyPair()],
-                  authentication: [key.id],
-                  assertionMethod: [key.id],
-                  capabilityDelegation: [key.id],
-                  capabilityInvocation: [key.id],
-                },
-                documentUrl: url,
-              }
-            }
-            updateLog((draft) => {
-              if (!draft.has(url)) draft.set(url, 'loading')
-            })
-            try {
-              const result = await documentLoaderFactory(url)
-              updateLog((draft) => {
-                if (draft.get(url) === 'loading')
-                  draft.set(url, JSON.parse(JSON.stringify(result)))
-              })
-              return result
-            } catch (err) {
-              updateLog((draft) => {
-                if (draft.get(url) === 'loading') draft.set(url, err.message)
-              })
-              throw err
-            }
-          }
-
-          const id = 'ebc6f1c2'
-          const holder = 'did:ex:12345'
-          const challenge = '123'
-          const presentation = await vc.createPresentation({
-            verifiableCredential: JSON.parse(
-              JSON.stringify([...json.values()])
-            ),
-            id,
-            holder,
-            documentLoader,
-          })
-          /*
-          presentation.verifiableCredential = presentation.verifiableCredential.map(
-            (_, i) => {
-              if (i % 2) return _
-              _.id = new Date().toISOString()
-              return _
-            }
-          )
-          // */
-          console.log({ presentation })
-          const verifiablePresentation = await vc.signPresentation({
-            presentation,
-            suite,
-            challenge,
-            documentLoader,
-          })
-
-          setVerifiablePresentation(verifiablePresentation)
-
-          console.log({ verifiablePresentation })
-          /*
-          verifiablePresentation.verifiableCredential = verifiablePresentation.verifiableCredential.map(
-            (_) => {
-              _.id = new Date().toISOString()
-              return _
-            }
-          )
-          // */
-          const presentationVerified = await vc.verify({
-            presentation: verifiablePresentation,
-            suite: new Ed25519Signature2018({}),
-            //suite,
-            challenge,
-            documentLoader,
-          })
-          console.log({ presentationVerified })
-
-          if (cancelled) return
-
-          setExpanded(presentationVerified)
-          if (presentationVerified.verified) {
-            setReadyState('success')
-            send({ type: 'VERIFIED_PRESENTATION_SUCCESS', input: id })
-            //Skip counterfeiting until implemented
-            send({ type: 'COUNTERFEIT_PRESENTATION_SUCCESS', input: id })
-          } else {
-            setReadyState('error')
-            setError(presentationVerified.error)
-            toast.error(` Failed verification`)
-            send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
-          }
+    const documentLoader = async (url: string) => {
+      if (url.startsWith(key.controller)) {
+        return {
+          contextUrl: null,
+          document: {
+            '@context': [
+              'https://w3id.org/did/v0.11',
+              {
+                '@base': key.controller,
+              },
+            ],
+            id: key.controller,
+            publicKey: [key.toKeyPair()],
+            authentication: [key.id],
+            assertionMethod: [key.id],
+            capabilityDelegation: [key.id],
+            capabilityInvocation: [key.id],
+          },
+          documentUrl: url,
         }
-      )
-      .catch((err) => {
-        if (cancelled) return
-        setReadyState('error')
-        setError(err)
-        toast.error(`The Verifiable Presentation didn't verify`)
-        send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: '' })
+      }
+
+      try {
+        const result = await documentLoaderFactory(url)
+
+        return result
+      } catch (err) {
+        throw err
+      }
+    }
+
+    const id = 'ebc6f1c2'
+    const holder = 'did:ex:12345'
+    const challenge = '123'
+    const presentation = await vc.createPresentation({
+      verifiableCredential: JSON.parse(JSON.stringify([...json.values()])),
+      id,
+      holder,
+      documentLoader,
+    })
+
+    const verifiablePresentation = await vc.signPresentation({
+      presentation,
+      suite,
+      challenge,
+      documentLoader,
+    })
+
+    try {
+      const result = await vc.verify({
+        presentation: verifiablePresentation,
+        suite: new Ed25519Signature2018({}),
+        //suite,
+        challenge,
+        documentLoader,
       })
 
-    return () => {
-      cancelled = true
+      if (result.verified) {
+        return { ok: true, verifiablePresentation, result }
+        // send({ type: 'VERIFIED_PRESENTATION_SUCCESS', input: id })
+      } else {
+        return { ok: false, verifiablePresentation, error: result.error }
+        // toast.error(` Failed verification`)
+        // send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
+      }
+    } catch (error) {
+      return { ok: false, verifiablePresentation, error }
+      // toast.error(` Failed verification`)
+      // send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  } catch (error) {
+    return { ok: false, error }
+  }
+})
 
-  const message =
-    readyState === 'loading'
-      ? 'Creating and Verifying Verifiable Presentation...'
-      : readyState === 'error'
-      ? `The Verifiable Presentation didn't verify`
-      : `The Verifiable Presentation is verifiable`
+function VerifyPresentationRow() {
+  const send = useMachineSend()
+  const json = useJsonMap()
+
+  const result = work.read(json)
+
+  useEffect(() => {
+    if (result?.ok === true) {
+      send({
+        type: 'VERIFIED_PRESENTATION_SUCCESS',
+        input: '',
+      })
+    }
+    if (result?.ok === false) {
+      console.error('VERIFIED_PRESENTATION_FAILURE', result.error)
+      send({
+        type: 'VERIFIED_PRESENTATION_FAILURE',
+        input: result.error.message,
+      })
+      toast.error(`Failed verificatio`)
+    }
+  }, [result, send])
+
+  const { verifiablePresentation, error } = result
 
   return (
     <>
       {verifiablePresentation && (
-        <Panel key="first" variant="success">
-          Created Verifiable Presentation with
+        <Panel key="first">
+          {`Created Verifiable Presentation with `}
+          <span className="font-bold">
+            {verifiablePresentation.verifiableCredential.length}
+          </span>
           {verifiablePresentation.verifiableCredential.length === 1
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
@@ -197,50 +152,52 @@ function VerifyPresentationRow() {
       )}
       <Panel
         key="second"
-        className={cx({
-          'animate-pulse': readyState === 'loading',
-        })}
         variant={
-          readyState === 'error'
+          result.ok === false
             ? 'error'
-            : readyState === 'success'
+            : result.ok === true
             ? 'success'
             : 'default'
         }
       >
-        {message}
-        {readyState === 'success' && expanded && (
-          <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
+        {result.ok === false
+          ? `The Verifiable Presentation didn't verify`
+          : `The Verifiable Presentation is verifiable`}
+        {result.ok === true && result.result && (
+          <SuperReadonlyTextarea value={JSON.stringify(result.result)} />
         )}
-        {readyState === 'error' &&
-          (expanded ? (
-            <SuperReadonlyTextarea
-              className="bg-red-100 dark:bg-red-900 dark:bg-opacity-20 focus:ring-inset focus:ring-red-200 dark:focus:ring-red-900 focus:ring-2"
-              value={JSON.stringify(expanded)}
-            />
-          ) : (
-            error && (
-              <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
-                {error.message}
-                <br />
-                {error.stack}
-              </div>
-            )
-          ))}
+        {result.ok === false && error && (
+          <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+            {error.message}
+            <br />
+            {error.stack}
+          </div>
+        )}
       </Panel>
     </>
   )
 }
 
 export default function VerifyPresentation() {
-  const state = useMachineState()
-  const { verifiedPresentation } = state.context
-  const isCurrent = state.matches('verifyingPresentation')
+  const verifiedPresentation = useMachineSelector(
+    useCallback((state) => state.context.verifiedPresentation, [])
+  )
+  const isCurrent = useMachineSelector(
+    useCallback((state) => state.value === 'verifyingPresentation', [])
+  )
 
   if (isCurrent || verifiedPresentation !== 'pending') {
     return (
       <ReportRow>
-        <VerifyPresentationRow />
+        <Suspense
+          fallback={
+            <Panel className="animate-pulse">
+              Creating and Verifying Verifiable Presentation...
+            </Panel>
+          }
+        >
+          <VerifyPresentationRow />
+        </Suspense>
       </ReportRow>
     )
   }

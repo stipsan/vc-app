@@ -1,18 +1,72 @@
-import cx from 'classnames'
-import { useCallback, useEffect, useState } from 'react'
+import produce from 'immer'
+import { memo, Suspense, useCallback, useEffect } from 'react'
+import { unstable_batchedUpdates } from 'react-dom'
 import toast from 'react-hot-toast'
+import { createAsset } from 'use-asset'
 import create from 'zustand'
-import { useMachineSend, useMachineState } from '../lib/contexts'
-import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
+import {
+  useMachineSelector,
+  useMachineSend,
+  useOnMachineReset,
+} from '../lib/contexts'
+import type { DocumentLoader } from '../lib/documentLoader'
+import { useIdsList, useJsonld, useJsonMap } from '../lib/selectors'
+import { LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
+const work = createAsset(
+  async (documentLoader: DocumentLoader, json: object) => {
+    try {
+      const [{ default: jsonld }, jsonldChecker] = await Promise.all([
+        import('jsonld'),
+        import('jsonld-checker'),
+      ])
+
+      const result = await jsonldChecker.check(
+        JSON.parse(JSON.stringify(json)),
+        documentLoader
+      )
+
+      if (!result.ok) {
+        const error = new Error(result.error.details)
+        error.name = result.error.type
+        console.error(error)
+        throw error
+      }
+
+      const expanded = await jsonld.expand(
+        JSON.parse(JSON.stringify(json)),
+        // @ts-expect-error
+        { documentLoader }
+      )
+
+      return {
+        ok: true,
+        data: expanded,
+      }
+    } catch (error) {
+      return { ok: false, error }
+    }
+  }
+)
+
 const useLogs = create<LogsState>((set) => ({
   urls: {},
-  set: (url, entry) => {
-    set((state) => ({ urls: { ...state.urls, [url]: entry } }))
-  },
+  set: (url, entry) =>
+    set(
+      produce((state) => {
+        if (entry === 'loading' && url in state.urls) {
+          return
+        }
+        if (entry !== 'loading' && state.urls[url] !== 'loading') {
+          return
+        }
+
+        state.urls[url] = entry
+      })
+    ),
 }))
 
 function ValidateLinkedDataRow({
@@ -25,120 +79,94 @@ function ValidateLinkedDataRow({
   documentLoader: DocumentLoader
 }) {
   const send = useMachineSend()
-  const state = useMachineState()
-  const { ids, json } = state.context
-  const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
-    'loading'
-  )
-  const [expanded, setExpanded] = useState(null)
-  const [error, setError] = useState(null)
+  const json = useJsonMap().get(id)
+
+  const result = work.read(documentLoader, json)
 
   useEffect(() => {
-    let cancelled = false
-
-    Promise.all([import('jsonld'), import('jsonld-checker')])
-      .then(async ([{ default: jsonld }, jsonldChecker]) => {
-        if (cancelled) return
-
-        const result = await jsonldChecker.check(
-          JSON.parse(JSON.stringify(json.get(id))),
-          documentLoader
-        )
-
-        if (!result.ok) {
-          const error = new Error(result.error.details)
-          error.name = result.error.type
-          console.error(error)
-          throw error
-        }
-        if (cancelled) return
-        // throw new Error('oooh')
-        const expanded = await jsonld.expand(
-          JSON.parse(JSON.stringify(json.get(id))),
-          // @ts-expect-error
-          { documentLoader }
-        )
-        if (cancelled) return
-        setReadyState('success')
-        setExpanded(expanded)
-        send({ type: 'LINKING_DATA_SUCCESS', input: id })
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setReadyState('error')
-        setError(err)
-        toast.error(`${nu} Invalid JSON-LD`)
-        send({ type: 'LINKING_DATA_FAILURE', input: id })
-      })
-
-    return () => {
-      cancelled = true
-      console.warn('JSON-LD validation cancelled')
+    if (result.ok === true) {
+      send({ type: 'LINKING_DATA_SUCCESS', input: id })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (result.ok === false) {
+      toast.error(`${nu} Invalid JSON-LD`)
+      send({ type: 'LINKING_DATA_FAILURE', input: id })
+    }
+  }, [id, nu, result, send])
 
-  const message =
-    readyState === 'loading'
-      ? 'Checking JSON-LD...'
-      : readyState === 'error'
-      ? 'Invalid JSON-LD'
-      : 'Valid JSON-LD'
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => work.clear(documentLoader, json), [])
 
-  return (
-    <Panel
-      className={cx({ 'animate-pulse': readyState === 'loading' })}
-      variant={
-        readyState === 'error'
-          ? 'error'
-          : readyState === 'success'
-          ? 'success'
-          : 'default'
-      }
-    >
-      {ids.length > 1 ? `${nu} ` : ''}
-      {message}
-      {readyState === 'success' && expanded && (
-        <SuperReadonlyTextarea value={JSON.stringify(expanded)} />
-      )}
-      {readyState === 'error' && error && (
-        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
-          {error.message}
-          <br />
-          {error.stack}
-        </div>
-      )}
-    </Panel>
-  )
+  switch (result.ok) {
+    case false:
+      return (
+        <Panel variant="error">
+          {nu}
+          Invalid JSON-LD
+          <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+            {result.error.message}
+            <br />
+            {result.error.stack}
+          </div>
+        </Panel>
+      )
+    case true:
+      return (
+        <Panel variant="success">
+          {nu}
+          Valid JSON-LD
+          <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+        </Panel>
+      )
+  }
 }
 
+const ValidateLinkedDataDocumentLoaderLogs = memo(
+  ({ loading }: { loading: boolean }) => {
+    const log = useLogs(useCallback((state) => state.urls, []))
+
+    return <DocumentLoaderLogs loading={loading} log={log} />
+  }
+)
+
 export default function ValidateLinkedData() {
-  const log = useLogs((state) => state.urls)
-  const updateLog = useLogs((state) => state.set)
-  const send = useMachineSend()
-  const state = useMachineState()
-  const { ids, jsonld } = state.context
-  const isCurrent = state.matches('linkingData')
-  const realDocumentLoader = documentLoaderStore(
-    (state) => state.documentLoader
+  useOnMachineReset(
+    useCallback(() => {
+      useLogs.setState({ urls: {} })
+    }, [])
   )
+
+  const send = useMachineSend()
+  const ids = useIdsList()
+  const jsonld = useJsonld()
+  const isCurrent = useMachineSelector(
+    useCallback((state) => state.value === 'linkingData', [])
+  )
+
+  const updateLog = useLogs(useCallback((state) => state.set, []))
   const documentLoader = useCallback(
     async (url: string) => {
-      updateLog(url, 'loading')
+      unstable_batchedUpdates(() => {
+        updateLog(url, 'loading')
+      })
       try {
-        const result = await realDocumentLoader(url)
-
-        updateLog(url, JSON.parse(JSON.stringify(result)))
+        const { default: documentLoader } = await import(
+          '../lib/documentLoader'
+        )
+        const result = await documentLoader(url)
+        unstable_batchedUpdates(() => {
+          updateLog(url, JSON.parse(JSON.stringify(result)))
+        })
         return result
       } catch (err) {
-        updateLog(url, err)
+        unstable_batchedUpdates(() => {
+          updateLog(url, err)
+        })
         throw err
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [updateLog]
   )
-  console.log('ValidateLinkedData', { log })
 
   useEffect(() => {
     if (isCurrent && jsonld.size === ids.length) {
@@ -150,18 +178,22 @@ export default function ValidateLinkedData() {
   if (isCurrent || jsonld.size) {
     return (
       <ReportRow>
-        <DocumentLoaderLogs
-          loading={isCurrent}
-          log={log}
-          updateLog={updateLog}
-        />
+        <ValidateLinkedDataDocumentLoaderLogs loading={isCurrent} />
         {ids.map((id, nu) => (
-          <ValidateLinkedDataRow
+          <Suspense
             key={id}
-            id={id}
-            nu={`#${nu + 1}`}
-            documentLoader={documentLoader}
-          />
+            fallback={
+              <Panel className="animate-pulse">
+                #{nu + 1} Checking JSON-LD...
+              </Panel>
+            }
+          >
+            <ValidateLinkedDataRow
+              id={id}
+              nu={`#${nu + 1} `}
+              documentLoader={documentLoader}
+            />
+          </Suspense>
         ))}
       </ReportRow>
     )

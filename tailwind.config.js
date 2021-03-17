@@ -18,7 +18,7 @@ module.exports = {
           'linear-gradient(to top, transparent 50%, var(--tw-gradient-from), var(--tw-gradient-from) 1.5rem, var(--tw-gradient-stops)), linear-gradient(to bottom, transparent 50%, var(--tw-gradient-from), var(--tw-gradient-from) 1.5rem, var(--tw-gradient-stops))',
       },
       colors: {
-        gray: colors.coolGray,
+        gray: colors.blueGray,
       },
       gridTemplateColumns: {
         header: 'max-content minmax(0,1fr)',
