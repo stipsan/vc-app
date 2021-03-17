@@ -4,8 +4,6 @@ import {
 } from '@transmute/jsonld-document-loader'
 import DataLoader from 'dataloader'
 import { Resolver } from 'did-resolver'
-import type { Draft } from 'immer'
-import { createAsset } from 'use-asset'
 import didDoc from './did.json'
 //import { getResolver } from 'web-did-resolver'
 import { getResolver } from './webResolver'
