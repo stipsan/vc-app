@@ -43,8 +43,6 @@ const work = createAsset(async () => {
       id: 'http://example.gov/credentials/3732',
       issuer: didDoc.id,
       issuanceDate: new Date().toISOString(),
-      // TODO: add expirationDate or not?
-      expirationDate: new Date(1647443812695).toISOString(),
     })
 
     const key = await Ed25519KeyPair.from(didDoc.publicKey[0])

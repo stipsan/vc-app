@@ -1,7 +1,6 @@
 import cx from 'classnames'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { useImmer } from 'use-immer'
 import { useMachineSend, useMachineState } from '../lib/contexts'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -16,8 +15,6 @@ function VerifyPresentationRow() {
   const [verifiablePresentation, setVerifiablePresentation] = useState(null)
   const [expanded, setExpanded] = useState(null)
   const [error, setError] = useState(null)
-  const [log, updateLog] = useImmer(new Map<string, string | object>())
-  console.log(log)
   useEffect(() => {
     let cancelled = false
 
@@ -79,20 +76,12 @@ function VerifyPresentationRow() {
                 documentUrl: url,
               }
             }
-            updateLog((draft) => {
-              if (!draft.has(url)) draft.set(url, 'loading')
-            })
+
             try {
               const result = await documentLoaderFactory(url)
-              updateLog((draft) => {
-                if (draft.get(url) === 'loading')
-                  draft.set(url, JSON.parse(JSON.stringify(result)))
-              })
+
               return result
             } catch (err) {
-              updateLog((draft) => {
-                if (draft.get(url) === 'loading') draft.set(url, err.message)
-              })
               throw err
             }
           }

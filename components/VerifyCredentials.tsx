@@ -16,7 +16,7 @@ import {
   useJsonMap,
   useVerifiedCredentials,
 } from '../lib/selectors'
-import { LogsState, wait } from '../lib/utils'
+import { LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
@@ -34,10 +34,6 @@ const work = createAsset(
         documentLoader,
         suite: new Ed25519Signature2018({}),
       })
-
-      if (process.env.NODE_ENV !== 'production') {
-        await wait(1000, 10000)
-      }
 
       if (result.verified) {
         return { ok: true, data: result }

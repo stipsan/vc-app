@@ -71,12 +71,14 @@ export function useOnMachineReset(cb: Function) {
     }
   }, [idle, cb])
   // TODO: temporary debugger
+  /*
   const debugRef = useRef(0)
   useEffect(() => {
     if (debugRef.current++ > 1) {
       console.error('cb changed!!', cb)
     }
   }, [cb])
+  //*/
 }
 function selectIdle(state: SelectorState) {
   switch (state.value) {
