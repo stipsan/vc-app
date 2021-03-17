@@ -125,7 +125,7 @@ export function DemoVerifiableCredentials({
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel variant="success">
+          <Panel>
             Created <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'

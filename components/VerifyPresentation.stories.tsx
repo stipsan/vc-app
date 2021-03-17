@@ -84,7 +84,7 @@ export const Success = () => {
     },
     id: 'http://example.gov/credentials/3732',
     issuer: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
-    issuanceDate: '2021-03-16T15:17:10.998Z',
+    issuanceDate: '2020-03-16T15:17:10.998Z',
     expirationDate: '2022-03-16T15:16:52.695Z',
     proof: {
       type: 'Ed25519Signature2018',

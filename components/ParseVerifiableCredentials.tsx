@@ -80,7 +80,7 @@ function ParseVerifiableCredentials() {
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel variant="success">
+          <Panel>
             Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
