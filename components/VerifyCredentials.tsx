@@ -1,19 +1,54 @@
-import { unstable_batchedUpdates } from 'react-dom'
-import cx from 'classnames'
 import produce from 'immer'
-import { useCallback, useEffect, useState, memo, Suspense } from 'react'
+import { memo, Suspense, useCallback, useEffect } from 'react'
+import { unstable_batchedUpdates } from 'react-dom'
 import toast from 'react-hot-toast'
+import { createAsset } from 'use-asset'
 import create from 'zustand'
 import {
   useMachineSelector,
   useMachineSend,
-  useMachineState,
+  useOnMachineReset,
 } from '../lib/contexts'
-import { DocumentLoader, documentLoaderStore, LogsState } from '../lib/utils'
+import type { DocumentLoader } from '../lib/documentLoader'
+import {
+  useIdsList,
+  useJsonld,
+  useJsonMap,
+  useVerifiedCredentials,
+} from '../lib/selectors'
+import { LogsState, wait } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
-import { useJsonld } from '../lib/selectors'
+
+const work = createAsset(
+  async (documentLoader: DocumentLoader, json: object) => {
+    try {
+      const [{ Ed25519Signature2018 }, { ld: vc }] = await Promise.all([
+        import('@transmute/ed25519-signature-2018'),
+        import('@transmute/vc.js'),
+      ])
+
+      const result = await vc.verifyCredential({
+        credential: JSON.parse(JSON.stringify(json)),
+        documentLoader,
+        suite: new Ed25519Signature2018({}),
+      })
+
+      if (process.env.NODE_ENV !== 'production') {
+        await wait(1000, 10000)
+      }
+
+      if (result.verified) {
+        return { ok: true, data: result }
+      } else {
+        return { ok: false, data: result, error: result.error }
+      }
+    } catch (error) {
+      return { ok: false, error }
+    }
+  }
+)
 
 const useLogs = create<LogsState>((set) => ({
   urls: {},
@@ -42,96 +77,48 @@ function VerifyCredentialsRow({
   documentLoader: DocumentLoader
 }) {
   const send = useMachineSend()
-  const state = useMachineState()
-  const { ids, json, jsonld } = state.context
-  const jsonldStatus = jsonld.get(id)
-  const [readyState, setReadyState] = useState<'loading' | 'success' | 'error'>(
-    'loading'
-  )
-  const [expanded, setExpanded] = useState(null)
-  const [error, setError] = useState(null)
+  const json = useJsonMap().get(id)
+
+  const result = work.read(documentLoader, json)
 
   useEffect(() => {
-    if (jsonldStatus === 'failure') {
+    if (result.ok === true) {
+      send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
+    }
+    if (result.ok === false) {
+      toast.error(`${nu} Failed verification`)
       send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
-      return
     }
+  }, [id, nu, result.ok, send])
 
-    let cancelled = false
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => work.clear(documentLoader, json), [])
 
-    Promise.all([
-      import('@transmute/ed25519-signature-2018'),
-      import('@transmute/vc.js'),
-    ])
-      .then(async ([{ Ed25519Signature2018 }, { ld: vc }]) => {
-        if (cancelled) return
-        const result = await vc.verifyCredential({
-          credential: JSON.parse(JSON.stringify(json.get(id))),
-          documentLoader,
-          suite: new Ed25519Signature2018({}),
-        })
-        // throw new Error('oooh')
-        if (cancelled) return
-        if (result.verified) {
-          setReadyState('success')
-          setExpanded(result.results)
-          send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
-        } else {
-          setReadyState('error')
-          setError(result.error)
-          toast.error(`${nu} Failed verification`)
-          send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
-        }
-        setExpanded(result)
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setReadyState('error')
-        setError(err)
-        toast.error(`${nu} Failed verification`)
-        send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
-      })
-
-    return () => {
-      cancelled = true
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const message =
-    jsonldStatus === 'failure'
-      ? `Skipping verification because of invalid JSON-LD`
-      : readyState === 'loading'
-      ? 'Verifying Credential...'
-      : readyState === 'error'
-      ? `Failed verification`
-      : 'Credential verified successfully'
-
-  return (
-    <Panel
-      className={cx({
-        'animate-pulse': readyState === 'loading' && jsonldStatus !== 'failure',
-      })}
-      variant={
-        readyState === 'error'
-          ? 'error'
-          : readyState === 'success'
-          ? 'success'
-          : 'default'
-      }
-    >
-      {ids.length > 1 ? `${nu} ` : ''}
-      {message}
-      {expanded && <SuperReadonlyTextarea value={JSON.stringify(expanded)} />}
-      {readyState === 'error' && error && (
-        <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
-          {error.message}
-          <br />
-          {error.stack}
-        </div>
-      )}
-    </Panel>
-  )
+  switch (result.ok) {
+    case false:
+      return (
+        <Panel variant="error">
+          {nu}
+          Failed verification
+          {result.data && (
+            <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+          )}
+          <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+            {result.error.message}
+            <br />
+            {result.error.stack}
+          </div>
+        </Panel>
+      )
+    case true:
+      return (
+        <Panel variant="success">
+          {nu}
+          Credential verified successfully
+          <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+        </Panel>
+      )
+  }
 }
 
 function VerifyCredentialsRowSuspender({
@@ -178,21 +165,29 @@ const VerifyCredentialsDocumentLoaderLogs = memo(
 )
 
 export default function VerifyCredentials() {
+  useOnMachineReset(
+    useCallback(() => {
+      useLogs.setState({ urls: {} })
+    }, [])
+  )
+
   const updateLog = useLogs(useCallback((state) => state.set, []))
   const send = useMachineSend()
-  const state = useMachineState()
-  const { ids, verifiedCredentials } = state.context
-  const isCurrent = state.matches('verifyingCredentials')
-  const realDocumentLoader = documentLoaderStore(
-    useCallback((state) => state.documentLoader, [])
+  const isCurrent = useMachineSelector(
+    useCallback((state) => state.value === 'verifyingCredentials', [])
   )
+  const ids = useIdsList()
+  const verifiedCredentials = useVerifiedCredentials()
   const documentLoader = useCallback(
     async (url: string) => {
       unstable_batchedUpdates(() => {
         updateLog(url, 'loading')
       })
       try {
-        const result = await realDocumentLoader(url)
+        const { default: documentLoader } = await import(
+          '../lib/documentLoader'
+        )
+        const result = await documentLoader(url)
 
         unstable_batchedUpdates(() => {
           updateLog(url, JSON.parse(JSON.stringify(result)))

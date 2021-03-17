@@ -1,11 +1,7 @@
 import { Suspense, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
-import {
-  useMachineSelector,
-  useMachineSend,
-  useMachineState,
-} from '../lib/contexts'
+import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useIdsList, useJsonMap } from '../lib/selectors'
 import { useStore } from '../lib/useStore'
 import ReactJason from './DS/react-jason'
@@ -46,7 +42,6 @@ const work = createAsset(async (editor: string) => {
 
 function ParseVerifiableCredentials() {
   const send = useMachineSend()
-  const state = useMachineState()
   const ids = useIdsList()
   const json = useJsonMap()
 

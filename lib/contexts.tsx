@@ -7,13 +7,11 @@ import React, {
   useRef,
 } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
-import documentLoader from './documentLoader'
 import type { Interpreter, State, StateValue } from './stateMachine'
 import defaultMachine from './stateMachine'
 
 export const context = {
   machine: createContext<Interpreter>(null),
-  documentLoader: createContext<typeof documentLoader>(null),
 }
 
 export function MachineProvider({ children }: { children: React.ReactNode }) {

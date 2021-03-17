@@ -75,3 +75,4 @@ const documentLoader = documentLoaderFactory.pluginFactory
 
 export default documentLoader
 
+export type DocumentLoader = typeof documentLoader

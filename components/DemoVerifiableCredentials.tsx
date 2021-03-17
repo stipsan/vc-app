@@ -91,7 +91,7 @@ export function DemoVerifiableCredentials({
 }: {
   defaultResult?: any
 }) {
-  useOnMachineReset(() => work.clear())
+  useOnMachineReset(useCallback(() => work.clear(), []))
   const send = useMachineSend()
   const ids = useIdsList()
   const json = useJsonMap()

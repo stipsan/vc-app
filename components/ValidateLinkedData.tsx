@@ -9,7 +9,7 @@ import {
   useMachineSend,
   useOnMachineReset,
 } from '../lib/contexts'
-import _documentLoader from '../lib/documentLoader'
+import type { DocumentLoader } from '../lib/documentLoader'
 import { useIdsList, useJsonld, useJsonMap } from '../lib/selectors'
 import { LogsState, wait } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
@@ -17,7 +17,7 @@ import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
 const work = createAsset(
-  async (documentLoader: typeof _documentLoader, json: object) => {
+  async (documentLoader: DocumentLoader, json: object) => {
     try {
       const [{ default: jsonld }, jsonldChecker] = await Promise.all([
         import('jsonld'),
@@ -80,7 +80,7 @@ function ValidateLinkedDataRow({
 }: {
   id: string
   nu: string
-  documentLoader: typeof _documentLoader
+  documentLoader: DocumentLoader
 }) {
   const send = useMachineSend()
   const json = useJsonMap().get(id)
@@ -153,7 +153,10 @@ export default function ValidateLinkedData() {
         updateLog(url, 'loading')
       })
       try {
-        const result = await _documentLoader(url)
+        const { default: documentLoader } = await import(
+          '../lib/documentLoader'
+        )
+        const result = await documentLoader(url)
         unstable_batchedUpdates(() => {
           updateLog(url, JSON.parse(JSON.stringify(result)))
         })
