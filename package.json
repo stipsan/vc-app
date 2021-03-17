@@ -12,7 +12,7 @@
   "dependencies": {
     "@reach/tabs": "^0.13.2",
     "@transmute/did-key-ed25519": "0.2.1-unstable.35",
-    "@transmute/ed25519-signature-2018": "0.0.4-unstable.14",
+    "@transmute/ed25519-signature-2018": "0.2.0",
     "@transmute/jsonld-document-loader": "0.2.0",
     "@transmute/vc.js": "0.2.1-unstable.10",
     "@xstate/immer": "^0.2.0",
@@ -26,7 +26,7 @@
     "jsonld": "^4.0.1",
     "jsonld-checker": "^0.1.8-unstable.3",
     "jsum": "^0.1.4",
-    "next": "10.0.8",
+    "next": "10.0.9",
     "polished": "^4.1.1",
     "react": "17.0.1",
     "react-confetti": "^6.0.1",
