@@ -19,16 +19,16 @@ export default function ScrollTo() {
       case 'verifyingPresentation':
       case 'failure':
       case 'success':
-        return (
-          nodeRef.current &&
-          requestAnimationFrame(() =>
+        requestAnimationFrame(
+          () =>
+            nodeRef.current &&
             scrollIntoView(nodeRef.current, {
               behavior: 'smooth',
               scrollMode: 'if-needed',
               block: 'nearest',
             })
-          )
         )
+        return
     }
   }, [value])
 
