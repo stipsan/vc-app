@@ -1,14 +1,18 @@
-import { themes } from '@storybook/theming'
-import { transparentize, darken } from 'polished'
-import { enableMapSet } from 'immer'
-import { Toaster } from 'react-hot-toast'
-import { MachineProvider } from '../lib/contexts'
-import 'tailwindcss/tailwind.css'
-import resolveConfig from 'tailwindcss/resolveConfig'
-import tailwindConfig from '../tailwind.config.js'
-import './style.css'
-import { themeStore } from '../lib/utils'
 import addons from '@storybook/addons'
+import { themes } from '@storybook/theming'
+import * as faker from 'faker'
+import { enableMapSet } from 'immer'
+import { darken } from 'polished'
+import { Toaster } from 'react-hot-toast'
+import resolveConfig from 'tailwindcss/resolveConfig'
+import { MachineProvider } from '../lib/contexts'
+import { themeStore } from '../lib/utils'
+import tailwindConfig from '../tailwind.config.js'
+
+import 'tailwindcss/tailwind.css'
+import './style.css'
+
+faker.seed(123)
 
 enableMapSet()
 
