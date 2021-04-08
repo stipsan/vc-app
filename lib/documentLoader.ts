@@ -62,13 +62,6 @@ const documentLoader = documentLoaderFactory.pluginFactory
       resolve: async () =>  (await import('./contexts/did-v0.11.json')).default
     }
   })
-  .addResolver({
-    // Fallback to local cache until it's published
-    'https://proxy.com/citizenship/v1': {
-      resolve: async () =>  (await import('./contexts/proxy-citizenship-v1.json')).default
-      ,
-    },
-  })
   .buildDocumentLoader()
 
 export default documentLoader
