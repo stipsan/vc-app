@@ -3,6 +3,7 @@ const colors = require('tailwindcss/colors')
 const isStorybook = process.env.STORYBOOK === 'true'
 
 module.exports = {
+  mode: 'jit',
   purge: [
     './pages/**/*.{ts,tsx}',
     isStorybook
