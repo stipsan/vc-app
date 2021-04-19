@@ -25,8 +25,10 @@ const work = createAsset(
   async (documentLoader: DocumentLoader, json: object) => {
     try {
       const [{ Ed25519Signature2018 }, { ld: vc }] = await Promise.all([
-        import('@transmute/ed25519-signature-2018'),
-        import('@transmute/vc.js'),
+        import(
+          /* webpackChunkName: "ed25519-signature-2018" */ '@transmute/ed25519-signature-2018'
+        ),
+        import(/* webpackChunkName: "vc-js" */ '@transmute/vc.js'),
       ])
 
       const result = await vc.verifyCredential({
@@ -154,7 +156,9 @@ function VerifyCredentialsRowSuspender({
     <Suspense
       key={id}
       fallback={
-        <Panel className="animate-pulse">{nu} Verifying Credential...</Panel>
+        <Panel className="motion-safe:animate-pulse">
+          {nu} Verifying Credential...
+        </Panel>
       }
     >
       <VerifyCredentialsRow id={id} nu={nu} documentLoader={documentLoader} />

@@ -1,38 +1,36 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import Confetti from 'react-confetti'
+import { useReduceMotion } from 'react-reduce-motion'
 import { useMachineSelector } from '../lib/contexts'
 
-/*
 function Celebration() {
-  return //
+  const [mounted, setMounted] = useState(true)
+
+  if (!mounted) return null
+
+  return (
+    <Confetti
+      height={window.innerHeight}
+      onConfettiComplete={() => setMounted(false)}
+      recycle={false}
+      width={window.innerWidth}
+    />
+  )
 }
-*/
 
 export default function CelebrateGate() {
+  const reducedMotion = useReduceMotion()
   const success = useMachineSelector(
     useCallback((state) => state.value === 'success', [])
   )
-  const [unmount, doUnmount] = useState(false)
 
-  useEffect(() => {
-    if (success) {
-      return () => {
-        setTimeout(() => doUnmount(true), 10000)
-      }
-    }
-  }, [success])
-
-  if (unmount || !success) {
+  if (reducedMotion || !success) {
     return null
   }
 
   return (
     <div className="fixed top-0 left-0 z-50 pointer-events-none transform-gpu">
-      <Confetti
-        recycle={false}
-        width={window.innerWidth}
-        height={window.innerHeight}
-      />
+      <Celebration />
     </div>
   )
 }

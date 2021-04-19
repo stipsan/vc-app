@@ -20,8 +20,8 @@ const work = createAsset(
   async (documentLoader: DocumentLoader, json: object) => {
     try {
       const [{ default: jsonld }, jsonldChecker] = await Promise.all([
-        import('jsonld'),
-        import('jsonld-checker'),
+        import(/* webpackChunkName: "jsonld" */ 'jsonld'),
+        import(/* webpackChunkName: "jsonld-checker" */ 'jsonld-checker'),
       ])
 
       const result = await jsonldChecker.check(
@@ -191,7 +191,7 @@ export default function ValidateLinkedData() {
           <Suspense
             key={id}
             fallback={
-              <Panel className="animate-pulse">
+              <Panel className="motion-safe:animate-pulse">
                 #{nu + 1} Checking JSON-LD...
               </Panel>
             }

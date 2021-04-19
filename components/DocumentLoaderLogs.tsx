@@ -19,12 +19,14 @@ function LogRow({
     return (
       <div
         className={cx('rounded-sm', {
-          'bg-gray-100 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse': true,
+          'bg-gray-100 dark:bg-gray-800 text-black dark:text-white text-opacity-80 motion-safe:animate-pulse': true,
         })}
       >
         <div className={cx('px-3 py-2 flex break-words items-center')}>
           <svg
-            className={cx('animate-spin inline-block h-5 w-5 mr-2.5 flex-none')}
+            className={cx(
+              'motion-safe:animate-spin inline-block h-5 w-5 mr-2.5 flex-none'
+            )}
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -69,7 +71,7 @@ function LogRow({
           </svg>
           {urlClamped}
           <button
-            className="flex-none ml-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase focus:outline-none transition-opacity opacity-70 hover:opacity-100 focus-visible:opacity-100 bg-red-900 dark:bg-red-500 text-white dark:text-gray-900"
+            className="flex-none ml-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase focus:outline-none motion-safe:transition-opacity opacity-70 hover:opacity-100 focus-visible:opacity-100 bg-red-900 dark:bg-red-500 text-white dark:text-gray-900"
             type="button"
             onClick={() => setView((view) => !view)}
           >
@@ -113,7 +115,7 @@ function LogRow({
         </svg>
         <span className={cx('break-all flex-auto line-clamp-2')}>{url}</span>
         <button
-          className="flex-none ml-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase focus:outline-none transition-opacity opacity-70 hover:opacity-100 focus-visible:opacity-100 bg-green-900 dark:bg-green-500 text-green-50 dark:text-green-900"
+          className="flex-none ml-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase focus:outline-none motion-safe:transition-opacity opacity-70 hover:opacity-100 focus-visible:opacity-100 bg-green-900 dark:bg-green-500 text-green-50 dark:text-green-900"
           type="button"
           onClick={(event) => {
             const target = event.currentTarget

@@ -13,8 +13,12 @@ const work = createAsset(async (editor: string) => {
       { default: babelParser },
       { default: prettier },
     ] = await Promise.all([
-      import('prettier/parser-babel'),
-      import('prettier/standalone'),
+      import(
+        /* webpackChunkName: "prettier-parser-babel" */ 'prettier/parser-babel'
+      ),
+      import(
+        /* webpackChunkName: "prettier-standalone" */ 'prettier/standalone'
+      ),
     ])
     // Prettier will handle annoying things like forgetting to use double quotes on keys, or forgetting to remove trailing slashes
     const formatted = prettier

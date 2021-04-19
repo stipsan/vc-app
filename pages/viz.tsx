@@ -6,7 +6,8 @@ import defaultMachine from '../lib/stateMachine'
 import '@xstate/viz/themes/dark.css'
 
 const MachineViz = dynamic(
-  async () => (await import('@xstate/viz')).MachineViz,
+  async () =>
+    (await import(/* webpackChunkName: "viz" */ '@xstate/viz')).MachineViz,
   { ssr: false }
 )
 

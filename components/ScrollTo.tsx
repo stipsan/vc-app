@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { useReduceMotion } from 'react-reduce-motion'
 import scrollIntoView from 'smooth-scroll-into-view-if-needed'
 import { useMachineSelector } from '../lib/contexts'
 
 export default function ScrollTo() {
+  const reducedMotion = useReduceMotion()
   // TODO replace with logic that observes when things load before the fold, and show a down arrow that can be clicked
   //      offer a checkbox to opt-out of auto scroll
   const value = useMachineSelector(useCallback((state) => state.value, []))
@@ -23,14 +25,16 @@ export default function ScrollTo() {
           () =>
             nodeRef.current &&
             scrollIntoView(nodeRef.current, {
-              behavior: 'smooth',
+              // TODO: make a fix on smooth-scroll-into-view to allow 'instant'
+              // @ts-expect-error
+              behavior: reducedMotion ? 'instant' : 'smooth',
               scrollMode: 'if-needed',
               block: 'nearest',
             })
         )
         return
     }
-  }, [value])
+  }, [value, reducedMotion])
 
   return <span ref={nodeRef} />
 }
