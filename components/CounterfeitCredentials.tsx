@@ -238,7 +238,7 @@ function CounterfeitCredentialsRowSuspender({
     <Suspense
       key={id}
       fallback={
-        <Panel className="animate-pulse">
+        <Panel className="motion-safe:animate-pulse">
           {nu} Attempting to tamper with credentialSubject and fool the
           signature check...
         </Panel>

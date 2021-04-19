@@ -191,7 +191,7 @@ export default function ValidateLinkedData() {
           <Suspense
             key={id}
             fallback={
-              <Panel className="animate-pulse">
+              <Panel className="motion-safe:animate-pulse">
                 #{nu + 1} Checking JSON-LD...
               </Panel>
             }

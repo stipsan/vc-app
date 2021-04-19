@@ -58,7 +58,7 @@ function ParseStrategy() {
         spellCheck={false}
         placeholder="Paste your JSON in here..."
         className={cx(
-          'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 transition-opacity',
+          'mt-1 h-10 block dark:placeholder-gray-400 w-full rounded-md dark:bg-gray-900 border-gray-300 dark:border-gray-700 shadow-sm focus:border-blue-300 dark:focus:border-blue-600 focus:ring focus:ring-blue-200 dark:focus:ring-blue-900 ring-opacity-50 motion-safe:transition-opacity',
           { 'opacity-30 pointer-events-none': loading }
         )}
         style={{ minHeight: '6rem' }}
@@ -129,7 +129,7 @@ function UrlField({ loading }: { loading: boolean }) {
 
   return (
     <label
-      className={cx('block transition-opacity', {
+      className={cx('block motion-safe:transition-opacity', {
         'opacity-30 pointer-events-none': loading,
       })}
     >
@@ -165,7 +165,7 @@ function AuthField({ loading }: { loading: boolean }) {
 
   return (
     <label
-      className={cx('block transition-opacity', {
+      className={cx('block motion-safe:transition-opacity', {
         'opacity-30 pointer-events-none': loading,
       })}
     >
@@ -228,7 +228,7 @@ function StrategyTab({
   return (
     <Tab
       className={cx(
-        'px-3 py-1 font-semibold focus:outline-none transition-colors duration-300 focus-visible:ring-2 ring-gray-300 dark:ring-gray-700 rounded-full',
+        'px-3 py-1 font-semibold focus:outline-none motion-safe:transition-colors duration-300 focus-visible:ring-2 ring-gray-300 dark:ring-gray-700 rounded-full',
         {
           'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800':
             selectedIndex === index,
@@ -278,7 +278,7 @@ export default function Strategy() {
       }}
     >
       <TabList
-        className={cx('flex flex-initial transition-opacity', {
+        className={cx('flex flex-initial motion-safe:transition-opacity', {
           'opacity-30 pointer-events-none': !idle,
         })}
       >

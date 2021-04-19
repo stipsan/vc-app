@@ -26,7 +26,9 @@ function SubmitButton() {
           'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-800 dark:hover:text-blue-200 active:bg-blue-300 dark:active:bg-blue-700': !loading,
           'opacity-0 cursor-default': !mounted,
         },
-        mounted && mountedComplete ? 'transition-colors' : 'transition-opacity'
+        mounted && mountedComplete
+          ? 'motion-safe:transition-colors'
+          : 'motion-safe:transition-opacity'
       )}
     >
       <span
@@ -34,10 +36,13 @@ function SubmitButton() {
         className="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
       >
         <svg
-          className={cx('animate-spin h-5 w-5 transition-opacity', {
-            'opacity-0': !loading,
-            'opacity-80': loading,
-          })}
+          className={cx(
+            'motion-safe:animate-spin h-5 w-5 motion-safe:transition-opacity',
+            {
+              'opacity-0': !loading,
+              'opacity-80': loading,
+            }
+          )}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -59,7 +64,7 @@ function SubmitButton() {
       </span>
       <span
         key="label"
-        className={cx('transition-opacity', {
+        className={cx('motion-safe:transition-opacity', {
           'opacity-0': loading,
           'opacity-100': !loading,
         })}

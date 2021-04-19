@@ -204,7 +204,7 @@ export default function VerifyPresentation() {
       <ReportRow>
         <Suspense
           fallback={
-            <Panel className="animate-pulse">
+            <Panel className="motion-safe:animate-pulse">
               Creating and Verifying Verifiable Presentation...
             </Panel>
           }

@@ -4,17 +4,17 @@ import { Panel } from './Formatted'
 
 const dots = (
   <>
-    <div className="animate-pulse bg-gray-100 dark:bg-gray-800 py-1 rounded-full w-16">
+    <div className="motion-safe:animate-pulse bg-gray-100 dark:bg-gray-800 py-1 rounded-full w-16">
       &nbsp;
     </div>
     <div
-      className="animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
+      className="motion-safe:animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
       style={{ animationDelay: '250ms' }}
     >
       &nbsp;
     </div>
     <div
-      className="animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
+      className="motion-safe:animate-pulse bg-gray-50 dark:bg-gray-800 dark:bg-opacity-50 mx-3 my-1 rounded text-gray-900 w-10"
       style={{ animationDelay: '500ms' }}
     >
       &nbsp;
@@ -34,8 +34,8 @@ export function StrategyLazy({
   timedOut?: boolean
 }) {
   const tClassName =
-    'px-4 md:px-6 pt-8 flex flex-initial items-center transition-opacity'
-  const bClassName = 'mx-4 md:mx-6 mt-4 transition-colors'
+    'px-4 md:px-6 pt-8 flex flex-initial items-center motion-safe:transition-opacity'
+  const bClassName = 'mx-4 md:mx-6 mt-4 motion-safe:transition-colors'
   switch (true) {
     case !!error:
     case timedOut:
@@ -69,7 +69,7 @@ export function StrategyLazy({
           <Panel
             className={cx(
               bClassName,
-              'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 animate-pulse'
+              'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80 motion-safe:animate-pulse'
             )}
             style={{ animationDelay: '250ms' }}
             variant="blank"

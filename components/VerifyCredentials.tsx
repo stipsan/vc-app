@@ -154,7 +154,9 @@ function VerifyCredentialsRowSuspender({
     <Suspense
       key={id}
       fallback={
-        <Panel className="animate-pulse">{nu} Verifying Credential...</Panel>
+        <Panel className="motion-safe:animate-pulse">
+          {nu} Verifying Credential...
+        </Panel>
       }
     >
       <VerifyCredentialsRow id={id} nu={nu} documentLoader={documentLoader} />
