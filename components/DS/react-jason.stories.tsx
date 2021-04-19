@@ -134,9 +134,10 @@ export const VerifiableCredentials = () => (
   <Example value={verifiableCredentials} variant="normal" />
 )
 
-export const Error = () => (
-  <Example value={new TypeError(`Uh oh huh`)} variant="failure" />
-)
+const err = new TypeError(`Uh oh huh`)
+err.stack = `${err.name}: ${err.message}
+at Module../components/DS/react-jason.stories.tsx (react-jason.stories.tsx:137)`
+export const Error = () => <Example value={err} variant="failure" />
 
 export const VerificationResult = () => (
   <Example

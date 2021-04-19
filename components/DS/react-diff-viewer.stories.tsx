@@ -143,7 +143,7 @@ export const CounterfeitCredentialsChangingTheID = () => {
     ...original,
     credentialSubject: {
       ...original.credentialSubject,
-      id: new Date().toISOString(),
+      id: '2021-04-19T17:24:48.173Z',
     },
   }
   return (
@@ -174,7 +174,7 @@ export const CounterfeitCredentialAddingAnID = () => {
   }
   const modified = {
     ...original,
-    credentialSubject: { id: new Date().toISOString() },
+    credentialSubject: { id: '2021-04-19T17:27:34.147Z' },
   }
   return (
     <Example original={original} modification={modified} variant="normal" />
