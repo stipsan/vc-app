@@ -18,7 +18,8 @@ import {
 } from '../lib/selectors'
 import { LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
-import { Panel, SuperReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { Collapsible, Panel } from './Formatted'
 import ReportRow from './ReportRow'
 
 const work = createAsset(
@@ -93,11 +94,16 @@ function VerifyCredentialsRow({
   switch (result.ok) {
     case false:
       return (
-        <Panel variant="error">
+        <Panel
+          variant="error"
+          className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]"
+        >
           {nu}
           Failed verification
           {result.data && (
-            <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+            <Collapsible className="rounded bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
+              <ReactJason value={result.data} />
+            </Collapsible>
           )}
           <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
             {result.error.message}
@@ -112,10 +118,12 @@ function VerifyCredentialsRow({
       )
     case true:
       return (
-        <Panel>
+        <Panel className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]">
           {nu}
           Credential verified successfully
-          <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+          <Collapsible>
+            <ReactJason value={result.data} />
+          </Collapsible>
         </Panel>
       )
   }

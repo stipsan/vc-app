@@ -164,8 +164,7 @@ export default function DocumentLoaderLogs({
     ),
     loadingTotal > 0 && (
       <span key="loading" className="">
-        is resolving{' '}
-        <span className="font-black animate-pulse">{loadingTotal}</span>
+        is resolving <span className="font-black">{loadingTotal}</span>
         {successTotal === 0 &&
           (loadingTotal === 1
             ? ' external reference '

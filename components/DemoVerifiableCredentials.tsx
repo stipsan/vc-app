@@ -10,7 +10,6 @@ import { useIdsList, useJsonMap } from '../lib/selectors'
 import ReactJason from './DS/react-jason'
 import { ErrorMessage, Panel } from './Formatted'
 import ReportRow from './ReportRow'
-import styles from './uglyworkarounds.module.css'
 
 const work = createAsset(async () => {
   try {
@@ -136,7 +135,10 @@ export function DemoVerifiableCredentials({
               : ' Verifiable Credentials'}
           </Panel>
           {ids.map((id) => (
-            <Panel key={id} className={styles.maxWidth2}>
+            <Panel
+              key={id}
+              className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]"
+            >
               <ReactJason value={json.get(id)} />
             </Panel>
           ))}

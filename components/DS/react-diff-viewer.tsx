@@ -22,9 +22,9 @@ export default memo(function CustomReactDiffViewer({
         light: {
           diffViewerBackground: theme.backgroundColor.white,
           diffViewerColor: theme.colors.gray[900],
-          addedBackground: theme.backgroundColor.green[50],
+          addedBackground: theme.backgroundColor.green[100],
           addedColor: theme.colors.green[900],
-          removedBackground: theme.backgroundColor.red[50],
+          removedBackground: theme.backgroundColor.red[100],
           removedColor: theme.colors.red[900],
           wordAddedBackground: theme.backgroundColor.green[200],
           wordRemovedBackground: theme.backgroundColor.red[200],

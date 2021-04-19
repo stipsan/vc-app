@@ -3,7 +3,8 @@ import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useJsonMap } from '../lib/selectors'
-import { Panel, SuperReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { Collapsible, Panel } from './Formatted'
 import ReportRow from './ReportRow'
 
 const work = createAsset(async (verifiableCredential: any) => {
@@ -147,7 +148,10 @@ function VerifyPresentationRow() {
   return (
     <>
       {verifiablePresentation && (
-        <Panel key="first">
+        <Panel
+          key="first"
+          className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]"
+        >
           {`Created Verifiable Presentation with `}
           <span className="font-bold">
             {verifiablePresentation.verifiableCredential.length}
@@ -155,17 +159,23 @@ function VerifyPresentationRow() {
           {verifiablePresentation.verifiableCredential.length === 1
             ? ' Verifiable Credential'
             : ' Verifiable Credentials'}
-          <SuperReadonlyTextarea
-            value={JSON.stringify(verifiablePresentation)}
-          />
+          <Collapsible>
+            <ReactJason value={verifiablePresentation} />
+          </Collapsible>
         </Panel>
       )}
-      <Panel key="second" variant={result.ok === false ? 'error' : 'default'}>
+      <Panel
+        key="second"
+        variant={result.ok === false ? 'error' : 'default'}
+        className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]"
+      >
         {result.ok === false
           ? `The Verifiable Presentation didn't verify`
           : `The Verifiable Presentation is verifiable`}
         {result.ok === true && result.result && (
-          <SuperReadonlyTextarea value={JSON.stringify(result.result)} />
+          <Collapsible>
+            <ReactJason value={result.result} />
+          </Collapsible>
         )}
         {result.ok === false && error && (
           <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">

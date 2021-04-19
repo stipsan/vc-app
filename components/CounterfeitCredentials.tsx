@@ -13,7 +13,6 @@ import {
 import ReactDiffViewer from './DS/react-diff-viewer'
 import { Panel } from './Formatted'
 import ReportRow from './ReportRow'
-import styles from './uglyworkarounds.module.css'
 
 const work = createAsset(async (json: object) => {
   try {
@@ -120,7 +119,7 @@ const DiffRow = memo(function DiffRow({
         {name}
       </div>
       {!skipped && (
-        <div className={cx('overflow-auto rounded my-1', styles.maxWidth4)}>
+        <div className="overflow-auto rounded my-1 w-[calc(100vw-4rem)] md:w-[calc(100vw-5rem)]">
           <ReactDiffViewer original={original} modification={modification} />
         </div>
       )}
