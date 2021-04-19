@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect } from 'react'
+import { Suspense, useCallback, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import { useMachineSelector, useMachineSend } from '../lib/contexts'
@@ -6,7 +6,7 @@ import { useJsonMap } from '../lib/selectors'
 import { Panel, SuperReadonlyTextarea } from './Formatted'
 import ReportRow from './ReportRow'
 
-const work = createAsset(async (json: Map<string, object>) => {
+const work = createAsset(async (verifiableCredential: any) => {
   try {
     const [
       { Ed25519KeyPair },
@@ -32,7 +32,10 @@ const work = createAsset(async (json: Map<string, object>) => {
     })
     //*/
     key.id = key.controller + key.id
-    const suite = new Ed25519Signature2018({ key })
+    const date = process.env.STORYBOOK
+      ? new Date('2021-03-16T15:17:11.053Z')
+      : new Date()
+    const suite = new Ed25519Signature2018({ key, date })
 
     const documentLoader = async (url: string) => {
       if (url.startsWith(key.controller)) {
@@ -69,7 +72,7 @@ const work = createAsset(async (json: Map<string, object>) => {
     const holder = 'did:ex:12345'
     const challenge = '123'
     const presentation = await vc.createPresentation({
-      verifiableCredential: JSON.parse(JSON.stringify([...json.values()])),
+      verifiableCredential,
       id,
       holder,
       documentLoader,
@@ -93,16 +96,19 @@ const work = createAsset(async (json: Map<string, object>) => {
 
       if (result.verified) {
         return { ok: true, verifiablePresentation, result }
-        // send({ type: 'VERIFIED_PRESENTATION_SUCCESS', input: id })
       } else {
-        return { ok: false, verifiablePresentation, error: result.error }
-        // toast.error(` Failed verification`)
-        // send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
+        console.log({ result })
+        return {
+          ok: false,
+          verifiablePresentation,
+          error:
+            result.error ??
+            // @ts-expect-error
+            result.credentialResults.find((_) => !_.verified)?.error,
+        }
       }
     } catch (error) {
       return { ok: false, verifiablePresentation, error }
-      // toast.error(` Failed verification`)
-      // send({ type: 'VERIFIED_PRESENTATION_FAILURE', input: id })
     }
   } catch (error) {
     return { ok: false, error }
@@ -112,8 +118,12 @@ const work = createAsset(async (json: Map<string, object>) => {
 function VerifyPresentationRow() {
   const send = useMachineSend()
   const json = useJsonMap()
+  const verifiableCredential = useMemo(
+    () => JSON.parse(JSON.stringify([...json.values()])),
+    [json]
+  )
 
-  const result = work.read(json)
+  const result = work.read(verifiableCredential)
 
   useEffect(() => {
     if (result?.ok === true) {
@@ -123,7 +133,7 @@ function VerifyPresentationRow() {
       })
     }
     if (result?.ok === false) {
-      console.error('VERIFIED_PRESENTATION_FAILURE', result.error)
+      console.error('VERIFIED_PRESENTATION_FAILURE', result, result?.error)
       send({
         type: 'VERIFIED_PRESENTATION_FAILURE',
         input: result.error.message,

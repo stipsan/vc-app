@@ -77,20 +77,28 @@ export const Failure = () => {
 
 export const Success = () => {
   const json = {
-    '@context': ['https://www.w3.org/2018/credentials/v1'],
-    type: ['VerifiableCredential'],
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      'https://www.w3.org/2018/credentials/examples/v1',
+    ],
+    type: ['VerifiableCredential', 'UniversityDegreeCredential'],
     credentialSubject: {
       id: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
+      givenName: 'Ben',
+      familyName: 'Von',
+      degree: {
+        type: 'BachelorDegree',
+        name: 'Bachelor of Partnerships and Deliverables',
+      },
     },
     id: 'http://example.gov/credentials/3732',
     issuer: 'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',
-    issuanceDate: '2020-03-16T15:17:10.998Z',
-    expirationDate: '2022-03-16T15:16:52.695Z',
+    issuanceDate: '2021-03-15T06:35:33.072Z',
     proof: {
       type: 'Ed25519Signature2018',
-      created: '2021-03-16T15:17:11.053Z',
+      created: '2021-03-15T06:35:33.945Z',
       jws:
-        'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..XHGJkrPTqPyPWdtlgtN508qFMnlJVPt9VSs5aUWKvH-msvcQ5mEpLF7YrMlh-mtvoTm5dgS5_MIp1LSkApFQAw',
+        'eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..L9cCEQfUqjBnJ7AAmuBpnxnxPcl2UuMhQdqrOmYrBl-mLnfnidl8EKUdFCtl0-qXVlQFtEjj6eHWEOTuiu0hAQ',
       proofPurpose: 'assertionMethod',
       verificationMethod:
         'did:key:z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ#z6MkpP568Jfkc1n51vdEut2EebtvhFXkod7S6LMZTVPGsZiZ',

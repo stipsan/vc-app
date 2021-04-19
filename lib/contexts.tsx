@@ -70,6 +70,13 @@ export function useOnMachineReset(cb: Function) {
       }
     }
   }, [idle, cb])
+
+  // Only needed for storybooks
+  if (process.env.STORYBOOK) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => () => cb(), [])
+  }
+
   // TODO: temporary debugger
   /*
   const debugRef = useRef(0)
