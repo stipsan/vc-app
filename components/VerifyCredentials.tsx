@@ -1,7 +1,6 @@
 import produce from 'immer'
 import { memo, Suspense, useCallback, useEffect } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import create from 'zustand'
 import {
@@ -83,7 +82,6 @@ function VerifyCredentialsRow({
       send({ type: 'VERIFIED_CREDENTIAL_SUCCESS', input: id })
     }
     if (result.ok === false) {
-      toast.error(`${nu} Failed verification`)
       send({ type: 'VERIFIED_CREDENTIAL_FAILURE', input: id })
     }
   }, [id, nu, result.ok, send])

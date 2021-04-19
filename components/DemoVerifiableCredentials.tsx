@@ -1,5 +1,4 @@
 import { Suspense, useCallback, useEffect } from 'react'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import {
   useMachineSelector,
@@ -112,7 +111,6 @@ export function DemoVerifiableCredentials({
     if (result?.ok === false) {
       console.error('DEMO_FAILURE', result.error)
       send({ type: 'DEMO_FAILURE', input: result.error.message })
-      toast.error(`Failed creating Verifiable Credentials`)
     }
   }, [result, send])
 

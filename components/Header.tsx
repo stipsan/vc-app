@@ -1,6 +1,5 @@
 import cx from 'classnames'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import toast from 'react-hot-toast'
 import { useMachineSelector } from '../lib/contexts'
 
 function SubmitButton() {
@@ -140,19 +139,6 @@ export default function Header() {
       }
     }
   }, [failure, success, status])
-
-  useEffect(() => {
-    if (success) {
-      let timeout = new Promise((resolve) =>
-        setTimeout(() => resolve(undefined), 3000)
-      )
-      const toastId = toast.success(status, { duration: 10000 })
-      return () => {
-        timeout.then(() => toast.dismiss(toastId))
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success])
 
   return (
     <>

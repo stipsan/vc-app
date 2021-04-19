@@ -3,7 +3,6 @@ import { themes } from '@storybook/theming'
 import * as faker from 'faker'
 import { enableMapSet } from 'immer'
 import { darken } from 'polished'
-import { Toaster } from 'react-hot-toast'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import { MachineProvider } from '../lib/contexts'
 import { themeStore } from '../lib/utils'
@@ -105,12 +104,9 @@ export const parameters = {
 
 export const decorators = [
   (Story) => (
-    <>
-      <MachineProvider>
-        <Story />
-      </MachineProvider>
-      <Toaster position="top-right" />
-    </>
+    <MachineProvider>
+      <Story />
+    </MachineProvider>
   ),
   ,
 ]

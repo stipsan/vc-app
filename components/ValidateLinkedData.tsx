@@ -1,7 +1,6 @@
 import produce from 'immer'
 import { memo, Suspense, useCallback, useEffect } from 'react'
 import { unstable_batchedUpdates } from 'react-dom'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import create from 'zustand'
 import {
@@ -92,7 +91,6 @@ function ValidateLinkedDataRow({
       send({ type: 'LINKING_DATA_SUCCESS', input: id })
     }
     if (result.ok === false) {
-      toast.error(`${nu} Invalid JSON-LD`)
       send({ type: 'LINKING_DATA_FAILURE', input: id })
     }
   }, [id, nu, result, send])

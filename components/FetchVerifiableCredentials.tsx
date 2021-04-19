@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 import { useMachineSend, useMachineState } from '../lib/contexts'
 import { useStore } from '../lib/useStore'
 import ReactJason from './DS/react-jason'
@@ -66,7 +65,6 @@ export default function FetchVerifiableCredentials() {
       })
       .catch((reason) => {
         send({ type: 'FETCH_FAILURE', input: `${reason}` })
-        toast.error(`Failed fetching Verifiable Credentials`)
         setError(reason)
       })
 

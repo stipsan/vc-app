@@ -1,5 +1,4 @@
 import { Suspense, useCallback, useEffect } from 'react'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useIdsList, useJsonMap } from '../lib/selectors'
@@ -63,7 +62,6 @@ function ParseVerifiableCredentials() {
     }
     if (result?.ok === false) {
       send({ type: 'PARSE_FAILURE', input: result.error.message })
-      toast.error(`Failed finding Verifiable Credentials in the editor`)
     }
   }, [result, send])
 

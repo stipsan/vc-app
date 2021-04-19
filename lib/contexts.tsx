@@ -73,7 +73,7 @@ export function useOnMachineReset(cb: Function) {
 
   // Only needed for storybooks
   if (process.env.STORYBOOK) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    // eslint-disable-next-line react-hooks/rules-of-hooks, react-hooks/exhaustive-deps
     useEffect(() => () => cb(), [])
   }
 
