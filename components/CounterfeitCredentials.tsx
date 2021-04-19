@@ -175,7 +175,7 @@ function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
     : `Able to tamper with credentialSubject without failing the signature check`
 
   return (
-    <Panel variant={success ? 'success' : 'error'}>
+    <Panel variant={success ? 'default' : 'error'}>
       {nu}
       {message}
       <button

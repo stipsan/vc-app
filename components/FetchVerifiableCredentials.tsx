@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useMachineSend, useMachineState } from '../lib/contexts'
 import { useStore } from '../lib/useStore'
-import { ErrorMessage, Panel, ReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { ErrorMessage, Panel } from './Formatted'
 import ReportRow from './ReportRow'
 
 export default function FetchVerifiableCredentials() {
@@ -54,10 +55,13 @@ export default function FetchVerifiableCredentials() {
 
         send({
           type: 'FETCH_SUCCESS',
-          input: items.map((item) => {
-            if ('verifiableCredential' in item) return item.verifiableCredential
-            return item
-          }),
+          input: items
+            .map((item) => {
+              if ('verifiableCredential' in item)
+                return item.verifiableCredential
+              return item
+            })
+            .filter((item) => item.type?.includes('VerifiableCredential')),
         })
       })
       .catch((reason) => {
@@ -87,14 +91,19 @@ export default function FetchVerifiableCredentials() {
     case ids.length > 0:
       return (
         <ReportRow readyState="success">
-          <Panel variant="success">
+          <Panel>
             Found <span className="font-bold">{ids.length}</span>
             {ids.length === 1
               ? ' Verifiable Credential'
               : ' Verifiable Credentials'}
           </Panel>
           {ids.map((id) => (
-            <ReadonlyTextarea key={id} value={JSON.stringify(json.get(id))} />
+            <Panel
+              key={id}
+              className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]"
+            >
+              <ReactJason value={json.get(id)} />
+            </Panel>
           ))}
         </ReportRow>
       )

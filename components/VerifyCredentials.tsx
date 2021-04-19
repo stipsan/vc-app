@@ -112,7 +112,7 @@ function VerifyCredentialsRow({
       )
     case true:
       return (
-        <Panel variant="success">
+        <Panel>
           {nu}
           Credential verified successfully
           <SuperReadonlyTextarea value={JSON.stringify(result.data)} />

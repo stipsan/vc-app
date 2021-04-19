@@ -68,6 +68,34 @@ export function ReadonlyTextarea({
   )
 }
 
+export function Collapsible({
+  children,
+  className = 'bg-gray-100 dark:bg-gray-700',
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <>
+      <button
+        className="float-right focus:outline-none focus:underline font-bold hover:underline text-sm block mt-0.5"
+        type="button"
+        onClick={() => setExpanded((expanded) => !expanded)}
+      >
+        {expanded ? 'Collapse' : 'Expand'}
+      </button>
+      {expanded && (
+        <div
+          className={cx('overflow-hidden rounded py-2 my-1 px-3', className)}
+        >
+          {children}
+        </div>
+      )}
+    </>
+  )
+}
+
 export function SuperReadonlyTextarea({
   className = 'bg-green-100 dark:bg-opacity-25 dark:bg-green-900 focus:ring-inset focus:ring-green-200 dark:focus:ring-green-900 focus:ring-2',
   value,
@@ -112,7 +140,7 @@ export function Panel({
   children: React.ReactNode
   className?: string
   style?: any
-  variant?: 'default' | 'error' | 'success' | 'blank'
+  variant?: 'default' | 'error' | 'blank'
 }) {
   return (
     <div
@@ -121,10 +149,8 @@ export function Panel({
         {
           'bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80':
             variant === 'default',
-          'text-red-900 dark:text-red-500 bg-red-50 dark:bg-opacity-20 dark:bg-red-900 break-words':
+          'bg-red-50 dark:bg-opacity-20 dark:bg-red-900 text-red-900 dark:text-red-500 break-words':
             variant === 'error',
-          'text-green-900 dark:text-green-500 bg-green-50 dark:bg-opacity-25 dark:bg-green-900':
-            variant === 'success',
         },
         className
       )}

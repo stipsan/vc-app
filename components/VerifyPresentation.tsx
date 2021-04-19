@@ -104,7 +104,7 @@ const work = createAsset(async (verifiableCredential: any) => {
           error:
             result.error ??
             // @ts-expect-error
-            result.credentialResults.find((_) => !_.verified)?.error,
+            result.credentialResults.find((_: any) => !_.verified)?.error,
         }
       }
     } catch (error) {
@@ -160,16 +160,7 @@ function VerifyPresentationRow() {
           />
         </Panel>
       )}
-      <Panel
-        key="second"
-        variant={
-          result.ok === false
-            ? 'error'
-            : result.ok === true
-            ? 'success'
-            : 'default'
-        }
-      >
+      <Panel key="second" variant={result.ok === false ? 'error' : 'default'}>
         {result.ok === false
           ? `The Verifiable Presentation didn't verify`
           : `The Verifiable Presentation is verifiable`}

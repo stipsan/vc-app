@@ -1,7 +1,6 @@
 import cx from 'classnames'
 import { useMemo, useState } from 'react'
 import { LogsState } from '../lib/utils'
-import styles from './DocumentLoaderLogs.module.css'
 import ReactJason from './DS/react-jason'
 import { Panel, useListFormat } from './Formatted'
 
@@ -130,12 +129,7 @@ function LogRow({
         </button>
       </div>
       {view && (
-        <div
-          className={cx(
-            'bg-white dark:bg-gray-900 overflow-hidden px-3 py-2 rounded-sm',
-            styles.maxWidth
-          )}
-        >
+        <div className="bg-white dark:bg-gray-900 overflow-hidden px-3 py-2 rounded-sm w-[calc(100vw-3.25rem)] md:w-[calc(100vw-4.25rem)]">
           <ReactJason value={value.document || value} />
         </div>
       )}
@@ -164,11 +158,7 @@ export default function DocumentLoaderLogs({
   const summaries = useListFormat([
     successTotal > 0 && (
       <span key="success">
-        resolved{' '}
-        <span className="font-black text-green-900 dark:text-green-500">
-          {successTotal}
-        </span>{' '}
-        external
+        resolved <span className="font-black">{successTotal}</span> external
         {successTotal === 1 ? ' reference ' : ' references '}
       </span>
     ),

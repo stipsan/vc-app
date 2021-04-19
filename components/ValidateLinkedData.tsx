@@ -13,7 +13,8 @@ import type { DocumentLoader } from '../lib/documentLoader'
 import { useIdsList, useJsonld, useJsonMap } from '../lib/selectors'
 import { LogsState } from '../lib/utils'
 import DocumentLoaderLogs from './DocumentLoaderLogs'
-import { Panel, SuperReadonlyTextarea } from './Formatted'
+import ReactJason from './DS/react-jason'
+import { Collapsible, Panel } from './Formatted'
 import ReportRow from './ReportRow'
 
 const work = createAsset(
@@ -118,10 +119,12 @@ function ValidateLinkedDataRow({
       )
     case true:
       return (
-        <Panel variant="success">
+        <Panel className="w-[calc(100vw-2rem)] md:w-[calc(100vw-3rem)]">
           {nu}
           Valid JSON-LD
-          <SuperReadonlyTextarea value={JSON.stringify(result.data)} />
+          <Collapsible>
+            <ReactJason value={result.data} />
+          </Collapsible>
         </Panel>
       )
   }

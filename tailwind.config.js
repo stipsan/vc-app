@@ -6,10 +6,9 @@ module.exports = {
   mode: 'jit',
   purge: [
     './pages/**/*.{ts,tsx}',
-    isStorybook
-      ? './components/**/*.{ts,tsx}'
-      : // TODO https://github.com/FullHuman/purgecss/issues/158
-        './components/**/*!(.stories).{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    // TODO https://github.com/FullHuman/purgecss/issues/158
+    // './components/**/*!(.stories).{ts,tsx}',
   ],
   darkMode: isStorybook ? 'class' : 'media',
   theme: {
