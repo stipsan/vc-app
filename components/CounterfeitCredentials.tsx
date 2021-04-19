@@ -32,12 +32,12 @@ const work = createAsset(async (json: object) => {
     const results = await Promise.all(
       [
         async (credential) => {
-          credential.id = await faker.random.uuid()
+          credential.id = await faker.datatype.uuid()
 
           return { name: 'Modifying the id', credential }
         },
         async (credential) => {
-          credential.credentialSubject.id = await faker.random.uuid()
+          credential.credentialSubject.id = await faker.datatype.uuid()
 
           return { name: 'Modifying the credentialSubject.id', credential }
         },
@@ -159,8 +159,12 @@ function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
         Unexpected error
         <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
           {result.error.message}
-          <br />
-          {result.error.stack}
+          {!process.env.STORYBOOK && (
+            <>
+              <br />
+              {result.error.stack}
+            </>
+          )}
         </div>
       </Panel>
     )

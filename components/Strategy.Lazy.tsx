@@ -52,7 +52,7 @@ export function StrategyLazy({
             >
               Retry?
             </button>
-            {error?.stack && (
+            {!process.env.STORYBOOK && error?.stack && (
               <>
                 <br />
                 {error.stack}

@@ -52,7 +52,7 @@ const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
               >
                 Retry?
               </button>
-              {error?.stack && (
+              {!process.env.STORYBOOK && error?.stack && (
                 <>
                   <br />
                   {error.stack}

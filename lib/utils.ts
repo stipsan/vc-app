@@ -30,8 +30,9 @@ useEffect(() => {
 // Instead of fchecking results of previous runs, simply fire FAILURE events for future stepps in the ladder.
 
 export const wait = (min, max = min) =>
-  new Promise((resolve) => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min))
-
+  new Promise((resolve) =>
+    setTimeout(resolve, Math.floor(Math.random() * (max - min + 1)) + min)
+  )
 
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }
@@ -61,7 +62,6 @@ export const useThemeVariables = () => themeStore(selectThemeVariables)
 const selectColorScheme = (state: ThemeLoaderState) => state.scheme
 export const useColorScheme = () => themeStore(selectColorScheme)
 
-
 const selectSetTheme = (state: ThemeLoaderState) => state.set
 const selectSetScheme = (state: ThemeLoaderState) => state.setScheme
 export function useTheme(theme: TailwindConfig['theme']) {
@@ -84,5 +84,5 @@ export function useTheme(theme: TailwindConfig['theme']) {
 
 export interface LogsState extends State {
   urls: { [key: string]: 'loading' | Error | object }
-  set: (url: string, entry: 'loading' | object | Error) => void,
+  set: (url: string, entry: 'loading' | object | Error) => void
 }

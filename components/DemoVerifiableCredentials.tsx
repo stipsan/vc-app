@@ -30,9 +30,9 @@ const work = createAsset(async () => {
       import('../lib/documentLoader'),
     ])
 
-    const date = new Date(
-      process.env.STORYBOOK ? '2019-12-11T03:50:55Z' : undefined
-    )
+    const date = process.env.STORYBOOK
+      ? new Date('2019-12-11T03:50:55Z')
+      : new Date()
 
     const create = (credentialSubject: any) => ({
       '@context': [

@@ -32,6 +32,9 @@ const work = createAsset(
       if (!result.ok) {
         const error = new Error(result.error.details)
         error.name = result.error.type
+        if (process.env.STORYBOOK) {
+          delete error.stack
+        }
         console.error(error)
         throw error
       }
@@ -104,8 +107,12 @@ function ValidateLinkedDataRow({
           Invalid JSON-LD
           <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
             {result.error.message}
-            <br />
-            {result.error.stack}
+            {!process.env.STORYBOOK && (
+              <>
+                <br />
+                {result.error.stack}
+              </>
+            )}
           </div>
         </Panel>
       )

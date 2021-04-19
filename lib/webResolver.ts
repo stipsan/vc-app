@@ -5,7 +5,6 @@ import { fetchLoader } from './documentLoader'
 
 const DOC_PATH = '/.well-known/did.json'
 
-
 export function getResolver() {
   async function resolve(
     did: string,

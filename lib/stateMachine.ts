@@ -1,4 +1,4 @@
-import {jsonChecksum} from '../lib/utils'
+import { jsonChecksum } from '../lib/utils'
 import { assign, createUpdater, ImmerUpdateEvent } from '@xstate/immer'
 import {
   Interpreter as MachineInterpreter,
@@ -10,17 +10,17 @@ import {
 
 interface MachineSchema {
   states: {
-    ready: {};
-    failure: {};
-    demoing: {},
-    parsing: {},
-    fetching: {},
-    linkingData: {},
-    verifyingCredentials: {},
-    counterfeitingCredentials:{},
-    verifyingPresentation:{},
+    ready: {}
+    failure: {}
+    demoing: {}
+    parsing: {}
+    fetching: {}
+    linkingData: {}
+    verifyingCredentials: {}
+    counterfeitingCredentials: {}
+    verifyingPresentation: {}
     success: {}
-  };
+  }
 }
 export type StateValue = keyof MachineSchema['states']
 
@@ -134,7 +134,7 @@ const demoSuccess = createUpdater<Context, DemoSuccessEvent>(
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = jsonChecksum(item)
-      if(!ctx.json.has(id)) {
+      if (!ctx.json.has(id)) {
         ctx.ids.push(id)
         ctx.json.set(id, item)
       }
@@ -148,7 +148,7 @@ const parseSuccess = createUpdater<Context, ParseSuccessEvent>(
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = jsonChecksum(item)
-      if(!ctx.json.has(id)) {
+      if (!ctx.json.has(id)) {
         ctx.ids.push(id)
         ctx.json.set(id, item)
       }
@@ -162,7 +162,7 @@ const fetchSuccess = createUpdater<Context, FetchSuccessEvent>(
     ctx.status = 'Checking JSON-LD...'
     input.forEach((item, i) => {
       const id = jsonChecksum(item)
-      if(!ctx.json.has(id)) {
+      if (!ctx.json.has(id)) {
         ctx.ids.push(id)
         ctx.json.set(id, item)
       }
@@ -479,7 +479,10 @@ const stateMachine = Machine<Context, MachineSchema, MachineEvent>({
           {
             cond: function someFailures(ctx) {
               return ctx.ids.some(
-                (id) => ctx.jsonld.get(id) === 'failure' || ctx.verifiedCredentials.get(id) === 'failure' || ctx.counterfeitCredentials.get(id) === 'failure'
+                (id) =>
+                  ctx.jsonld.get(id) === 'failure' ||
+                  ctx.verifiedCredentials.get(id) === 'failure' ||
+                  ctx.counterfeitCredentials.get(id) === 'failure'
               )
             },
             actions: assign((ctx) => {

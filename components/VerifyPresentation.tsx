@@ -128,7 +128,7 @@ function VerifyPresentationRow() {
         type: 'VERIFIED_PRESENTATION_FAILURE',
         input: result.error.message,
       })
-      toast.error(`Failed verificatio`)
+      toast.error(`Failed verification`)
     }
   }, [result, send])
 
@@ -169,8 +169,12 @@ function VerifyPresentationRow() {
         {result.ok === false && error && (
           <div className="rounded py-2 my-1 px-3 bg-red-100 dark:bg-red-900 dark:bg-opacity-20">
             {error.message}
-            <br />
-            {error.stack}
+            {!process.env.STORYBOOK && (
+              <>
+                <br />
+                {error.stack}
+              </>
+            )}
           </div>
         )}
       </Panel>

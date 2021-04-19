@@ -1,5 +1,5 @@
 import { useMachineSelector } from './contexts'
-import type {StateMachineState}  from './types'
+import type { StateMachineState } from './types'
 
 function idsSelector(state: StateMachineState) {
   return state.context.ids
