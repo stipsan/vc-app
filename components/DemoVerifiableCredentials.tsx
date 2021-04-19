@@ -20,12 +20,16 @@ const work = createAsset(async () => {
       didDoc,
       { default: documentLoader },
     ] = await Promise.all([
-      import('faker'),
-      import('@transmute/did-key-ed25519'),
-      import('@transmute/ed25519-signature-2018'),
-      import('@transmute/vc.js'),
-      import('../lib/did.json'),
-      import('../lib/documentLoader'),
+      import(/* webpackChunkName: "faker" */ 'faker'),
+      import(
+        /* webpackChunkName: "did-key-ed25519" */ '@transmute/did-key-ed25519'
+      ),
+      import(
+        /* webpackChunkName: "ed25519-signature-2018" */ '@transmute/ed25519-signature-2018'
+      ),
+      import(/* webpackChunkName: "vc-js" */ '@transmute/vc.js'),
+      import(/* webpackChunkName: "did-json" */ '../lib/did.json'),
+      import(/* webpackChunkName: "documentLoader" */ '../lib/documentLoader'),
     ])
 
     const date = process.env.STORYBOOK

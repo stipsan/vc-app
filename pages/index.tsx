@@ -24,68 +24,74 @@ export const getStaticProps: GetStaticProps = async () => {
 // and a dynamic.loading. The single Suspense fallback will be enough
 
 let retried = false
-const LazyBunch = dynamic(() => import('../components/LazyBunch'), {
-  ssr: false,
-  // @ts-expect-error
-  delay: 3000,
-  timeout: 10000,
-  loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
-    const className = 'mx-4 md:mx-6 mt-4 motion-safe:transition-colors'
-    switch (true) {
-      case !!error:
-      case timedOut:
-        return (
-          <div className="motion-safe:transition-opacity">
-            <HorisontalRuler />
-            <Panel className={className} variant="error">
-              {error?.message || 'Loading failed'}
-              {'! '}
-              <button
-                className="focus:outline-none focus:underline font-semibold hover:underline"
-                type="button"
-                onClick={() => {
-                  retried = true
-                  retry()
-                }}
-              >
-                Retry?
-              </button>
-              {!process.env.STORYBOOK && error?.stack && (
-                <>
-                  <br />
-                  {error.stack}
-                </>
-              )}
-            </Panel>
-          </div>
-        )
+const LazyBunch = dynamic(
+  () => import(/* webpackChunkName: "LazyBunch" */ '../components/LazyBunch'),
+  {
+    ssr: false,
+    // @ts-expect-error
+    delay: 3000,
+    timeout: 10000,
+    loading: ({ error, isLoading, pastDelay, retry, timedOut }) => {
+      const className = 'mx-4 md:mx-6 mt-4 motion-safe:transition-colors'
+      switch (true) {
+        case !!error:
+        case timedOut:
+          return (
+            <div className="motion-safe:transition-opacity">
+              <HorisontalRuler />
+              <Panel className={className} variant="error">
+                {error?.message || 'Loading failed'}
+                {'! '}
+                <button
+                  className="focus:outline-none focus:underline font-semibold hover:underline"
+                  type="button"
+                  onClick={() => {
+                    retried = true
+                    retry()
+                  }}
+                >
+                  Retry?
+                </button>
+                {!process.env.STORYBOOK && error?.stack && (
+                  <>
+                    <br />
+                    {error.stack}
+                  </>
+                )}
+              </Panel>
+            </div>
+          )
 
-      case isLoading:
-        return (
-          <div
-            className={cx('motion-safe:transition-opacity', {
-              'opacity-0': !pastDelay && !retried,
-            })}
-          >
-            <HorisontalRuler />
-            <Panel
-              className={cx(
-                className,
-                'motion-safe:animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
-              )}
-              variant="blank"
+        case isLoading:
+          return (
+            <div
+              className={cx('motion-safe:transition-opacity', {
+                'opacity-0': !pastDelay && !retried,
+              })}
             >
-              {(pastDelay || retried) && 'Loading...'}
-            </Panel>
-          </div>
-        )
-      default:
-        return null
-    }
-  },
-})
+              <HorisontalRuler />
+              <Panel
+                className={cx(
+                  className,
+                  'motion-safe:animate-pulse bg-gray-50 dark:bg-gray-800 text-black dark:text-white text-opacity-80'
+                )}
+                variant="blank"
+              >
+                {(pastDelay || retried) && 'Loading...'}
+              </Panel>
+            </div>
+          )
+        default:
+          return null
+      }
+    },
+  }
+)
 
-const ScrollTo = dynamic(() => import('../components/ScrollTo'), { ssr: false })
+const ScrollTo = dynamic(
+  () => import(/* webpackChunkName: "ScrollTo" */ '../components/ScrollTo'),
+  { ssr: false }
+)
 
 export default function Index({ theme }) {
   useTheme(theme)

@@ -14,10 +14,14 @@ const work = createAsset(async (verifiableCredential: any) => {
       { ld: vc },
       { default: documentLoaderFactory },
     ] = await Promise.all([
-      import('@transmute/did-key-ed25519'),
-      import('@transmute/ed25519-signature-2018'),
-      import('@transmute/vc.js'),
-      import('../lib/documentLoader'),
+      import(
+        /* webpackChunkName: "did-key-ed25519" */ '@transmute/did-key-ed25519'
+      ),
+      import(
+        /* webpackChunkName: "ed25519-signature-2018" */ '@transmute/ed25519-signature-2018'
+      ),
+      import(/* webpackChunkName: "vc-js" */ '@transmute/vc.js'),
+      import(/* webpackChunkName: "documentLoader" */ '../lib/documentLoader'),
     ])
 
     const key = await Ed25519KeyPair.generate({

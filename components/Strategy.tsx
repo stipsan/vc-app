@@ -70,8 +70,12 @@ function ParseStrategy() {
         onBlur={() => {
           editingRef.current = false
           Promise.all([
-            import('prettier/parser-babel'),
-            import('prettier/standalone'),
+            import(
+              /* webpackChunkName: "prettier-parser-babel" */ 'prettier/parser-babel'
+            ),
+            import(
+              /* webpackChunkName: "prettier-standalone" */ 'prettier/standalone'
+            ),
             // The delay ensure that if the user tries to click on Verify the
             // click event have time to trigger before the textarea might change its height and push
             // the button out of view

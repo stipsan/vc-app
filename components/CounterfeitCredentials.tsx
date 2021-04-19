@@ -21,10 +21,12 @@ const work = createAsset(async (json: object) => {
       { default: documentLoader },
       { default: faker },
     ] = await Promise.all([
-      import('@transmute/ed25519-signature-2018'),
-      import('@transmute/vc.js'),
-      import('../lib/documentLoader'),
-      import('faker'),
+      import(
+        /* webpackChunkName: "ed25519-signature-2018" */ '@transmute/ed25519-signature-2018'
+      ),
+      import(/* webpackChunkName: "vc-js" */ '@transmute/vc.js'),
+      import(/* webpackChunkName: "documentLoader" */ '../lib/documentLoader'),
+      import(/* webpackChunkName: "faker" */ 'faker'),
     ])
 
     const results = await Promise.all(

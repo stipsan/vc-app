@@ -83,16 +83,19 @@ export function StrategyLazy({
   }
 }
 
-export default dynamic(() => import('./Strategy'), {
-  ssr: false,
-  // @ts-expect-error
-  timeout: 10000,
-  loading: ({ error, isLoading, retry, timedOut }) => (
-    <StrategyLazy
-      error={error}
-      isLoading={isLoading}
-      retry={retry}
-      timedOut={timedOut}
-    />
-  ),
-})
+export default dynamic(
+  () => import(/* webpackChunkName: "Strategy" */ './Strategy'),
+  {
+    ssr: false,
+    // @ts-expect-error
+    timeout: 10000,
+    loading: ({ error, isLoading, retry, timedOut }) => (
+      <StrategyLazy
+        error={error}
+        isLoading={isLoading}
+        retry={retry}
+        timedOut={timedOut}
+      />
+    ),
+  }
+)
