@@ -30,6 +30,10 @@ const work = createAsset(async () => {
       import('../lib/documentLoader'),
     ])
 
+    const date = new Date(
+      process.env.STORYBOOK ? '2019-12-11T03:50:55Z' : undefined
+    )
+
     const create = (credentialSubject: any) => ({
       '@context': [
         'https://www.w3.org/2018/credentials/v1',
@@ -42,12 +46,12 @@ const work = createAsset(async () => {
       },
       id: 'http://example.gov/credentials/3732',
       issuer: didDoc.id,
-      issuanceDate: new Date().toISOString(),
+      issuanceDate: date.toISOString(),
     })
 
     const key = await Ed25519KeyPair.from(didDoc.publicKey[0])
     key.id = key.controller + key.id
-    const suite = new Ed25519Signature2018({ key })
+    const suite = new Ed25519Signature2018({ key, date })
 
     return {
       ok: true,
