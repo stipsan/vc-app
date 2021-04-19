@@ -2,7 +2,6 @@ import cx from 'classnames'
 import type { GetStaticProps } from 'next'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { Toaster } from 'react-hot-toast'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import ExecForm from '../components/ExecForm'
 import { Panel } from '../components/Formatted'
@@ -111,7 +110,6 @@ export default function Index({ theme }) {
           GitHub
         </a>
       </footer>
-      <Toaster position="top-right" />
     </>
   )
 }

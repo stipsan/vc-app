@@ -1,6 +1,5 @@
 import cx from 'classnames'
 import { memo, Suspense, useCallback, useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import {
@@ -141,12 +140,10 @@ function CounterfeitCredentialsRow({ id, nu }: { id: string; nu: string }) {
       if (success) {
         send({ type: 'COUNTERFEIT_CREDENTIAL_SUCCESS', input: id })
       } else {
-        toast.error(`${nu} Failed to detect tampering`)
         send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
       }
     }
     if (result.ok === false) {
-      toast.error(`${nu} Failed to perform tampering check`)
       send({ type: 'COUNTERFEIT_CREDENTIAL_FAILURE', input: id })
     }
   }, [id, nu, result.ok, send, success])

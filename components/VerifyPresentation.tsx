@@ -1,5 +1,4 @@
 import { Suspense, useCallback, useEffect, useMemo } from 'react'
-import toast from 'react-hot-toast'
 import { createAsset } from 'use-asset'
 import { useMachineSelector, useMachineSend } from '../lib/contexts'
 import { useJsonMap } from '../lib/selectors'
@@ -139,7 +138,6 @@ function VerifyPresentationRow() {
         type: 'VERIFIED_PRESENTATION_FAILURE',
         input: result.error.message,
       })
-      toast.error(`Failed verification`)
     }
   }, [result, send])
 
