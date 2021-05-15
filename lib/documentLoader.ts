@@ -46,6 +46,11 @@ const documentLoader = documentLoaderFactory.pluginFactory
   .addResolver({
     'https:': { resolve: (url: string) => fetchLoader.load(url) },
   })
+  .addResolver({
+    'https://w3id.org/did/v0.11': {
+      resolve: async () => (await import('./did-v0.11.json')).default,
+    },
+  })
   .buildDocumentLoader()
 
 export default documentLoader
