@@ -20,7 +20,7 @@
     "@xstate/viz": "^0.3.4",
     "classnames": "^2.3.1",
     "dataloader": "^2.0.0",
-    "did-resolver": "^3.1.0",
+    "did-resolver": "^4.0.0",
     "faker": "^5.5.3",
     "immer": "^9.0.1",
     "jsonld": "^5.2.0",
